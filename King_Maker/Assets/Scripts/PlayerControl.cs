@@ -19,7 +19,7 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 0.12f;
     [SerializeField] private float minPitch = -85f;
     [SerializeField] private float maxPitch = 85f;
-
+    [SerializeField] private Transform headTransform;
     private CharacterController controller;
     private Vector3 currentVelocity;
     private float verticalVelocity;
@@ -61,6 +61,10 @@ public class PlayerControl : MonoBehaviour
         if (cameraTransform != null)
         {
             cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+        if (headTransform != null)
+        {
+            headTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
         }
     }
 
