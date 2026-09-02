@@ -25,24 +25,32 @@ public class InputManager : MonoBehaviour
     public static bool sprintHeld;
     private InputAction sprintAction;
 
+    //공격
+    public static bool attackPressed;
+    private InputAction attackAction;
+
+    //상호작용(미션)
+    public static bool interactPressed;
+    private InputAction interactAction;
+
+    
+
     private void Awake()
     {
-        if (playerInput != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
+    
 
-        else
-        {
-            playerInput = GetComponent<PlayerInput>();
-        }
+        
+        playerInput = GetComponent<PlayerInput>();
+        
         
 
         moveAction = playerInput.actions["Move"];
         lookAction = playerInput.actions["Look"];
         jumpAction = playerInput.actions["Jump"];
         sprintAction = playerInput.actions["Sprint"];
+        attackAction = playerInput.actions["Attack"];
+        interactAction = playerInput.actions["Interact"];
+
 
     }
 
@@ -53,6 +61,9 @@ public class InputManager : MonoBehaviour
 
         jumpPressed = jumpAction.WasPressedThisFrame();
         sprintHeld = sprintAction.IsPressed();
+
+        attackPressed = attackAction.WasPressedThisFrame();
+        interactPressed = interactAction.WasPressedThisFrame();
 
     }
 

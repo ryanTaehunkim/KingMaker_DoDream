@@ -58,10 +58,10 @@ public class PlayerControl : MonoBehaviour
         // 상하 - 카메라만 회전 (클램프)
         pitch -= delta.y;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-        if (cameraTransform != null)
-        {
-            cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-        }
+        //if (cameraTransform != null)
+        //{
+        //    cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        //}
         if (headTransform != null)
         {
             headTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
