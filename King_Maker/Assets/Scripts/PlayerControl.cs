@@ -18,7 +18,7 @@ public class PlayerControl : NetworkBehaviour
 
     [Header("Jump / Gravity")]
     [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float gravity = -9.81f;
+    [SerializeField] private float gravity = -19.6f;
 
     [Header("Look Settings")]
     [SerializeField] private float mouseSensitivity = 0.12f;
