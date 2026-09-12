@@ -1,16 +1,11 @@
 using UnityEngine;
-using Unity.Netcode;
-using Unity.Cinemachine;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerControl : NetworkBehaviour
+public class PlayerControl : MonoBehaviour
 {
     [Header("References")]
-    [Tooltip("플레이어 자식으로 있는 카메라 기준점")]
+    [Tooltip("플레이어 자식으로 있는 카메라 Transform")]
     [SerializeField] private Transform cameraTransform;
-
-    [Tooltip("플레이어 자식으로 있는 Head Transform")]
-    [SerializeField] private Transform headTransform;
 
     [Header("Move Settings")]
     [SerializeField] private float walkSpeed = 4.0f;
@@ -18,177 +13,93 @@ public class PlayerControl : NetworkBehaviour
 
     [Header("Jump / Gravity")]
     [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float gravity = -19.6f;
+    [SerializeField] private float gravity = -9.81f;
 
     [Header("Look Settings")]
     [SerializeField] private float mouseSensitivity = 0.12f;
     [SerializeField] private float minPitch = -85f;
     [SerializeField] private float maxPitch = 85f;
-
+    [SerializeField] private Transform headTransform;
     private CharacterController controller;
-
     private Vector3 currentVelocity;
     private float verticalVelocity;
     private float pitch;
-
-    private CinemachineCamera cinemachineCamera;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
     }
 
-    public override void OnNetworkSpawn()
-    {
-        // 내가 조종하는 Player가 아니면 카메라를 설정하지 않음
-        if (!IsOwner)
-            return;
-
-        SetupLocalCamera();
-    }
-
     private void OnEnable()
     {
-        if (!IsOwner)
-            return;
-
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     private void Update()
     {
-        // 내 Player만 입력을 처리
-        if (!IsOwner)
-            return;
-
         HandleLook();
         Move();
         Jump();
 
-        Vector3 finalMove =
-            currentVelocity +
-            Vector3.up * verticalVelocity;
-
+        // Move()가 만든 수평 속도 + Jump()가 만든 수직 속도를 합쳐서 실제로 이동시킴
+        Vector3 finalMove = currentVelocity + Vector3.up * verticalVelocity;
         controller.Move(finalMove * Time.deltaTime);
-    }
-
-    private void SetupLocalCamera()
-    {
-        // 씬에 있는 CinemachineCamera 찾기
-        cinemachineCamera =
-            FindFirstObjectByType<CinemachineCamera>();
-
-        if (cinemachineCamera == null)
-        {
-            Debug.LogWarning(
-                "PlayerControl: 씬에서 CinemachineCamera를 찾을 수 없습니다."
-            );
-
-            return;
-        }
-
-        // Head Transform이 지정되어 있는지 확인
-        if (headTransform == null)
-        {
-            Debug.LogWarning(
-                "PlayerControl: Head Transform이 지정되지 않았습니다."
-            );
-
-            return;
-        }
-
-        // 내 Player의 Head를 CinemachineCamera의 Tracking Target으로 설정
-        cinemachineCamera.Target.TrackingTarget = headTransform;
-
-        Debug.Log(
-            $"PlayerControl: Local Camera Target 설정 완료 → {headTransform.name}"
-        );
     }
 
     private void HandleLook()
     {
-        Vector2 delta =
-            InputManager.lookDelta *
-            mouseSensitivity;
+        // InputManager.lookDelta : 마우스 델타 (x = 좌우, y = 상하)
+        Vector2 delta = InputManager.lookDelta * mouseSensitivity;
 
-        // 좌우 회전
-        transform.Rotate(
-            Vector3.up * delta.x
-        );
+        // 좌우 - 몸통(Player) 회전
+        transform.Rotate(Vector3.up * delta.x);
 
-        // 상하 회전
+        // 상하 - 카메라만 회전 (클램프)
         pitch -= delta.y;
-
-        pitch = Mathf.Clamp(
-            pitch,
-            minPitch,
-            maxPitch
-        );
-
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        //if (cameraTransform != null)
+        //{
+        //    cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        //}
         if (headTransform != null)
         {
-            headTransform.localRotation =
-                Quaternion.Euler(
-                    pitch,
-                    0f,
-                    0f
-                );
+            headTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
         }
     }
 
     private void Move()
     {
-        Vector2 input =
-            InputManager.moveDir;
-
-        Vector3 desiredDir =
-            transform.right * input.x +
-            transform.forward * input.y;
-
-        desiredDir =
-            Vector3.ClampMagnitude(
-                desiredDir,
-                1f
-            );
+        // InputManager.moveDir : WASD 입력 (x = 좌우, y = 앞뒤)
+        Vector2 input = InputManager.moveDir;
+        Vector3 desiredDir = (transform.right * input.x + transform.forward * input.y);
+        desiredDir = Vector3.ClampMagnitude(desiredDir, 1f);
 
         float speed = Run();
 
-        currentVelocity =
-            desiredDir * speed;
+        // 가속/감속 없이 입력 방향 * 속도로 매 프레임 즉시 덮어씀
+        currentVelocity = desiredDir * speed;
     }
 
     private float Run()
     {
-        return InputManager.sprintHeld
-            ? sprintSpeed
-            : walkSpeed;
+        return InputManager.sprintHeld ? sprintSpeed : walkSpeed;
     }
+
 
     private void Jump()
     {
-        bool isGrounded =
-            controller.isGrounded;
-
-        if (isGrounded &&
-            verticalVelocity < 0f)
+        bool isGrounded = controller.isGrounded;
+        if (isGrounded && verticalVelocity < 0f)
         {
-            verticalVelocity = -2f;
+            verticalVelocity = -2f; // 지면에 붙어있도록
         }
 
-        if (InputManager.jumpPressed &&
-            isGrounded)
+        if (InputManager.jumpPressed && isGrounded)
         {
-            verticalVelocity =
-                Mathf.Sqrt(
-                    jumpHeight *
-                    -2f *
-                    gravity
-                );
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
-        verticalVelocity +=
-            gravity *
-            Time.deltaTime;
+        verticalVelocity += gravity * Time.deltaTime;
     }
 }
