@@ -28,10 +28,16 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private float verticalVelocity;
     private float pitch;
 
+    //뛰는 중인지 서버에 보내기 위한 변수
+    private PlayerStateList playerState; 
+    private bool isRunning;
+    
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController> ();
         virtualCamera = FindFirstObjectByType<CinemachineCamera> ();
+        playerState = GetComponent<PlayerStateList>();
     }
 
     public override void OnNetworkSpawn()
@@ -55,8 +61,9 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
-
+        Debug.Log(playerState.stamina.Value.ToString());
         HandleLook();
+        UpdateRunState();
         Move();
         Jump();
 
@@ -89,7 +96,35 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
     private float Run()
     {
-        return InputManager.sprintHeld ? sprintSpeed : walkSpeed;
+        return isRunning ? sprintSpeed : walkSpeed;
+    }
+
+    private void UpdateRunState()
+    {
+        bool newRunningState = InputManager.sprintHeld;
+
+        if (playerState.stamina.Value < 5f)
+        {
+            Debug.Log("달릴 수 없음");
+            isRunning = false;
+            newRunningState = false;
+            SetRunningServerRpc(false);
+            return;
+        }
+
+
+        if(isRunning != newRunningState)
+        {
+            isRunning = newRunningState;
+            SetRunningServerRpc(isRunning);
+        }
+    }
+
+    [ServerRpc]
+    private void SetRunningServerRpc(bool running)
+    {
+        playerState.SetRunning(running);
+       
     }
 
     private void Jump()
