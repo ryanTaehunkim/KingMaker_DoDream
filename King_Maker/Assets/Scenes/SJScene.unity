@@ -395,12 +395,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 91324802}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.22936, y: 0, z: -2.61189}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1009916660}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &388541453 stripped
 Transform:
@@ -865,7 +865,8 @@ Transform:
   m_LocalPosition: {x: -2.22936, y: 0, z: 2.61189}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 91324806}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1110002153
@@ -1165,7 +1166,7 @@ GameObject:
   - component: {fileID: 2109828843}
   - component: {fileID: 2109828846}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: networkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1252,7 +1253,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109828842}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.10745, y: 0, z: 7.25282}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1407,12 +1408,20 @@ PrefabInstance:
       value: 1995576601
       objectReference: {fileID: 0}
     - target: {fileID: 916318310131637467, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
+      propertyPath: m_InScenePlacedDisabledByDefault
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 916318310131637467, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
       value: 4003424284
       objectReference: {fileID: 0}
     - target: {fileID: 5266217302069297866, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5266217302069297866, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8495135304571328573, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
       propertyPath: headTransform
@@ -1432,12 +1441,11 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 549605116}
-  - {fileID: 91324806}
   - {fileID: 1424132986827448999}
   - {fileID: 1110002154}
-  - {fileID: 1009916660}
   - {fileID: 892652396}
   - {fileID: 45082534}
   - {fileID: 1277567155}
   - {fileID: 2143463880}
+  - {fileID: 1009916660}
   - {fileID: 2109828845}

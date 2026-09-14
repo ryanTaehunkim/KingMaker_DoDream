@@ -1,6 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
-
+using Unity.Cinemachine;
 
 [RequireComponent (typeof(CharacterController))]
 public class PlayerControlForNetwork : NetworkBehaviour
@@ -20,6 +20,8 @@ public class PlayerControlForNetwork : NetworkBehaviour
     [SerializeField] private float minPitch = -85f; //고개 최대 내림 각도
     [SerializeField] private float maxPitch = 85f; //고개 최대 올림 각도
     [SerializeField] private Transform headTransform; //돌릴 머리 위치
+    [SerializeField] private CinemachineCamera virtualCamera;
+    [SerializeField] private Transform cameraTransform;
 
     private CharacterController characterController;
     private Vector3 currentVelocity;
@@ -29,6 +31,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private void Awake()
     {
         characterController = GetComponent<CharacterController> ();
+        virtualCamera = FindFirstObjectByType<CinemachineCamera> ();
     }
 
     public override void OnNetworkSpawn()
@@ -36,6 +39,10 @@ public class PlayerControlForNetwork : NetworkBehaviour
         if (!IsOwner)
         {
             return;
+        }
+        if(virtualCamera != null)
+        {
+            virtualCamera.Follow = cameraTransform;
         }
         CursorLock();
     }

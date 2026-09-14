@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1906833621
+  GlobalObjectIdHash: 4003424284
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -245,7 +245,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControlForNetwork
   ShowTopMostFoldoutHeaderGroup: 1
-  cameraTransform: {fileID: 0}
   walkSpeed: 4
   sprintSpeed: 7
   jumpHeight: 1.2
@@ -253,7 +252,9 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   minPitch: -85
   maxPitch: 85
-  headTransform: {fileID: 0}
+  headTransform: {fileID: 6870118770904133688}
+  virtualCamera: {fileID: 0}
+  cameraTransform: {fileID: 1047449250658816594}
 --- !u!1 &6093129094976018735
 GameObject:
   m_ObjectHideFlags: 0
