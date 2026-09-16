@@ -28,15 +28,7 @@ public class PlayerStateList : NetworkBehaviour{
     {
         if (!IsServer) return;
 
-        if (isRunning)
-        {
-            stamina.Value -= 20f * Time.deltaTime;
-        }
-        else
-        {
-            stamina.Value += 5f * Time.deltaTime;
-        }
-        stamina.Value = Mathf.Clamp(stamina.Value, 0f, 100f);
+        StaminaChanged();
     }
     public override void OnNetworkSpawn()
     {
@@ -86,5 +78,17 @@ public class PlayerStateList : NetworkBehaviour{
         
         if (!IsServer) return;
         isRunning = running;
+    }
+    private void StaminaChanged()
+    {
+        if (isRunning)
+        {
+            stamina.Value -= 20f * Time.deltaTime;
+        }
+        else
+        {
+            stamina.Value += 5f * Time.deltaTime;
+        }
+        stamina.Value = Mathf.Clamp(stamina.Value, 0f, 100f);
     }
 }

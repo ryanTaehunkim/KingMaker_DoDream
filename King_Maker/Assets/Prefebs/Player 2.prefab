@@ -201,7 +201,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 2.31
-  m_Radius: 0.3
+  m_Radius: 0.6
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
@@ -257,6 +257,8 @@ MonoBehaviour:
   headTransform: {fileID: 6870118770904133688}
   virtualCamera: {fileID: 0}
   cameraTransform: {fileID: 1047449250658816594}
+  interactionDistance: 1.4
+  playerCamera: {fileID: 0}
 --- !u!114 &1354081519779399334
 MonoBehaviour:
   m_ObjectHideFlags: 0

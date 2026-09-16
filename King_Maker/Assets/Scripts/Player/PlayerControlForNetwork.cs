@@ -23,6 +23,12 @@ public class PlayerControlForNetwork : NetworkBehaviour
     [SerializeField] private CinemachineCamera virtualCamera;
     [SerializeField] private Transform cameraTransform;
 
+    [Header("Interaction")]
+    [SerializeField] private float interactionDistance = 3f;
+    [SerializeField] private Camera playerCamera;
+    private bool canInteract;
+    private GameObject currentInteractable;
+
     private CharacterController characterController;
     private Vector3 currentVelocity;
     private float verticalVelocity;
@@ -31,13 +37,20 @@ public class PlayerControlForNetwork : NetworkBehaviour
     //뛰는 중인지 서버에 보내기 위한 변수
     private PlayerStateList playerState; 
     private bool isRunning;
-    
+
+    private Transform handTransform;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController> ();
         virtualCamera = FindFirstObjectByType<CinemachineCamera> ();
         playerState = GetComponent<PlayerStateList>();
+
+        GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
+        if(camearObj != null)
+        {
+            playerCamera = camearObj.GetComponent<Camera> ();
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -66,6 +79,8 @@ public class PlayerControlForNetwork : NetworkBehaviour
         UpdateRunState();
         Move();
         Jump();
+        DetectInteractable();
+        TrytoInteract();
 
         Vector3 finalMove = currentVelocity + Vector3.up * verticalVelocity;
         characterController.Move(finalMove * Time.deltaTime);
@@ -101,16 +116,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
     private void UpdateRunState()
     {
-        bool newRunningState = InputManager.sprintHeld;
-
-        if (playerState.stamina.Value < 5f)
-        {
-            Debug.Log("달릴 수 없음");
-            isRunning = false;
-            newRunningState = false;
-            SetRunningServerRpc(false);
-            return;
-        }
+        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value < 5f;
 
 
         if(isRunning != newRunningState)
@@ -141,5 +147,50 @@ public class PlayerControlForNetwork : NetworkBehaviour
         }
 
         verticalVelocity += gravity * Time.deltaTime;
+    }
+
+    private void DetectInteractable()
+    {
+        currentInteractable = null;
+
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+
+        Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.red);
+
+        if(Physics.Raycast(ray,out RaycastHit hit, interactionDistance)){
+            
+            if (hit.collider.CompareTag("Interactable"))
+            {
+                canInteract = true;
+                currentInteractable = hit.collider.gameObject;
+                Debug.Log("상호작용 가능: " + currentInteractable.name);
+
+            }
+            else
+            {
+                canInteract = false;
+                currentInteractable = null;
+            }
+        }
+    }
+
+    private void TrytoInteract()
+    {
+        if(canInteract && currentInteractable != null&&InputManager.interactPressed)
+        {
+            if(currentInteractable != null)
+            {
+                IInteractable interactobj = currentInteractable.GetComponent<IInteractable>();
+                if (interactobj != null) {
+                    interactobj.Interact(playerState);
+                }
+            }
+            
+        }
+    }
+
+    public Transform GetHandTransform()
+    {
+        return handTransform;
     }
 }
