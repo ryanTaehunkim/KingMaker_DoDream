@@ -126,6 +126,8 @@ GameObject:
   - component: {fileID: 5419631627844348802}
   - component: {fileID: 9064264798093214589}
   - component: {fileID: 7992828657789693336}
+  - component: {fileID: -5232061570318517180}
+  - component: {fileID: 341448730468773349}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -216,6 +218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   ShowTopMostFoldoutHeaderGroup: 1
   cameraTransform: {fileID: 0}
+  headTransform: {fileID: 3957066898185214379}
   walkSpeed: 4
   sprintSpeed: 7
   jumpHeight: 1.2
@@ -223,7 +226,6 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   minPitch: -85
   maxPitch: 85
-  headTransform: {fileID: 3957066898185214379}
 --- !u!114 &7992828657789693336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +272,73 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &-5232061570318517180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244102399326578302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf53248f24a8dcb4f8184deaf7f3bc1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerControlForNetwork
+  ShowTopMostFoldoutHeaderGroup: 1
+  walkSpeed: 4
+  sprintSpeed: 7
+  jumpHeight: 1.2
+  gravity: -9.8
+  mouseSensitivity: 0.12
+  minPitch: -85
+  maxPitch: 85
+  headTransform: {fileID: 3957066898185214379}
+  virtualCamera: {fileID: 0}
+  cameraTransform: {fileID: 1527074259474401022}
+  interactionDistance: 3
+  playerCamera: {fileID: 0}
+--- !u!114 &341448730468773349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244102399326578302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dbaad47ef640ca42a6da975e0672e3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStateList
+  ShowTopMostFoldoutHeaderGroup: 1
+  health:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  stamina:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  cardGrade:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 2
+  isHoldingItem:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  heldItemNetworkId:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  clearedMissionIds:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
 --- !u!1 &1901730257646681589
 GameObject:
   m_ObjectHideFlags: 0
