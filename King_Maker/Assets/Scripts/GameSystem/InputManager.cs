@@ -56,6 +56,9 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+        // 미니게임 등으로 플레이어 입력이 잠긴 동안에는 값을 갱신하지 않는다
+        if (playerInput.currentActionMap != null && !playerInput.currentActionMap.enabled) return;
+
         moveDir = moveAction.ReadValue<Vector2>();
         lookDelta = lookAction.ReadValue<Vector2>();
 
@@ -69,11 +72,21 @@ public class InputManager : MonoBehaviour
 
     public static void ActivatePlayerControls()
     {
+        if (playerInput == null || playerInput.currentActionMap == null) return;
         playerInput.currentActionMap.Enable();
     }
 
     public static void DeactivatePlayerControls()
     {
+        if (playerInput == null || playerInput.currentActionMap == null) return;
         playerInput.currentActionMap.Disable();
+
+        // 비활성화 직전 프레임 값이 남아 캐릭터가 계속 움직이지 않도록 초기화
+        moveDir = Vector2.zero;
+        lookDelta = Vector2.zero;
+        jumpPressed = false;
+        sprintHeld = false;
+        attackPressed = false;
+        interactPressed = false;
     }
 }

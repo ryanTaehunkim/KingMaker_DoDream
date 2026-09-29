@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4713d886fc618af40a64b67334d993f3, type: 3}
+  m_Name: Mission_P1_WineGlass
+  m_EditorClassIdentifier: Assembly-CSharp::WineGlassMissionData
+  missionId: 101
+  displayName: "\uC640\uC778\uC794 \uB2E6\uAE30"
+  ruleText: "\uB9C8\uC6B0\uC2A4\uB97C \uB204\uB978 \uCC44 \uBB38\uC9C8\uB7EC \uC640\uC778
+    \uC5BC\uB8E9\uC744 \uC9C0\uC6B0\uC138\uC694."
+  type: 0
+  isShared: 0
+  requiredToolId: cloth
+  requiredToolName: "\uD589\uC8FC"
+  requiredPlayers: 1
+  gradeReward: 1
+  suitBonusEligible: 1
+  timeLimit: 15
+  minClearTime: 3
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 2694908631922460941, guid: 74e15fc11060af34483cebbd95657289, type: 3}
+  stainCount: 4
+  stainRadius: {x: 0.07, y: 0.11}
+  brushRadius: 0.08
+  scrubStrength: 0.3
+  requiredCleanRatio: 0.95
