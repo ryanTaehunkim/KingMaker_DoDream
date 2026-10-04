@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0613f60e14aed0446b0a838afefbdb66, type: 3}
+  m_Name: Mission_P3_Jackpot
+  m_EditorClassIdentifier: Assembly-CSharp::JackpotMissionData
+  missionId: 103
+  displayName: "\uC7AD\uD31F \uC22B\uC790 \uB9DE\uCD94\uAE30"
+  ruleText: "\u25B2\u25BC \uBC84\uD2BC\uC73C\uB85C \uBAA8\uB4E0 \uCE78\uC744 9\uB85C
+    \uB9DE\uCD94\uC138\uC694."
+  type: 0
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 1
+  gradeReward: 1
+  suitBonusEligible: 1
+  timeLimit: 10
+  minClearTime: 0.5
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 8721029741532424683, guid: e8b61442ad2e75549bac871ff246a00d, type: 3}
+  slotCount: 3
+  randomSlotCount: 1
+  targetDigit: 9
+  rollDuration: 0.3
+  allowDownButton: 1
