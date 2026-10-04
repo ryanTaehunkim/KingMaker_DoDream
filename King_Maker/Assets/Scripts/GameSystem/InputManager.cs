@@ -33,6 +33,10 @@ public class InputManager : MonoBehaviour
     public static bool interactPressed;
     private InputAction interactAction;
 
+    //내려놓기
+    public static bool putDownPressed;
+    private InputAction putDownAction;
+
     
 
     private void Awake()
@@ -50,6 +54,7 @@ public class InputManager : MonoBehaviour
         sprintAction = playerInput.actions["Sprint"];
         attackAction = playerInput.actions["Attack"];
         interactAction = playerInput.actions["Interact"];
+        putDownAction = playerInput.actions["PutDown"];
 
 
     }
@@ -65,6 +70,7 @@ public class InputManager : MonoBehaviour
         attackPressed = attackAction.WasPressedThisFrame();
         interactPressed = interactAction.WasPressedThisFrame();
 
+        putDownPressed = putDownAction.WasPressedThisFrame();
     }
 
     public static void ActivatePlayerControls()

@@ -28,6 +28,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
     [SerializeField] private Camera playerCamera;
     private bool canInteract;
     private GameObject currentInteractable;
+    private GameObject holdItem;
 
     private CharacterController characterController;
     private Vector3 currentVelocity;
@@ -38,7 +39,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private PlayerStateList playerState; 
     private bool isRunning;
 
-    private Transform handTransform;
+    
 
     private void Awake()
     {
@@ -81,6 +82,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
         Jump();
         DetectInteractable();
         TrytoInteract();
+        PutDownObject();
 
         Vector3 finalMove = currentVelocity + Vector3.up * verticalVelocity;
         characterController.Move(finalMove * Time.deltaTime);
@@ -183,14 +185,32 @@ public class PlayerControlForNetwork : NetworkBehaviour
                 IInteractable interactobj = currentInteractable.GetComponent<IInteractable>();
                 if (interactobj != null) {
                     interactobj.Interact(playerState);
+                    
                 }
             }
             
         }
+
     }
 
-    public Transform GetHandTransform()
+    private void PutDownObject()
     {
-        return handTransform;
+        if (playerState.isHoldingItem.Value && InputManager.putDownPressed)
+        {
+            Debug.Log("놓기");
+            ulong itemId = playerState.heldItemNetworkId.Value;
+
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemId, out NetworkObject itemNetObj))
+            {
+                GrabInteractableObject grabScript = itemNetObj.GetComponent<GrabInteractableObject>();
+                if (grabScript != null)
+                {
+                    grabScript.PutDown();
+                }
+
+            }
+        }
     }
+
+
 }
