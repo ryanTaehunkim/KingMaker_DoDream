@@ -73,6 +73,13 @@ public class PlayerStateList : NetworkBehaviour{
 
     }
 
+    //일차가 바뀌면 클리어 기록 초기화 (MissionManager가 호출)
+    public void ResetClearedMissions()
+    {
+        if (!IsServer) return;
+        clearedMissionIds.Clear();
+    }
+
     public void SetRunning(bool running)
     {
         
