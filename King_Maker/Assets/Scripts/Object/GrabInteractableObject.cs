@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public class GrabInteractableObject : MonoBehaviour, IInteractable
+public class GrabInteractableObject : NetworkBehaviour, IInteractable
 {
     private NetworkObject netObj;
     public NetworkVariable<bool> isHeld = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -55,7 +55,10 @@ public class GrabInteractableObject : MonoBehaviour, IInteractable
 
         NetworkObject newNetObj = newItemObj.GetComponent<NetworkObject>();
         newNetObj.Spawn();
-        newNetObj.TrySetParent(playerObj, worldPositionStays: true);
+        newNetObj.TrySetParent(playerObj, worldPositionStays: false);
+
+        newItemObj.transform.localPosition = gripOffset;
+        newItemObj.transform.localRotation = Quaternion.Euler(gripEuler);
         GrabInteractableObject holdObj = newItemObj.GetComponent<GrabInteractableObject>();
         holdObj.isHeld.Value = true; //손에있는걸 다른 사람이 못잡게
 
