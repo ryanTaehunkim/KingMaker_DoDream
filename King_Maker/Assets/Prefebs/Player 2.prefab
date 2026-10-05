@@ -289,7 +289,7 @@ MonoBehaviour:
   headTransform: {fileID: 6870118770904133688}
   virtualCamera: {fileID: 0}
   cameraTransform: {fileID: 1047449250658816594}
-  interactionDistance: 1.8
+  interactionDistance: 9
   playerCamera: {fileID: 0}
 --- !u!114 &1354081519779399334
 MonoBehaviour:

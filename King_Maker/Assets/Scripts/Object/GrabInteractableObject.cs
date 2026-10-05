@@ -8,6 +8,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
     [SerializeField] private Vector3 gripOffset;
     [SerializeField] private Vector3 gripEuler;
+    [SerializeField] private Vector3 gripScale;
     [SerializeField] private GameObject heldItemPrefab;
 
     private void Awake()
@@ -45,6 +46,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         Vector3 spawnPos = playerTransform.TransformPoint(gripOffset);
         Quaternion spawnRot = playerTransform.rotation * Quaternion.Euler(gripEuler);
+       
 
         GameObject newItemObj = Instantiate(heldItemPrefab, spawnPos, spawnRot);
         Rigidbody objRigid = newItemObj.GetComponent<Rigidbody>();
@@ -59,6 +61,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         newItemObj.transform.localPosition = gripOffset;
         newItemObj.transform.localRotation = Quaternion.Euler(gripEuler);
+        newItemObj.transform.localScale = gripScale;
         GrabInteractableObject holdObj = newItemObj.GetComponent<GrabInteractableObject>();
         holdObj.isHeld.Value = true; //손에있는걸 다른 사람이 못잡게
 
