@@ -113,17 +113,19 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
     private float Run()
     {
+        
         return isRunning ? sprintSpeed : walkSpeed;
     }
 
     private void UpdateRunState()
     {
-        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value < 5f;
+        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value > 5f;
+        
 
-
-        if(isRunning != newRunningState)
+        if (isRunning != newRunningState)
         {
             isRunning = newRunningState;
+            
             SetRunningServerRpc(isRunning);
         }
     }

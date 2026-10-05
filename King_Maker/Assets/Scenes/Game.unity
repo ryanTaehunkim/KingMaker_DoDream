@@ -164063,7 +164063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 053c37dc2e1a9454eb491379f710b527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnManager
-  playerPrefab: {fileID: 5419631627844348802, guid: 597ba64fc6dddf44180d9c45daf41a44, type: 3}
+  playerPrefab: {fileID: 916318310131637467, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
   spawnPoints:
   - {fileID: 1812202256}
   - {fileID: 1667100362}

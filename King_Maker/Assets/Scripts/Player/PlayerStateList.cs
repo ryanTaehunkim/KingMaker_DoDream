@@ -8,7 +8,7 @@ public class PlayerStateList : NetworkBehaviour{
     public NetworkVariable<float> health = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<float> stamina = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    public NetworkVariable<int> cardGrade = new NetworkVariable<int>(2 , NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> cardGrade = new NetworkVariable<int>(1 , NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Interaction State")]
     public NetworkVariable<bool> isHoldingItem = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
