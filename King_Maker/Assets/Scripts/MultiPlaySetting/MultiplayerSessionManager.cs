@@ -18,36 +18,36 @@ public class MultiplayerSessionManager : MonoBehaviour
 
     [SerializeField] private string gameSceneName = "Game";
 
-    // 현재 참가 중인 Session
+    // Current active Session
     public ISession CurrentSession { get; private set; }
 
-    // 현재 Session의 Host인지
+    // Whether this client is the Host of the current Session
     public bool IsHost =>
         CurrentSession != null &&
         CurrentSession.IsHost;
 
-    // Session에 참가한 상태인지
+    // Whether the player is currently in a Session
     public bool IsInSession =>
         CurrentSession != null;
 
-    // 실제 NGO 네트워크에 연결되어 있는지
+    // Whether the player is actually connected to the NGO network
     public bool IsNetworkConnected =>
         NetworkManager.Singleton != null &&
         NetworkManager.Singleton.IsConnectedClient;
 
-    // 현재 Session의 Join Code
+    // Current Session Join Code
     public string JoinCode =>
         CurrentSession != null
             ? CurrentSession.Code
             : string.Empty;
 
-    // UI에서 사용할 이벤트
+    // Events used by the UI
     public event Action<string> OnStatusChanged;
     public event Action<string> OnJoinCodeCreated;
     public event Action OnSessionConnected;
     public event Action<string> OnError;
 
-    // 내부 상태
+    // Internal state
     private bool isInitializing;
     private bool isBusy;
 
@@ -57,7 +57,7 @@ public class MultiplayerSessionManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton 중복 방지
+        // Prevent duplicate Singleton instances
         if (Instance != null &&
             Instance != this)
         {
@@ -67,7 +67,7 @@ public class MultiplayerSessionManager : MonoBehaviour
 
         Instance = this;
 
-        // Scene이 바뀌어도 유지
+        // Keep this object when changing scenes
         DontDestroyOnLoad(gameObject);
     }
 
@@ -77,12 +77,12 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // UGS 초기화
+    // UGS Initialization
     // =========================================================
 
     public async Task InitializeServicesAsync()
     {
-        // 이미 초기화 중이면 중복 실행하지 않음
+        // Prevent duplicate initialization
         if (isInitializing)
             return;
 
@@ -90,10 +90,10 @@ public class MultiplayerSessionManager : MonoBehaviour
 
         try
         {
-            SetStatus("온라인 서비스 초기화 중...");
+            SetStatus("Initializing online services...");
 
             // -------------------------------------------------
-            // Unity Gaming Services 초기화
+            // Unity Gaming Services Initialization
             // -------------------------------------------------
 
             if (UnityServices.State !=
@@ -108,16 +108,16 @@ public class MultiplayerSessionManager : MonoBehaviour
 
             if (!AuthenticationService.Instance.IsSignedIn)
             {
-                SetStatus("플레이어 인증 중...");
+                SetStatus("Authenticating player...");
 
                 await AuthenticationService.Instance
                     .SignInAnonymouslyAsync();
             }
 
-            SetStatus("온라인 서비스 준비 완료");
+            SetStatus("Online services are ready.");
 
             Debug.Log(
-                $"[Multiplayer] UGS 인증 완료\n" +
+                $"[Multiplayer] UGS authentication completed.\n" +
                 $"Player ID: {AuthenticationService.Instance.PlayerId}"
             );
         }
@@ -126,7 +126,7 @@ public class MultiplayerSessionManager : MonoBehaviour
             Debug.LogException(e);
 
             SetError(
-                "온라인 서비스 초기화에 실패했습니다."
+                "Failed to initialize online services."
             );
         }
         finally
@@ -136,19 +136,19 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // 방 만들기
+    // Create Room
     // =========================================================
 
     public async Task CreateRoomAsync()
     {
-        // 다른 작업 중이면 실행하지 않음
+        // Do not execute if another operation is in progress
         if (isBusy)
             return;
 
-        // 이미 방에 들어가 있다면 생성하지 않음
+        // Do not create another room if already in a Session
         if (CurrentSession != null)
         {
-            SetError("이미 방에 참가한 상태입니다.");
+            SetError("Already joined a room.");
             return;
         }
 
@@ -156,20 +156,20 @@ public class MultiplayerSessionManager : MonoBehaviour
 
         try
         {
-            // UGS 초기화
+            // Initialize UGS
             await InitializeServicesAsync();
 
-            // 초기화 실패 등으로 인증되지 않은 경우
+            // Check authentication
             if (!AuthenticationService.Instance.IsSignedIn)
             {
-                SetError("플레이어 인증에 실패했습니다.");
+                SetError("Player authentication failed.");
                 return;
             }
 
-            SetStatus("방 생성 중...");
+            SetStatus("Creating room...");
 
             // -------------------------------------------------
-            // Session 설정
+            // Session Settings
             // -------------------------------------------------
 
             SessionOptions options =
@@ -177,20 +177,20 @@ public class MultiplayerSessionManager : MonoBehaviour
                 {
                     Name = "KINGMAKER ROOM",
 
-                    // 최대 플레이어 수
+                    // Maximum number of players
                     MaxPlayers = maxPlayers,
 
-                    // Join Code를 통한 참가를 사용할 것이므로
-                    // 현재는 비공개 방으로 설정
+                    // Use Join Code to allow players to join,
+                    // so the room is currently private.
                     IsPrivate = true,
 
-                    // 방장에 의해 잠그기 전까지 참가 가능
+                    // Players can join until the room is locked.
                     IsLocked = false
                 }
                 .WithRelayNetwork();
 
             // -------------------------------------------------
-            // Session 생성
+            // Create Session
             // -------------------------------------------------
 
             CurrentSession =
@@ -198,26 +198,26 @@ public class MultiplayerSessionManager : MonoBehaviour
                     .CreateSessionAsync(options);
 
             // -------------------------------------------------
-            // 생성 결과
+            // Creation Result
             // -------------------------------------------------
 
             Debug.Log(
-                $"[Multiplayer] 방 생성 성공\n" +
+                $"[Multiplayer] Room created successfully.\n" +
                 $"Session ID: {CurrentSession.Id}\n" +
                 $"Join Code: {CurrentSession.Code}"
             );
 
             SetStatus(
-                $"방 생성 완료\n" +
-                $"코드: {CurrentSession.Code}"
+                $"Room created.\n" +
+                $"Code: {CurrentSession.Code}"
             );
 
-            // UI에 Join Code 전달
+            // Send Join Code to the UI
             OnJoinCodeCreated?.Invoke(
                 CurrentSession.Code
             );
 
-            // Session 연결 완료
+            // Notify that the Session connection is complete
             OnSessionConnected?.Invoke();
         }
         catch (Exception e)
@@ -227,7 +227,7 @@ public class MultiplayerSessionManager : MonoBehaviour
             CurrentSession = null;
 
             SetError(
-                "방 생성 실패: " +
+                "Failed to create room: " +
                 e.Message
             );
         }
@@ -238,30 +238,30 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // 방 참가
+    // Join Room
     // =========================================================
 
     public async Task JoinRoomAsync(string joinCode)
     {
-        // 다른 작업 중이면 실행하지 않음
+        // Do not execute if another operation is in progress
         if (isBusy)
             return;
 
-        // 이미 방에 참가한 경우
+        // Do not join another room if already in a Session
         if (CurrentSession != null)
         {
-            SetError("이미 방에 참가한 상태입니다.");
+            SetError("Already joined a room.");
             return;
         }
 
-        // 입력된 코드 정리
+        // Clean up the input code
         string code =
             joinCode.Trim().ToUpperInvariant();
 
-        // 빈 코드 검사
+        // Check for an empty code
         if (string.IsNullOrEmpty(code))
         {
-            SetError("방 코드를 입력해주세요.");
+            SetError("Please enter a room code.");
             return;
         }
 
@@ -269,20 +269,20 @@ public class MultiplayerSessionManager : MonoBehaviour
 
         try
         {
-            // UGS 초기화
+            // Initialize UGS
             await InitializeServicesAsync();
 
-            // 인증 확인
+            // Check authentication
             if (!AuthenticationService.Instance.IsSignedIn)
             {
-                SetError("플레이어 인증에 실패했습니다.");
+                SetError("Player authentication failed.");
                 return;
             }
 
-            SetStatus("방 참가 중...");
+            SetStatus("Joining room...");
 
             // -------------------------------------------------
-            // Join Code를 이용해 Session 참가
+            // Join Session using Join Code
             // -------------------------------------------------
 
             CurrentSession =
@@ -290,18 +290,18 @@ public class MultiplayerSessionManager : MonoBehaviour
                     .JoinSessionByCodeAsync(code);
 
             // -------------------------------------------------
-            // 참가 결과
+            // Join Result
             // -------------------------------------------------
 
             Debug.Log(
-                $"[Multiplayer] 방 참가 성공\n" +
+                $"[Multiplayer] Room joined successfully.\n" +
                 $"Session ID: {CurrentSession.Id}\n" +
                 $"Join Code: {CurrentSession.Code}"
             );
 
-            SetStatus("방 참가 완료");
+            SetStatus("Room joined successfully.");
 
-            // Session 연결 완료
+            // Notify that the Session connection is complete
             OnSessionConnected?.Invoke();
         }
         catch (Exception e)
@@ -311,7 +311,7 @@ public class MultiplayerSessionManager : MonoBehaviour
             CurrentSession = null;
 
             SetError(
-                "방 참가 실패: " +
+                "Failed to join room: " +
                 e.Message
             );
         }
@@ -322,7 +322,7 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // 게임 시작
+    // Start Game
     // =========================================================
 
     public void StartGame()
@@ -336,17 +336,17 @@ public class MultiplayerSessionManager : MonoBehaviour
             $"IsListening={NetworkManager.Singleton?.IsListening}"
         );
 
-        // Session 확인
+        // Check Session
         if (CurrentSession == null)
         {
-            SetError("참가한 방이 없습니다.");
+            SetError("No active room.");
             return;
         }
 
         if (!CurrentSession.IsHost)
         {
             SetError(
-                "게임 시작은 방장만 할 수 있습니다."
+                "Only the Host can start the game."
             );
             return;
         }
@@ -354,7 +354,7 @@ public class MultiplayerSessionManager : MonoBehaviour
         if (NetworkManager.Singleton == null)
         {
             SetError(
-                "NetworkManager를 찾을 수 없습니다."
+                "NetworkManager could not be found."
             );
             return;
         }
@@ -362,13 +362,13 @@ public class MultiplayerSessionManager : MonoBehaviour
         if (!NetworkManager.Singleton.IsServer)
         {
             SetError(
-                "Network Server가 실행되지 않았습니다."
+                "Network Server is not running."
             );
             return;
         }
 
         Debug.Log(
-            $"[Multiplayer] 게임 시작: {gameSceneName}"
+            $"[Multiplayer] Starting game: {gameSceneName}"
         );
 
         NetworkManager.Singleton
@@ -380,51 +380,51 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // 방 나가기
+    // Leave Room
     // =========================================================
 
     public async Task LeaveRoomAsync()
     {
-        // 참가 중인 방이 없으면 종료
+        // Exit if there is no active Session
         if (CurrentSession == null)
             return;
 
         try
         {
-            SetStatus("방에서 나가는 중...");
+            SetStatus("Leaving room...");
 
-            // 현재 Session 저장
+            // Store the current Session
             ISession session =
                 CurrentSession;
 
-            // 먼저 참조 제거
+            // Clear the reference first
             CurrentSession = null;
 
-            // Session에서 나가기
+            // Leave the Session
             await session.LeaveAsync();
 
-            // NGO 네트워크가 남아 있다면 종료
+            // Shutdown NGO if the network is still active
             if (NetworkManager.Singleton != null &&
                 NetworkManager.Singleton.IsListening)
             {
                 NetworkManager.Singleton.Shutdown();
             }
 
-            SetStatus("방에서 나왔습니다.");
+            SetStatus("Left the room.");
         }
         catch (Exception e)
         {
             Debug.LogException(e);
 
             SetError(
-                "방 나가기 실패: " +
+                "Failed to leave room: " +
                 e.Message
             );
         }
     }
 
     // =========================================================
-    // 상태 표시
+    // Status Display
     // =========================================================
 
     private void SetStatus(string message)
@@ -440,7 +440,7 @@ public class MultiplayerSessionManager : MonoBehaviour
     }
 
     // =========================================================
-    // 에러 표시
+    // Error Display
     // =========================================================
 
     private void SetError(string message)

@@ -13,11 +13,11 @@ public class PlayerSpawnManager : MonoBehaviour
     {
         if (NetworkManager.Singleton == null)
         {
-            Debug.LogError("[PlayerSpawn] NetworkManager가 없습니다.");
+            Debug.LogError("[PlayerSpawn] NetworkManager is missing.");
             return;
         }
 
-        // Host / Server만 Spawn을 담당한다.
+        // Only Host / Server handles player spawning.
         if (!NetworkManager.Singleton.IsServer)
             return;
 
@@ -39,7 +39,7 @@ public class PlayerSpawnManager : MonoBehaviour
         if (playerPrefab == null)
         {
             Debug.LogError(
-                "[PlayerSpawn] Player Prefab이 지정되지 않았습니다."
+                "[PlayerSpawn] Player Prefab is not assigned."
             );
             return;
         }
@@ -47,12 +47,12 @@ public class PlayerSpawnManager : MonoBehaviour
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
             Debug.LogError(
-                "[PlayerSpawn] Spawn Point가 없습니다."
+                "[PlayerSpawn] No Spawn Points are assigned."
             );
             return;
         }
 
-        // 이미 Player Object가 있는 Client라면 다시 Spawn하지 않는다.
+        // Do not spawn again if the Client already has a Player Object.
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(
                 clientId,
                 out NetworkClient client))
@@ -60,7 +60,7 @@ public class PlayerSpawnManager : MonoBehaviour
             if (client.PlayerObject != null)
             {
                 Debug.Log(
-                    $"[PlayerSpawn] Client {clientId}는 이미 Player가 있습니다."
+                    $"[PlayerSpawn] Client {clientId} already has a Player Object."
                 );
 
                 return;
@@ -83,7 +83,7 @@ public class PlayerSpawnManager : MonoBehaviour
         );
 
         Debug.Log(
-            $"[PlayerSpawn] Player Spawn 완료 - " +
+            $"[PlayerSpawn] Player Spawned - " +
             $"ClientId: {clientId}, " +
             $"Position: {spawnPoint.position}"
         );

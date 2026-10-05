@@ -26,10 +26,10 @@ public class MainMenuNetworkUI : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[MainMenuUI] Awake 실행");
+        Debug.Log("[MainMenuUI] Awake called");
 
         // -----------------------------------------------------
-        // 버튼 이벤트 연결
+        // Connect button events
         // -----------------------------------------------------
 
         if (createRoomButton != null)
@@ -45,7 +45,7 @@ public class MainMenuNetworkUI : MonoBehaviour
         else
         {
             Debug.LogError(
-                "[MainMenuUI] Create Room Button이 연결되지 않았습니다."
+                "[MainMenuUI] Create Room Button is not assigned."
             );
         }
 
@@ -63,7 +63,7 @@ public class MainMenuNetworkUI : MonoBehaviour
         else
         {
             Debug.LogError(
-                "[MainMenuUI] Join Room Button이 연결되지 않았습니다."
+                "[MainMenuUI] Join Room Button is not assigned."
             );
         }
 
@@ -81,13 +81,13 @@ public class MainMenuNetworkUI : MonoBehaviour
         else
         {
             Debug.LogError(
-                "[MainMenuUI] Start Game Button이 연결되지 않았습니다."
+                "[MainMenuUI] Start Game Button is not assigned."
             );
         }
 
 
         // -----------------------------------------------------
-        // 초기 UI
+        // Initial UI
         // -----------------------------------------------------
 
         SetRoomCodeText("");
@@ -113,7 +113,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // Session Manager 연결
+    // Session Manager Connection
     // =========================================================
 
     private void SubscribeToSessionManager()
@@ -121,7 +121,7 @@ public class MainMenuNetworkUI : MonoBehaviour
         if (sessionManager == null)
         {
             Debug.LogError(
-                "[MainMenuUI] Session Manager가 연결되지 않았습니다."
+                "[MainMenuUI] Session Manager is not assigned."
             );
 
             return;
@@ -133,7 +133,7 @@ public class MainMenuNetworkUI : MonoBehaviour
         sessionManager.OnError += HandleError;
 
         Debug.Log(
-            "[MainMenuUI] Session Manager 이벤트 연결 완료"
+            "[MainMenuUI] Session Manager event subscription completed."
         );
     }
 
@@ -151,19 +151,19 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // 방 만들기
+    // Create Room
     // =========================================================
 
     private async void OnCreateRoomButtonClicked()
     {
         Debug.Log(
-            "[MainMenuUI] Create Room 버튼 클릭"
+            "[MainMenuUI] Create Room button clicked."
         );
 
         if (sessionManager == null)
         {
             Debug.LogError(
-                "[MainMenuUI] Session Manager가 없습니다."
+                "[MainMenuUI] Session Manager is missing."
             );
 
             SetStatusText(
@@ -182,19 +182,19 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // 방 참가
+    // Join Room
     // =========================================================
 
     private async void OnJoinRoomButtonClicked()
     {
         Debug.Log(
-            "[MainMenuUI] Join Room 버튼 클릭"
+            "[MainMenuUI] Join Room button clicked."
         );
 
         if (sessionManager == null)
         {
             Debug.LogError(
-                "[MainMenuUI] Session Manager가 없습니다."
+                "[MainMenuUI] Session Manager is missing."
             );
 
             SetStatusText(
@@ -234,7 +234,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // 게임 시작
+    // Start Game
     // =========================================================
 
     private void OnStartGameButtonClicked()
@@ -244,14 +244,14 @@ public class MainMenuNetworkUI : MonoBehaviour
         );
 
         Debug.Log(
-            "[MainMenuUI] Start Game 버튼 클릭됨"
+            "[MainMenuUI] Start Game button clicked."
         );
 
 
         if (sessionManager == null)
         {
             Debug.LogError(
-                "[MainMenuUI] Session Manager가 없습니다."
+                "[MainMenuUI] Session Manager is missing."
             );
 
             SetStatusText(
@@ -263,13 +263,13 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
         Debug.Log(
-            $"[MainMenuUI] SessionManager 확인 - " +
+            $"[MainMenuUI] SessionManager check - " +
             $"IsHost: {sessionManager.IsHost}"
         );
 
 
         Debug.Log(
-            "[MainMenuUI] SessionManager.StartGame() 호출"
+            "[MainMenuUI] Calling SessionManager.StartGame()."
         );
 
 
@@ -277,7 +277,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
         Debug.Log(
-            "[MainMenuUI] SessionManager.StartGame() 호출 완료"
+            "[MainMenuUI] SessionManager.StartGame() completed."
         );
 
         Debug.Log(
@@ -287,7 +287,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // Session 이벤트
+    // Session Events
     // =========================================================
 
     private void HandleStatusChanged(
@@ -343,7 +343,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
     // =========================================================
-    // UI 상태
+    // UI State
     // =========================================================
 
     private void UpdateStartGameButton()
@@ -359,7 +359,7 @@ public class MainMenuNetworkUI : MonoBehaviour
         }
 
 
-        // Host만 게임 시작 가능
+        // Only the Host can start the game.
         bool canStart =
             sessionManager.IsHost;
 
@@ -385,7 +385,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
         // -----------------------------------------------------
-        // 방 생성
+        // Create Room
         // -----------------------------------------------------
 
         if (createRoomButton != null)
@@ -396,7 +396,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
         // -----------------------------------------------------
-        // 방 참가
+        // Join Room
         // -----------------------------------------------------
 
         if (joinRoomButton != null)
@@ -407,7 +407,7 @@ public class MainMenuNetworkUI : MonoBehaviour
 
 
         // -----------------------------------------------------
-        // Join Code 입력
+        // Join Code Input
         // -----------------------------------------------------
 
         if (joinCodeInput != null)
