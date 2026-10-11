@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 1462115581999239799}
   - component: {fileID: 8448915889336523730}
   - component: {fileID: 8561464842897598766}
-  - component: {fileID: 934677087060326813}
   - component: {fileID: 4341436432668298911}
+  - component: {fileID: 934677087060326813}
   - component: {fileID: 7333357892844982837}
   - component: {fileID: 8965262720900387293}
   - component: {fileID: 733237170173098570}
@@ -120,27 +120,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &934677087060326813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1092972642928779719}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0af901396af1646449f3145a861c6da8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GrabInteractableObject
-  ShowTopMostFoldoutHeaderGroup: 1
-  isHeld:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  gripOffset: {x: 0.47880337, y: 0.6742837, z: 0.2909951}
-  gripEuler: {x: 356.97253, y: 84.44762, z: 337.27267}
-  heldItemPrefab: {fileID: 1092972642928779719}
 --- !u!114 &4341436432668298911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,6 +147,28 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &934677087060326813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092972642928779719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0af901396af1646449f3145a861c6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrabInteractableObject
+  ShowTopMostFoldoutHeaderGroup: 1
+  isHeld:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  gripOffset: {x: 0.47880337, y: 0.6742837, z: 0.2909951}
+  gripEuler: {x: 356.97253, y: 84.44762, z: 337.27267}
+  gripScale: {x: 0, y: 0, z: 0}
+  heldItemPrefab: {fileID: 1092972642928779719}
 --- !u!54 &7333357892844982837
 Rigidbody:
   m_ObjectHideFlags: 0

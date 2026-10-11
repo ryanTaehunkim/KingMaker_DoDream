@@ -2363,7 +2363,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Creat Room
+  m_text: Create Room
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
