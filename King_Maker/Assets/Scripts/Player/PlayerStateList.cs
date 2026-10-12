@@ -4,12 +4,14 @@ using Unity.Netcode;
 public class PlayerStateList : NetworkBehaviour
 {
     [Header("Stats")]
-<<<<<<< HEAD
-=======
-    public NetworkVariable<bool> isAlive = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public NetworkVariable<float> health = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public NetworkVariable<float> stamina = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
->>>>>>> 2c4009ba8b735024214ef1a6b133984e66ac08a0
+
+    // 생존 여부 (추가)
+    public NetworkVariable<bool> isAlive =
+        new NetworkVariable<bool>(
+            true,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server
+        );
 
     // 체력
     public NetworkVariable<float> health =
@@ -87,7 +89,7 @@ public class PlayerStateList : NetworkBehaviour
 
     private void Update()
     {
-        // 스테미나 계산은 서버에서만
+        // 스태미나 계산은 서버에서만
         if (!IsServer)
             return;
 
@@ -124,6 +126,23 @@ public class PlayerStateList : NetworkBehaviour
         // 나중에 HUD HP Bar와 연결
         // 예:
         // HPBar.value = newValue;
+    }
+
+
+    // 피해 처리 (추가)
+    public void TakeDamage(float damage)
+    {
+        if (!IsServer || !isAlive.Value)
+        {
+            return;
+        }
+
+        health.Value = Mathf.Max(0f, health.Value - damage);
+
+        if (health.Value <= 0f)
+            isAlive.Value = false;
+
+        Debug.Log(health.Value);
     }
 
 
@@ -236,7 +255,7 @@ public class PlayerStateList : NetworkBehaviour
     }
 
 
-    // 일차가 바뀌면 클리어 미션 기록 초기화
+    // 일차가 바뀌면 클리어 기록 초기화
     public void ResetClearedMissions()
     {
         if (!IsServer)
@@ -277,21 +296,4 @@ public class PlayerStateList : NetworkBehaviour
                 100f
             );
     }
-<<<<<<< HEAD
 }
-=======
-    public void TakeDamage(float damage)
-    {
-        if (!IsServer || !isAlive.Value)
-        {
-            return;
-        }
-
-        health.Value = Mathf.Max(0f, health.Value - damage);
-        if (health.Value <= 0f)
-            isAlive.Value = false;
-
-        Debug.Log(health.Value);
-    }
-}
->>>>>>> 2c4009ba8b735024214ef1a6b133984e66ac08a0
