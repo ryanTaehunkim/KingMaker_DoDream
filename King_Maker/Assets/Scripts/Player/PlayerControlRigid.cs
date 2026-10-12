@@ -46,8 +46,11 @@ public class PlayerControlRigid : NetworkBehaviour
     //점프
     private bool isGrounded;
     private Vector3 groundNormal = Vector3.up;
-    private bool jumpRequested;
+    
     private float lastJumpTime = -1f;
+    [SerializeField] private float jumpBufferTime = 0.15f;
+    private float jumpBufferCounter;
+
     private bool Grounded() => isGrounded;
     //공격
     [Header("Knockback")]
@@ -57,7 +60,8 @@ public class PlayerControlRigid : NetworkBehaviour
 
     //뛰는 중인지 서버에 보내기 위한 변수
     private PlayerStateList playerState;
-    private bool isRunning;
+    [HideInInspector]public bool isRunning;
+    [HideInInspector] public bool isJumping = false;
 
 
 
@@ -159,7 +163,7 @@ public class PlayerControlRigid : NetworkBehaviour
 
     private void UpdateRunState()
     {
-        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value > 5f;
+        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value > 0f;
 
 
         if (isRunning != newRunningState)
@@ -188,13 +192,16 @@ public class PlayerControlRigid : NetworkBehaviour
     private void InputJump()
     {
         if (InputManager.jumpPressed)
-            jumpRequested = true;
+            jumpBufferCounter = jumpBufferTime;
+        else
+            jumpBufferCounter -= Time.deltaTime;
     }
 
     private void CheckGround()
     {
         if (Time.time - lastJumpTime < jumpCooldown){
             isGrounded = false;
+            
             return;
         }
 
@@ -208,6 +215,7 @@ public class PlayerControlRigid : NetworkBehaviour
             if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundRayLength,
                 groundMask, QueryTriggerInteraction.Ignore))
             {
+                isJumping = false;
                 isGrounded = true;
                 groundNormal = hit.normal;
                 return;
@@ -218,11 +226,13 @@ public class PlayerControlRigid : NetworkBehaviour
     }
     private void Jump()
     {
-        if (!jumpRequested) return;
-        jumpRequested = false;
+        if (jumpBufferCounter<=0f) return;
+        
 
         if (!isGrounded) return;
 
+        jumpBufferCounter = 0f;
+        isJumping = true;
         float jumpVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         Vector3 v = rb.linearVelocity;
         rb.linearVelocity = new Vector3(v.x, jumpVelocity, v.z);
