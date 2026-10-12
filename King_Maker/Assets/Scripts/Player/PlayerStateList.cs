@@ -5,6 +5,7 @@ using UnityEditor.Rendering;
 public class PlayerStateList : NetworkBehaviour{
 
     [Header("Stats")]
+    public NetworkVariable<bool> isAlive = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<float> health = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<float> stamina = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -97,5 +98,18 @@ public class PlayerStateList : NetworkBehaviour{
             stamina.Value += 5f * Time.deltaTime;
         }
         stamina.Value = Mathf.Clamp(stamina.Value, 0f, 100f);
+    }
+    public void TakeDamage(float damage)
+    {
+        if (!IsServer || !isAlive.Value)
+        {
+            return;
+        }
+
+        health.Value = Mathf.Max(0f, health.Value - damage);
+        if (health.Value <= 0f)
+            isAlive.Value = false;
+
+        Debug.Log(health.Value);
     }
 }
