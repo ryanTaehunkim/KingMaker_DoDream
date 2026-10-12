@@ -50,9 +50,14 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         GameObject newItemObj = Instantiate(heldItemPrefab, spawnPos, spawnRot);
         Rigidbody objRigid = newItemObj.GetComponent<Rigidbody>();
+        Collider collider = newItemObj.GetComponent<Collider>();
         if (objRigid != null)
         {
             objRigid.isKinematic = true;
+        }
+        if (collider != null)
+        {
+            collider.isTrigger = true;
         }
 
         NetworkObject newNetObj = newItemObj.GetComponent<NetworkObject>();
@@ -90,6 +95,11 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         if (objRigid != null)
         {
             objRigid.isKinematic = false;
+        }
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            collider.isTrigger = false;
         }
         isHeld.Value = false;
     }

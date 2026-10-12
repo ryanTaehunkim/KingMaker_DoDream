@@ -4,6 +4,12 @@ using Unity.Netcode;
 public class PlayerStateList : NetworkBehaviour
 {
     [Header("Stats")]
+<<<<<<< HEAD
+=======
+    public NetworkVariable<bool> isAlive = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> health = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> stamina = new NetworkVariable<float>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+>>>>>>> 2c4009ba8b735024214ef1a6b133984e66ac08a0
 
     // 체력
     public NetworkVariable<float> health =
@@ -271,4 +277,21 @@ public class PlayerStateList : NetworkBehaviour
                 100f
             );
     }
+<<<<<<< HEAD
 }
+=======
+    public void TakeDamage(float damage)
+    {
+        if (!IsServer || !isAlive.Value)
+        {
+            return;
+        }
+
+        health.Value = Mathf.Max(0f, health.Value - damage);
+        if (health.Value <= 0f)
+            isAlive.Value = false;
+
+        Debug.Log(health.Value);
+    }
+}
+>>>>>>> 2c4009ba8b735024214ef1a6b133984e66ac08a0
