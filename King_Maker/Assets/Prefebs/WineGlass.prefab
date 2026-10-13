@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 3817991038467660397}
   - component: {fileID: 4588535084914597847}
   - component: {fileID: 7691508777992465267}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: WineGlass
   m_TagString: Interactable
   m_Icon: {fileID: 0}
@@ -108,14 +108,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3891158964
+  GlobalObjectIdHash: 2290087001
   InScenePlacedSourceGlobalObjectIdHash: 3910286506
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -141,9 +141,9 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
-  gripOffset: {x: 0.51591, y: 0.7954, z: 0.06456001}
-  gripEuler: {x: 340, y: 24.999996, z: 0.0000004542835}
-  gripScale: {x: 30, y: 30, z: 30}
+  gripOffset: {x: -0.035, y: 0.085, z: -0.064}
+  gripEuler: {x: 0.0000008673566, y: 178.61655, z: -0.000010144611}
+  gripScale: {x: 150, y: 150, z: 150}
   heldItemPrefab: {fileID: 6511010173568261770}
 --- !u!114 &1736842181517346190
 MonoBehaviour:

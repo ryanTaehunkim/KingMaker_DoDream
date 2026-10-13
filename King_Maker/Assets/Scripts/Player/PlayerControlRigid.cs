@@ -33,12 +33,12 @@ public class PlayerControlRigid : NetworkBehaviour
     [Header("Interaction")]
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private LayerMask interactMask;
     private bool canInteract;
     private GameObject currentInteractable;
     private GameObject holdItem;
 
     private Rigidbody rb;
-    private Collider feetCollider;
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
     private float speed;
@@ -51,7 +51,7 @@ public class PlayerControlRigid : NetworkBehaviour
     [SerializeField] private float jumpBufferTime = 0.15f;
     private float jumpBufferCounter;
 
-    private bool Grounded() => isGrounded;
+   
     //공격
     [Header("Knockback")]
     private PlayerCombat combat;
@@ -60,9 +60,15 @@ public class PlayerControlRigid : NetworkBehaviour
 
     //뛰는 중인지 서버에 보내기 위한 변수
     private PlayerStateList playerState;
-    [HideInInspector]public bool isRunning;
-    [HideInInspector] public bool isJumping = false;
+    private bool isMoving;
+    private bool isRunning;
 
+
+    //애니메이션
+    private Animator animator;
+    private static readonly int IsMovingHash = Animator.StringToHash("isWalk");
+    private static readonly int IsRunningHash = Animator.StringToHash("isRun");
+    private static readonly int IsJumpingHash = Animator.StringToHash("isJump");
 
 
     private void Awake()
@@ -71,6 +77,7 @@ public class PlayerControlRigid : NetworkBehaviour
         virtualCamera = FindFirstObjectByType<CinemachineCamera>();
         playerState = GetComponent<PlayerStateList>();
         combat = GetComponent<PlayerCombat>();
+        animator = GetComponentInChildren<Animator>();
 
         GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
         if (camearObj != null)
@@ -102,8 +109,9 @@ public class PlayerControlRigid : NetworkBehaviour
         if (!IsOwner) return;
         Debug.Log(playerState.stamina.Value.ToString());
         HandleLook();
-        UpdateRunState();
+        
         InputMove();
+        UpdateRunState();
         InputJump();
         DetectInteractable();
         TrytoInteract();
@@ -142,6 +150,12 @@ public class PlayerControlRigid : NetworkBehaviour
     private void InputMove()
     {
         Vector2 input = InputManager.moveDir;
+
+        //걷기 애니메이션
+        isMoving = input.sqrMagnitude > 0.01f;
+        animator.SetBool(IsMovingHash, isMoving);
+
+
         horizontalVelocity = (transform.right * input.x + transform.forward * input.y);
         horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, 1f);
     }
@@ -179,6 +193,9 @@ public class PlayerControlRigid : NetworkBehaviour
         {
             speed = walkSpeed;
         }
+        bool isRun = isRunning && isMoving&& playerState.stamina.Value > 5f;
+        animator.SetBool(IsRunningHash, isRun);
+
     }
 
     [ServerRpc]
@@ -215,7 +232,7 @@ public class PlayerControlRigid : NetworkBehaviour
             if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundRayLength,
                 groundMask, QueryTriggerInteraction.Ignore))
             {
-                isJumping = false;
+                animator.SetBool(IsJumpingHash, false);
                 isGrounded = true;
                 groundNormal = hit.normal;
                 return;
@@ -232,7 +249,7 @@ public class PlayerControlRigid : NetworkBehaviour
         if (!isGrounded) return;
 
         jumpBufferCounter = 0f;
-        isJumping = true;
+        animator.SetBool(IsJumpingHash, true);
         float jumpVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         Vector3 v = rb.linearVelocity;
         rb.linearVelocity = new Vector3(v.x, jumpVelocity, v.z);
@@ -261,8 +278,8 @@ public class PlayerControlRigid : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
         Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.red);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance))
+        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, interactMask, QueryTriggerInteraction.Ignore))
+            
         {
 
             if (hit.collider.CompareTag("Interactable"))
@@ -291,7 +308,7 @@ public class PlayerControlRigid : NetworkBehaviour
         {
             if (currentInteractable != null)
             {
-                IInteractable interactobj = currentInteractable.GetComponent<IInteractable>();
+                IInteractable interactobj = currentInteractable.GetComponentInParent<IInteractable>();
                 if (interactobj != null)
                 {
                     interactobj.Interact(playerState);

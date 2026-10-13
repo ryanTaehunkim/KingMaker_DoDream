@@ -6,9 +6,9 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
     private NetworkObject netObj;
     public NetworkVariable<bool> isHeld = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    [SerializeField] private Vector3 gripOffset;
-    [SerializeField] private Vector3 gripEuler;
-    [SerializeField] private Vector3 gripScale;
+    [SerializeField] public Vector3 gripOffset;
+    [SerializeField] public Vector3 gripEuler;
+    [SerializeField] public Vector3 gripScale;
     [SerializeField] private GameObject heldItemPrefab;
 
     private void Awake()
@@ -44,11 +44,11 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         Transform playerTransform = playerObj.transform;
 
 
-        Vector3 spawnPos = playerTransform.TransformPoint(gripOffset);
-        Quaternion spawnRot = playerTransform.rotation * Quaternion.Euler(gripEuler);
+        //Vector3 spawnPos = playerTransform.TransformPoint(gripOffset);
+        //Quaternion spawnRot = playerTransform.rotation * Quaternion.Euler(gripEuler);
        
 
-        GameObject newItemObj = Instantiate(heldItemPrefab, spawnPos, spawnRot);
+        GameObject newItemObj = Instantiate(heldItemPrefab);
         Rigidbody objRigid = newItemObj.GetComponent<Rigidbody>();
         Collider collider = newItemObj.GetComponent<Collider>();
         if (objRigid != null)
@@ -62,11 +62,13 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         NetworkObject newNetObj = newItemObj.GetComponent<NetworkObject>();
         newNetObj.Spawn();
-        newNetObj.TrySetParent(playerObj, worldPositionStays: false);
+        //newNetObj.TrySetParent(playerObj, worldPositionStays: false);
 
-        newItemObj.transform.localPosition = gripOffset;
-        newItemObj.transform.localRotation = Quaternion.Euler(gripEuler);
+        //newItemObj.transform.localPosition = gripOffset;
+        //newItemObj.transform.localRotation = Quaternion.Euler(gripEuler);
         newItemObj.transform.localScale = gripScale;
+        Debug.Log($"아이템 localScale: {newItemObj.transform.localScale}");
+        Debug.Log($"아이템 lossyScale: {newItemObj.transform.lossyScale}");
         GrabInteractableObject holdObj = newItemObj.GetComponent<GrabInteractableObject>();
         holdObj.isHeld.Value = true; //손에있는걸 다른 사람이 못잡게
 

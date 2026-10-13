@@ -26,7 +26,7 @@ public class PlayerCombat : NetworkBehaviour
     [SerializeField] private float knockbackForce = 6f;
     [SerializeField] private float knockbackUpward = 3f;
     private PlayerControlRigid controlRigid;
-
+    private Animator animator;
     // 서버 거리 검증 디버그용
     private Vector3 dbgStart;
     private Vector3 dbgEnd;
@@ -37,6 +37,7 @@ public class PlayerCombat : NetworkBehaviour
     private void Awake() {
         state = GetComponent<PlayerStateList>();
         controlRigid = GetComponent<PlayerControlRigid>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     public void TryAttack()

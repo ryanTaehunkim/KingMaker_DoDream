@@ -2771,7 +2771,6 @@ GameObject:
   - component: {fileID: 7461978560619011022}
   - component: {fileID: 7363783387093563115}
   - component: {fileID: 1923764386690786393}
-  - component: {fileID: 672082571213639014}
   m_Layer: 6
   m_Name: Player_rigid
   m_TagString: Untagged
@@ -3009,9 +3008,8 @@ MonoBehaviour:
   cameraTransform: {fileID: 6954300923994050591}
   interactionDistance: 8
   playerCamera: {fileID: 0}
+  jumpBufferTime: 0.15
   knockbackDecay: 8
-  isRunning: 0
-  isJumping: 0
 --- !u!114 &7461978560619011022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3050,7 +3048,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 0af78f88289b0ea4cb2b29a389c7b612, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -3091,19 +3089,6 @@ MonoBehaviour:
       Synchronize: 1
       ParameterType: 4
   AnimatorParametersExpanded: 0
---- !u!114 &672082571213639014
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6434790445215497672}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6922b8a4fd092248aa90128f215f074, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationControl
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &6505873112861103399
 GameObject:
   m_ObjectHideFlags: 0

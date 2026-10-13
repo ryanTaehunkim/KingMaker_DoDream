@@ -21,11 +21,11 @@ public class PlayerAnimationControl : NetworkBehaviour
         if (!IsOwner) return; // 파라미터는 Owner만 세팅, 전파는 NetworkAnimator가 처리
 
         bool isMoving = InputManager.moveDir.sqrMagnitude > 0.01f;
-        bool isRunning = pc.isRunning; // 스태미나 조건은 PlayerControlRigid의 isRunning을 공개해서 쓰는 게 정확
-        bool isjumping = pc.isJumping;
+        //bool isRunning = pc.isRunning; // 스태미나 조건은 PlayerControlRigid의 isRunning을 공개해서 쓰는 게 정확
+        //bool isjumping = pc.isJumping;
 
         animator.SetBool(IsMovingHash, isMoving);
-        animator.SetBool(IsRunningHash, isRunning);
-        animator.SetBool(IsJumpingHash, isjumping);
+        //animator.SetBool(IsRunningHash, isRunning);
+        //animator.SetBool(IsJumpingHash, isjumping);
     }
 }

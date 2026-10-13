@@ -102,6 +102,7 @@ public class RoleManager : NetworkBehaviour
 
     private void Update()
     {
+        //UpGradeBtn();
         // 역할 배정은 서버에서만 가능
         if (!IsServer)
             return;
@@ -115,6 +116,25 @@ public class RoleManager : NetworkBehaviour
         }
     }
 
+
+    public void UpGradeBtn()
+    {
+        
+            UpGradeBtnRpc();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void UpGradeBtnRpc(RpcParams rpcParams = default)
+    {
+        ulong senderId = rpcParams.Receive.SenderClientId;
+
+        if (!NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var client)) return;
+        if (client.PlayerObject == null) return;
+
+        var state = client.PlayerObject.GetComponent<PlayerStateList>();
+        if(state == null) return;
+        state.cardGrade.Value = Mathf.Min(state.cardGrade.Value+1, 10);
+    }
 
     // =========================================================
     // Assign Roles

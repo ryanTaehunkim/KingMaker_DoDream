@@ -115,6 +115,8 @@ public class PlayerStateList : NetworkBehaviour
     }
 
 
+ 
+
     // =========================================================
     // Health
     // =========================================================
@@ -173,6 +175,9 @@ public class PlayerStateList : NetworkBehaviour
             $"Client {OwnerClientId} CardGrade: " +
             $"{oldValue} → {newValue}"
         );
+        if (!IsServer) return;
+
+        GameCheckManager.Instance.CheckAllPlayersGrade();
     }
 
 
@@ -280,20 +285,23 @@ public class PlayerStateList : NetworkBehaviour
 
     private void StaminaChanged()
     {
+        float newStamina = stamina.Value;
+
         if (isRunning)
         {
-            stamina.Value -= 20f * Time.deltaTime;
+            newStamina -= 20f * Time.deltaTime;
         }
         else
         {
-            stamina.Value += 5f * Time.deltaTime;
+            newStamina += 5f * Time.deltaTime;
         }
 
-        stamina.Value =
+        newStamina =
             Mathf.Clamp(
-                stamina.Value,
+                newStamina,
                 0f,
                 100f
             );
+        stamina.Value = newStamina;
     }
 }
