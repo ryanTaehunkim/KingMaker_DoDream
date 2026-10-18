@@ -173,11 +173,23 @@ public class PlayerStateList : NetworkBehaviour
         Debug.Log(
             $"[PlayerStateList] " +
             $"Client {OwnerClientId} CardGrade: " +
-            $"{oldValue} → {newValue}"
+            $"{oldValue} -> {newValue}"
         );
-        if (!IsServer) return;
 
-        GameCheckManager.Instance.CheckAllPlayersGrade();
+        // 서버만 게임 결과와 익명 순위판을 갱신
+        if (!IsServer)
+            return;
+
+        if (GameCheckManager.Instance != null)
+        {
+            GameCheckManager.Instance.CheckAllPlayersGrade();
+        }
+
+        if (AnonymousScoreboardManager.Instance != null)
+        {
+            AnonymousScoreboardManager.Instance
+                .RefreshBoardForEligibleClientsServer();
+        }
     }
 
 
@@ -196,18 +208,6 @@ public class PlayerStateList : NetworkBehaviour
             return;
 
         cardGrade.Value = newGrade;
-
-        // RoleManager를 통해 현재 조커에게 변경된 등급 전달
-        RoleManager roleManager =
-            FindFirstObjectByType<RoleManager>();
-
-        if (roleManager != null)
-        {
-            roleManager.NotifyCardGradeChanged(
-                OwnerClientId,
-                newGrade
-            );
-        }
     }
 
 
