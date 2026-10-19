@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
-
+using UnityEngine.InputSystem;
 public enum Role
 {
     None,
@@ -64,6 +64,7 @@ public class RoleManager : NetworkBehaviour
     {
         // 테스트용:
         // Host에서 Z를 누르면 역할 배정
+        
         if (Keyboard.current != null &&
             Keyboard.current.zKey.wasPressedThisFrame)
         {

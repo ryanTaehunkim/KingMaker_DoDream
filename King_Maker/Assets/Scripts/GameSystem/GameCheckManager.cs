@@ -13,15 +13,10 @@ public class GameCheckManager : NetworkBehaviour
 {
     public static GameCheckManager Instance { get; private set; }
 
-    public NetworkVariable<GameResult> result =
-        new NetworkVariable<GameResult>(
-            GameResult.None,
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Server
-        );
+
 
     [Header("Win Condition")]
-    [SerializeField] private int kingGrade = 10;
+ 
 
     public NetworkVariable<GameResult> result = new NetworkVariable<GameResult>(GameResult.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     [SerializeField] private int kingGrade;
