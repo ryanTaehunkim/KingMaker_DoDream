@@ -224,6 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5341649900150601940}
   - component: {fileID: 3870500192338291111}
+  - component: {fileID: 8660935095416167621}
   m_Layer: 0
   m_Name: LeftfeetCollider
   m_TagString: Untagged
@@ -263,11 +264,32 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1396153242230697762, guid: 549e910cd08e62b4aa03045263cb4123, type: 3}
+--- !u!65 &8660935095416167621
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570795826764345341}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.21445774, y: 0.19893004, z: 0.36824355}
+  m_Center: {x: 0.22270854, y: 0.099464975, z: -0.03213147}
 --- !u!1 &628932341172658087
 GameObject:
   m_ObjectHideFlags: 0
@@ -2231,6 +2253,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8456599639821866252}
   - component: {fileID: 3059646693279513857}
+  - component: {fileID: 3908130962391118617}
   m_Layer: 0
   m_Name: RightfeetCollider
   m_TagString: Untagged
@@ -2270,11 +2293,32 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6189640644437526248, guid: 549e910cd08e62b4aa03045263cb4123, type: 3}
+--- !u!65 &3908130962391118617
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5464064377425882287}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.21445774, y: 0.19893004, z: 0.36824355}
+  m_Center: {x: -0.2227085, y: 0.099464975, z: -0.03213147}
 --- !u!1 &5507839411934307347
 GameObject:
   m_ObjectHideFlags: 0
@@ -3278,6 +3322,7 @@ GameObject:
   - component: {fileID: 7963295908465592789}
   - component: {fileID: 4468412214565977874}
   - component: {fileID: 6179157319527751481}
+  - component: {fileID: 4438931925981037110}
   m_Layer: 6
   m_Name: Player3
   m_TagString: Untagged
@@ -3561,6 +3606,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHandHolder
   ShowTopMostFoldoutHeaderGroup: 1
   handSocket: {fileID: 1092306260291536194}
+--- !u!114 &4438931925981037110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8479978985355811839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f10b39531ef69e04194457e9910b726c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementLock
+  ShowTopMostFoldoutHeaderGroup: 1
+  behavioursToDisable: []
+  IsLocked:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
 --- !u!1 &8678139609499985502
 GameObject:
   m_ObjectHideFlags: 0
@@ -3715,7 +3779,7 @@ Transform:
   m_GameObject: {fileID: 9152730622820069581}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.11, z: 0.475}
+  m_LocalPosition: {x: 0, y: 0.11, z: 0.575}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

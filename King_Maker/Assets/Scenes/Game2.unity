@@ -90678,7 +90678,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 053c37dc2e1a9454eb491379f710b527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnManager
-  playerPrefab: {fileID: 4381418043258388218, guid: ecb1af8757b30d744b6ac57f8c2979ee, type: 3}
+  playerPrefab: {fileID: 4381418043258388218, guid: d5c8959d6caaa554db1040643cd77c7e, type: 3}
   spawnPoints:
   - {fileID: 1748888497}
   - {fileID: 724511956}
@@ -282431,6 +282431,7 @@ MonoBehaviour:
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
   kingGrade: 19
+  citizenLossCount: 0
 --- !u!114 &1883375675
 MonoBehaviour:
   m_ObjectHideFlags: 0
