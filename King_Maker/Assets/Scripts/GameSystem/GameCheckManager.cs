@@ -23,6 +23,10 @@ public class GameCheckManager : NetworkBehaviour
     [Header("Win Condition")]
     [SerializeField] private int kingGrade = 10;
 
+    public NetworkVariable<GameResult> result = new NetworkVariable<GameResult>(GameResult.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    [SerializeField] private int kingGrade;
+    [SerializeField] private int citizenLossCount;
+ 
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -109,25 +113,43 @@ public class GameCheckManager : NetworkBehaviour
             if (state.cardGrade.Value < kingGrade)
                 continue;
 
-            if (role == Role.Joker)
-            {
-                result.Value = GameResult.JokerWin;
-            }
-            else if (role == Role.Citizen)
-            {
-                result.Value = GameResult.CitizenWin;
-            }
+            EndGame(state.role.Value == Role.Joker ? GameResult.JokerWin : GameResult.CitizenWin);
+            return;
+        }
+    }
 
-            if (result.Value != GameResult.None)
-            {
-                Debug.Log(
-                    $"[GameCheckManager] 승리 조건 충족: " +
-                    $"Client {client.ClientId}, Role {role}, " +
-                    $"Grade {state.cardGrade.Value}"
-                );
+    public void CheckAllLife()
+    {
+        if (!IsServer) return;
+        if (result.Value != GameResult.None) return;
 
-                return;
+        int currentAliveCount = 0;
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.PlayerObject == null) continue;
+            var state = client.PlayerObject.GetComponent<PlayerStateList>();
+
+           
+            if (state.role.Value == Role.Citizen && state.isAlive.Value)
+            {
+                currentAliveCount++;
             }
         }
+
+        if (currentAliveCount <= citizenLossCount)
+        {
+            EndGame(GameResult.JokerWin);
+        
+        }
+    
+    }
+
+
+    private void EndGame(GameResult finalResult)
+    {
+        if (!IsServer || result.Value != GameResult.None) return;
+
+        result.Value = finalResult;
+        MissionManager.Instance?.ServerEndDay();
     }
 }

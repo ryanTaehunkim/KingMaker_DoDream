@@ -52,9 +52,20 @@ public class RoleManager : NetworkBehaviour
         }
     }
 
+    private void Update()
+    {
+        UpGradeBtn();
+        // 역할 배정은 서버에서만 가능
+        if (!IsServer)
+            return;
+    }
+
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
+        // 테스트용:
+        // Host에서 Z를 누르면 역할 배정
+        if (Keyboard.current != null &&
+            Keyboard.current.zKey.wasPressedThisFrame)
         {
             rolesAssigned = false;
             serverRoles.Clear();
@@ -76,7 +87,8 @@ public class RoleManager : NetworkBehaviour
         if (!IsSpawned)
             return;
 
-        UpGradeBtnRpc();
+        if(InputManager.interactPressed)
+            UpGradeBtnRpc();
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

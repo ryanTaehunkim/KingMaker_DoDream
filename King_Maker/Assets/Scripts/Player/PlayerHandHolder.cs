@@ -44,10 +44,8 @@ public class PlayerHandHolder : NetworkBehaviour
         obj = heldItem.GetComponent<GrabInteractableObject>();
         if (obj == null) return;
         Vector3 graboffset = obj.gripOffset;
-        //heldItem.SetPositionAndRotation(handSocket.position, handSocket.rotation);
         Vector3 worldPos = handSocket.TransformPoint(graboffset);
         Quaternion worldRotation = handSocket.rotation * Quaternion.Euler(obj.gripEuler);
-
         heldItem.SetPositionAndRotation(worldPos, worldRotation);
     }
 }
