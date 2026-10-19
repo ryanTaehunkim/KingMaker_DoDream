@@ -43,9 +43,6 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         Transform playerTransform = playerObj.transform;
 
-
-        //Vector3 spawnPos = playerTransform.TransformPoint(gripOffset);
-        //Quaternion spawnRot = playerTransform.rotation * Quaternion.Euler(gripEuler);
        
 
         GameObject newItemObj = Instantiate(heldItemPrefab);
@@ -62,13 +59,9 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
 
         NetworkObject newNetObj = newItemObj.GetComponent<NetworkObject>();
         newNetObj.Spawn();
-        //newNetObj.TrySetParent(playerObj, worldPositionStays: false);
 
-        //newItemObj.transform.localPosition = gripOffset;
-        //newItemObj.transform.localRotation = Quaternion.Euler(gripEuler);
         newItemObj.transform.localScale = gripScale;
-        Debug.Log($"아이템 localScale: {newItemObj.transform.localScale}");
-        Debug.Log($"아이템 lossyScale: {newItemObj.transform.lossyScale}");
+
         GrabInteractableObject holdObj = newItemObj.GetComponent<GrabInteractableObject>();
         holdObj.isHeld.Value = true; //손에있는걸 다른 사람이 못잡게
 

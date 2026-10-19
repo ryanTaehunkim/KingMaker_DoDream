@@ -324,6 +324,8 @@ public class MissionManager : NetworkBehaviour
         if (mission.requiredPlayers > 1) return MissionDenyReason.NotEnoughPlayers;
 
         var player = GetPlayerObject(clientId);
+        if (player != null && player.TryGetComponent(out PlayerStateList ps) && !ps.isAlive.Value)
+            return MissionDenyReason.InvalidStation;
         if (mission.RequiresTool)
         {
             var holder = player != null ? player.GetComponent<IMissionToolHolder>() : null;
@@ -399,7 +401,7 @@ public class MissionManager : NetworkBehaviour
         if (applyGradeToPlayerState)
         {
             var ps = GetPlayerState(clientId);
-            if (ps != null && ps.IsSpawned) ps.cardGrade.Value += mission.gradeReward;
+            if (ps != null && ps.IsSpawned) ps.AddCardGrade(mission.gradeReward);
         }
         return mission.gradeReward;
     }

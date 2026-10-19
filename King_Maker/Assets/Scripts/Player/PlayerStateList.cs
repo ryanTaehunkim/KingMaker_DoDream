@@ -103,6 +103,7 @@ public class PlayerStateList : NetworkBehaviour
         stamina.OnValueChanged += OnStaminaChanged;
         cardGrade.OnValueChanged += OnCardGradeChanged;
         role.OnValueChanged += OnRoleChanged;
+        isAlive.OnValueChanged += OnAliveChanged;
     }
 
 
@@ -112,9 +113,19 @@ public class PlayerStateList : NetworkBehaviour
         stamina.OnValueChanged -= OnStaminaChanged;
         cardGrade.OnValueChanged -= OnCardGradeChanged;
         role.OnValueChanged -= OnRoleChanged;
+        isAlive.OnValueChanged -= OnAliveChanged;
     }
 
+    private void OnAliveChanged(bool oldValue, bool newValue)
+    {
+        if (!IsServer) return;
+        if (newValue) return;
 
+        MissionManager.Instance?.ServerCancelFor(OwnerClientId, MinigameCancelReason.Server);
+
+        GameCheckManager.Instance?.CheckAllLife();
+       
+    }
  
 
     // =========================================================
@@ -177,7 +188,7 @@ public class PlayerStateList : NetworkBehaviour
         );
         if (!IsServer) return;
 
-        GameCheckManager.Instance.CheckAllPlayersGrade();
+        GameCheckManager.Instance?.CheckAllPlayersGrade();
     }
 
 

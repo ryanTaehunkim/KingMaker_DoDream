@@ -102,7 +102,7 @@ public class RoleManager : NetworkBehaviour
 
     private void Update()
     {
-        //UpGradeBtn();
+        UpGradeBtn();
         // 역할 배정은 서버에서만 가능
         if (!IsServer)
             return;
@@ -119,7 +119,7 @@ public class RoleManager : NetworkBehaviour
 
     public void UpGradeBtn()
     {
-        
+        if(InputManager.interactPressed)
             UpGradeBtnRpc();
     }
 
