@@ -90,13 +90,20 @@ public class PlayerControlRigid : NetworkBehaviour
     {
         if (!IsOwner)
         {
+            rb.isKinematic = true;
+            rb.interpolation = RigidbodyInterpolation.None;
             return;
         }
+
+        rb.isKinematic = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
         if (virtualCamera != null)
         {
             virtualCamera.Follow = cameraTransform;
         }
         CursorLock();
+        
     }
     private void CursorLock()
     {
@@ -107,7 +114,7 @@ public class PlayerControlRigid : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
-        Debug.Log(playerState.stamina.Value.ToString());
+ 
         HandleLook();
         
         InputMove();
@@ -286,7 +293,7 @@ public class PlayerControlRigid : NetworkBehaviour
             {
                 canInteract = true;
                 currentInteractable = hit.collider.gameObject;
-                Debug.Log("상호작용 가능: " + currentInteractable.name);
+            
 
             }
             else
@@ -324,7 +331,7 @@ public class PlayerControlRigid : NetworkBehaviour
     {
         if (playerState.isHoldingItem.Value && InputManager.putDownPressed)
         {
-            Debug.Log("놓기");
+           
             ulong itemId = playerState.heldItemNetworkId.Value;
 
             if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemId, out NetworkObject itemNetObj))

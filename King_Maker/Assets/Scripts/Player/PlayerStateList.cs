@@ -25,9 +25,13 @@ public class PlayerStateList : NetworkBehaviour
     public NetworkVariable<float> stamina =
         new NetworkVariable<float>(
             100f,
-            NetworkVariableReadPermission.Everyone,
+            NetworkVariableReadPermission.Owner,
             NetworkVariableWritePermission.Server
         );
+    [Header("Stamina Sync")]
+    [SerializeField] private float staminaSyncInterval = 0.2f;
+    private float serverStamina = 100f;
+    private float staminaSyncTimer;
 
     // 카드 등급
     // 기본적으로 자기 자신만 읽을 수 있도록 설정
@@ -316,4 +320,30 @@ public class PlayerStateList : NetworkBehaviour
             );
         stamina.Value = newStamina;
     }
+
+    //private void StaminaChanged()
+    //{
+    //    // 내부 값은 매 프레임 정밀하게 계산
+    //    if (isRunning)
+    //        serverStamina -= 20f * Time.deltaTime;
+    //    else
+    //        serverStamina += 5f * Time.deltaTime;
+
+    //    serverStamina = Mathf.Clamp(serverStamina, 0f, 100f);
+
+    //    // 네트워크 반영은 일정 간격으로만
+    //    staminaSyncTimer += Time.deltaTime;
+
+    //    bool hitBoundary = serverStamina <= 0f || serverStamina >= 100f;
+    //    bool intervalPassed = staminaSyncTimer >= staminaSyncInterval;
+
+    //    // 0/100에 도달한 순간은 즉시 반영해야 달리기 차단/회복 완료가 정확함
+    //    if (intervalPassed || hitBoundary)
+    //    {
+    //        staminaSyncTimer = 0f;
+
+    //        if (!Mathf.Approximately(stamina.Value, serverStamina))
+    //            stamina.Value = serverStamina;
+    //    }
+    //}
 }

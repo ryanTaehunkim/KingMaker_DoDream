@@ -1723,6 +1723,7 @@ MonoBehaviour:
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
   kingGrade: 10
+  citizenLossCount: 0
 --- !u!1 &2132446447
 GameObject:
   m_ObjectHideFlags: 0
@@ -2294,6 +2295,10 @@ PrefabInstance:
     - target: {fileID: 5627335097256599128, guid: d5c8959d6caaa554db1040643cd77c7e, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5672637601669063564, guid: d5c8959d6caaa554db1040643cd77c7e, type: 3}
+      propertyPath: Interpolate
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6058876763931845704, guid: d5c8959d6caaa554db1040643cd77c7e, type: 3}
       propertyPath: m_Layer
