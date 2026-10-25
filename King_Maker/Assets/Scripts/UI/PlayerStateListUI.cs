@@ -1,4 +1,4 @@
-
+ï»¿
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -18,7 +18,7 @@ public class PlayerStateListUI : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // ³×Æ®¿öÅ© ¸Å´ÏÀú¿Í Á¡¼öÆÇ °ü¸®ÀÚ°¡ ÁØºñµÉ ¶§±îÁö ´ë±â
+        // ë„¤íŠ¸ì›Œí¬ ë§¤ë‹ˆì €ì™€ ì ìˆ˜íŒ ê´€ë¦¬ìê°€ ì¤€ë¹„ë  ë•Œê¹Œì§€ ëŒ€ê¸°
         while (NetworkManager.Singleton == null)
         {
             yield return null;
@@ -35,7 +35,7 @@ public class PlayerStateListUI : MonoBehaviour
 
         scoreboardManager.OnLocalBoardChanged += RefreshList;
 
-        // ½ÃÀÛÇÒ ¶§ Á¡¼öÆÇ ¼û±è
+        // ì‹œì‘í•  ë•Œ ì ìˆ˜íŒ ìˆ¨ê¹€
         RefreshList();
     }
 
@@ -56,7 +56,7 @@ public class PlayerStateListUI : MonoBehaviour
         if (scoreboardManager == null)
             return;
 
-        // °ø°³ »óÅÂ°¡ ¾Æ´Ï¸é ÆĞ³Î ÀüÃ¼¸¦ ¼û±è
+        // ê³µê°œ ìƒíƒœê°€ ì•„ë‹ˆë©´ íŒ¨ë„ ì „ì²´ë¥¼ ìˆ¨ê¹€
         if (!scoreboardManager.LocalBoardVisible)
         {
             if (scoreboardPanel != null)
@@ -65,7 +65,7 @@ public class PlayerStateListUI : MonoBehaviour
             return;
         }
 
-        // °ø°³ »óÅÂÀÏ ¶§¸¸ ÆĞ³Î Ç¥½Ã
+        // ê³µê°œ ìƒíƒœì¼ ë•Œë§Œ íŒ¨ë„ í‘œì‹œ
         if (scoreboardPanel != null)
             scoreboardPanel.SetActive(true);
 

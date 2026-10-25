@@ -1,10 +1,10 @@
-
+ï»¿
 using Unity.Netcode;
 using UnityEngine;
 
 public class GameTimeManager : NetworkBehaviour
 {
-    // ÁøÇà ´Ü°è
+    // ì§„í–‰ ë‹¨ê³„
     public const int PhaseWaiting = 0;
     public const int PhaseDay1Field = 1;
     public const int PhaseDay1Drop = 2;
@@ -14,10 +14,10 @@ public class GameTimeManager : NetworkBehaviour
     public const int PhaseDay4Final = 6;
     public const int PhaseFinished = 7;
 
-    // ÃÑ 18ºĞ
+    // ì´ 18ë¶„
     public const float GameDuration = 1080f;
 
-    // ÇöÀç ÀÏÂ÷
+    // í˜„ì¬ ì¼ì°¨
     public NetworkVariable<int> currentDay =
         new NetworkVariable<int>(
             1,
@@ -25,7 +25,7 @@ public class GameTimeManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    // ÇöÀç ´Ü°è°¡ ³¡³¯ ¶§±îÁö ³²Àº ½Ã°£
+    // í˜„ì¬ ë‹¨ê³„ê°€ ëë‚  ë•Œê¹Œì§€ ë‚¨ì€ ì‹œê°„
     public NetworkVariable<float> remainingTime =
         new NetworkVariable<float>(
             0f,
@@ -33,7 +33,7 @@ public class GameTimeManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    // °ÔÀÓ ½ÃÀÛ ÀÌÈÄ °æ°ú ½Ã°£
+    // ê²Œì„ ì‹œì‘ ì´í›„ ê²½ê³¼ ì‹œê°„
     public NetworkVariable<float> elapsedTime =
         new NetworkVariable<float>(
             0f,
@@ -41,7 +41,7 @@ public class GameTimeManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    // ÇöÀç ÁøÇà ´Ü°è
+    // í˜„ì¬ ì§„í–‰ ë‹¨ê³„
     public NetworkVariable<int> currentPhase =
         new NetworkVariable<int>(
             PhaseWaiting,
@@ -49,7 +49,7 @@ public class GameTimeManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    // Å¸ÀÌ¸Ó ½ÇÇà »óÅÂ
+    // íƒ€ì´ë¨¸ ì‹¤í–‰ ìƒíƒœ
     public NetworkVariable<bool> timerRunning =
         new NetworkVariable<bool>(
             false,
@@ -69,7 +69,7 @@ public class GameTimeManager : NetworkBehaviour
         timerRunning.Value = false;
     }
 
-    // GameFlowManager¿¡¼­ °ÔÀÓÀÌ ½ÃÀÛµÉ ¶§ È£Ãâ
+    // GameFlowManagerì—ì„œ ê²Œì„ì´ ì‹œì‘ë  ë•Œ í˜¸ì¶œ
     public void StartGameTimer()
     {
         if (!IsServer || !IsSpawned)
@@ -85,10 +85,10 @@ public class GameTimeManager : NetworkBehaviour
 
         timerRunning.Value = true;
 
-        Debug.Log("[GameTime] 1ÀÏÂ÷ ÇÊµå ½ÃÀÛ");
+        Debug.Log("[GameTime] 1ì¼ì°¨ í•„ë“œ ì‹œì‘");
     }
 
-    // °ÔÀÓ °á°ú°¡ °áÁ¤µÇ¾úÀ» ¶§ È£Ãâ
+    // ê²Œì„ ê²°ê³¼ê°€ ê²°ì •ë˜ì—ˆì„ ë•Œ í˜¸ì¶œ
     public void FinishGameTimer()
     {
         if (!IsServer)
@@ -126,7 +126,7 @@ public class GameTimeManager : NetworkBehaviour
         if (elapsed >= GameDuration)
         {
             FinishGameTimer();
-            Debug.Log("[GameTime] 18ºĞ °æ°ú");
+            Debug.Log("[GameTime] 18ë¶„ ê²½ê³¼");
         }
     }
 

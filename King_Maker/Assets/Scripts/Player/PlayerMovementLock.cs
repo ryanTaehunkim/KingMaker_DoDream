@@ -1,19 +1,11 @@
-
-using Unity.Netcode;
+ï»¿using Unity.Netcode;
 using UnityEngine;
 
+// í”Œë ˆì´ì–´ì˜ ì´ë™/ì í”„/ê³µê²©/ìƒí˜¸ì‘ìš©ì„ ì ê·¸ëŠ” "ìƒíƒœê°’"ë§Œ ê´€ë¦¬í•œë‹¤.
+// ì‹¤ì œë¡œ ë©ˆì¶”ëŠ” ë™ì‘ì€ PlayerControlRigidê°€ IsLocked ê°’ì„ ì½ì–´ì„œ ì²˜ë¦¬í•œë‹¤.
+// (ê³ ê°œ ëŒë¦¬ê¸°ëŠ” ì ê¸ˆ ì¤‘ì—ë„ PlayerControlRigid.HandleLookì´ ê³„ì† ë™ì‘)
 public class PlayerMovementLock : NetworkBehaviour
 {
-    [Header("¹Ì´Ï°ÔÀÓ Áß ºñÈ°¼ºÈ­ÇÒ ÄÄÆ÷³ÍÆ®")]
-    [SerializeField] private Behaviour[] behavioursToDisable;
-
-    private Rigidbody rb;
-    private PlayerControlRigid playerControl;
-
-    private bool[] originalEnabledStates;
-    private bool originalIsKinematic;
-    private bool originalUseGravity;
-
     public NetworkVariable<bool> IsLocked =
         new NetworkVariable<bool>(
             false,
@@ -23,116 +15,12 @@ public class PlayerMovementLock : NetworkBehaviour
 
     public bool IsGameplayLocked => IsLocked.Value;
 
-    public override void OnNetworkSpawn()
-    {
-        rb = GetComponent<Rigidbody>();
-        playerControl = GetComponent<PlayerControlRigid>();
-
-        if (behavioursToDisable != null)
-        {
-            originalEnabledStates =
-                new bool[behavioursToDisable.Length];
-
-            for (int i = 0; i < behavioursToDisable.Length; i++)
-            {
-                if (behavioursToDisable[i] != null)
-                {
-                    originalEnabledStates[i] =
-                        behavioursToDisable[i].enabled;
-                }
-            }
-        }
-
-        if (rb != null)
-        {
-            originalIsKinematic = rb.isKinematic;
-            originalUseGravity = rb.useGravity;
-        }
-
-        IsLocked.OnValueChanged += OnLockChanged;
-
-        ApplyLock(IsLocked.Value);
-    }
-
-    public override void OnNetworkDespawn()
-    {
-        IsLocked.OnValueChanged -= OnLockChanged;
-
-        // ¿ÀºêÁ§Æ®°¡ »ç¶óÁú ¶§ ¿ø·¡ ¹°¸® ¼³Á¤ º¹±¸
-        if (rb != null)
-        {
-            rb.isKinematic = originalIsKinematic;
-            rb.useGravity = originalUseGravity;
-        }
-    }
-
-    // ¼­¹ö¿¡¼­¸¸ È£Ãâ
+    // ì„œë²„ì—ì„œë§Œ í˜¸ì¶œ (GameFlowManager ë“±)
     public void SetLockedServer(bool locked)
     {
         if (!IsServer)
             return;
 
         IsLocked.Value = locked;
-        ApplyLock(locked);
-    }
-
-    private void OnLockChanged(bool previous, bool current)
-    {
-        ApplyLock(current);
-    }
-
-    private void ApplyLock(bool locked)
-    {
-        // ³» Ä³¸¯ÅÍÀÇ Çàµ¿ ÄÄÆ÷³ÍÆ® Á¦ÇÑ
-        if (IsOwner && behavioursToDisable != null)
-        {
-            for (int i = 0; i < behavioursToDisable.Length; i++)
-            {
-                Behaviour behaviour = behavioursToDisable[i];
-
-                if (behaviour == null)
-                    continue;
-
-                // PlayerControlRigid´Â ºñÈ°¼ºÈ­ÇÏÁö ¾ÊÀ½.
-                // ±×·¡¾ß ¹Ì´Ï°ÔÀÓ Áß¿¡µµ ¸¶¿ì½º ½Ã¼± ÀÌµ¿ÀÌ °¡´ÉÇÔ.
-                if (behaviour == playerControl)
-                    continue;
-
-                if (locked)
-                {
-                    behaviour.enabled = false;
-                }
-                else if (originalEnabledStates != null)
-                {
-                    behaviour.enabled = originalEnabledStates[i];
-                }
-            }
-        }
-
-        if (rb == null)
-            return;
-
-        if (locked)
-        {
-            // Rigidbody ÀÚÃ¼¸¦ °íÁ¤ÇÏÁö ¾Ê°í Áß·Â¸¸ Á¤Áö
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-
-            rb.useGravity = false;
-
-            // isKinematicÀº º¯°æÇÏÁö ¾ÊÀ½
-            // PlayerControlRigidÀÇ Ä«¸Ş¶ó ÀÔ·ÂÀº °è¼Ó ÀÛµ¿ÇÔ
-        }
-        else
-        {
-            rb.isKinematic = originalIsKinematic;
-            rb.useGravity = originalUseGravity;
-
-            if (!rb.isKinematic)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-        }
     }
 }

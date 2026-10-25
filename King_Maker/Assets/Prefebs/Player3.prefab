@@ -3456,6 +3456,7 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
+  staminaSyncInterval: 0.2
   cardGrade:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -3595,13 +3596,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8479978985355811839}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f10b39531ef69e04194457e9910b726c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementLock
   ShowTopMostFoldoutHeaderGroup: 1
-  behavioursToDisable: []
   IsLocked:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

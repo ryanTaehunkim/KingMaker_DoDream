@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -18,7 +18,7 @@ public class PlayerHUD : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // NetworkManager¿Í Local Player°¡ »ı¼ºµÉ ¶§±îÁö ±â´Ù¸²
+        // NetworkManagerì™€ Local Playerê°€ ìƒì„±ë  ë•Œê¹Œì§€ ê¸°ë‹¤ë¦¼
         while (
             NetworkManager.Singleton == null ||
             NetworkManager.Singleton.LocalClient == null ||
@@ -28,7 +28,7 @@ public class PlayerHUD : MonoBehaviour
             yield return null;
         }
 
-        // ÀÚ½ÅÀÇ PlayerObject¿¡¼­ PlayerStateList °¡Á®¿À±â
+        // ìì‹ ì˜ PlayerObjectì—ì„œ PlayerStateList ê°€ì ¸ì˜¤ê¸°
         localPlayerState =
             NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerStateList>();
 
@@ -38,13 +38,13 @@ public class PlayerHUD : MonoBehaviour
             localPlayerState.stamina.OnValueChanged += OnStaminaChanged;
             localPlayerState.cardGrade.OnValueChanged += OnCardGradeChanged;
 
-            // Ã³À½ µé¾î¿ÔÀ» ¶§ ÇöÀç°ª ¹Ù·Î Ç¥½Ã
+            // ì²˜ìŒ ë“¤ì–´ì™”ì„ ë•Œ í˜„ì¬ê°’ ë°”ë¡œ í‘œì‹œ
             UpdateHealth(localPlayerState.health.Value);
             UpdateStamina(localPlayerState.stamina.Value);
             UpdateCardGrade(localPlayerState.cardGrade.Value);
         }
 
-        // °ÔÀÓ ½Ã°£ °ü¸®ÀÚ Ã£±â
+        // ê²Œì„ ì‹œê°„ ê´€ë¦¬ì ì°¾ê¸°
         gameTimeManager = FindFirstObjectByType<GameTimeManager>();
 
         if (gameTimeManager != null)
