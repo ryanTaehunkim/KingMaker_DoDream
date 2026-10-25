@@ -224,7 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5341649900150601940}
   - component: {fileID: 3870500192338291111}
-  - component: {fileID: 8660935095416167621}
+  - component: {fileID: 4669187910028689247}
   m_Layer: 0
   m_Name: LeftfeetCollider
   m_TagString: Untagged
@@ -269,8 +269,8 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1396153242230697762, guid: 549e910cd08e62b4aa03045263cb4123, type: 3}
---- !u!65 &8660935095416167621
-BoxCollider:
+--- !u!136 &4669187910028689247
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -287,9 +287,11 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.21445774, y: 0.19893004, z: 0.36824355}
-  m_Center: {x: 0.22270854, y: 0.099464975, z: -0.03213147}
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 0.5
+  m_Direction: 2
+  m_Center: {x: 0.23, y: 0.2, z: 0}
 --- !u!1 &628932341172658087
 GameObject:
   m_ObjectHideFlags: 0
@@ -2253,7 +2255,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8456599639821866252}
   - component: {fileID: 3059646693279513857}
-  - component: {fileID: 3908130962391118617}
+  - component: {fileID: 7455134308684732299}
   m_Layer: 0
   m_Name: RightfeetCollider
   m_TagString: Untagged
@@ -2298,8 +2300,8 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6189640644437526248, guid: 549e910cd08e62b4aa03045263cb4123, type: 3}
---- !u!65 &3908130962391118617
-BoxCollider:
+--- !u!136 &7455134308684732299
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2316,9 +2318,11 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.21445774, y: 0.19893004, z: 0.36824355}
-  m_Center: {x: -0.2227085, y: 0.099464975, z: -0.03213147}
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 0.5
+  m_Direction: 2
+  m_Center: {x: -0.23, y: 0.2, z: 0}
 --- !u!1 &5507839411934307347
 GameObject:
   m_ObjectHideFlags: 0
@@ -3456,6 +3460,7 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
+  staminaSyncInterval: 0.2
   cardGrade:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

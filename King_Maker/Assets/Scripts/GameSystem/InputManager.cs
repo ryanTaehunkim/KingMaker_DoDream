@@ -84,7 +84,13 @@ public class InputManager : MonoBehaviour
 
     public static void DeactivatePlayerControls()
     {
-        if (playerInput == null || playerInput.currentActionMap == null) return;
+        if (playerInput == null || playerInput.currentActionMap == null)
+        {
+     
+            return;
+
+        }
+        
         playerInput.currentActionMap.Disable();
 
         // 비활성화 직전 프레임 값이 남아 캐릭터가 계속 움직이지 않도록 초기화

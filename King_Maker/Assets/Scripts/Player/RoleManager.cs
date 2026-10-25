@@ -58,6 +58,7 @@ public class RoleManager : NetworkBehaviour
         // 역할 배정은 서버에서만 가능
         if (!IsServer)
             return;
+        
     }
 
     public override void OnNetworkSpawn()
@@ -70,6 +71,7 @@ public class RoleManager : NetworkBehaviour
         {
             rolesAssigned = false;
             serverRoles.Clear();
+            AssignRoles();
         }
     }
 
@@ -254,8 +256,11 @@ public class RoleManager : NetworkBehaviour
 
     private IEnumerator RevealRoutine(string label)
     {
-        yield return new WaitForSecondsRealtime(fadeoutTime);
-
+        bool done = false;
+        FadeManager.Instance.FadeOut(fadeoutTime, () => done = true);
+        InputManager.DeactivatePlayerControls();
+        yield return new WaitUntil(() => done);
+        yield return new WaitForSeconds(1f);
         roleText.text = label;
 
         yield return FadeTextRoutine(0f, 1f, fadeDuration);
@@ -264,6 +269,8 @@ public class RoleManager : NetworkBehaviour
 
         yield return FadeTextRoutine(1f, 0f, fadeDuration);
 
+        FadeManager.Instance.FadeIn(fadeoutTime);
+        InputManager.ActivatePlayerControls();
         revealRoutine = null;
     }
 
