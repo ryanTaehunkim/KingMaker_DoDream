@@ -1,4 +1,4 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 
 public class PlayerEntryUI : MonoBehaviour
@@ -6,7 +6,7 @@ public class PlayerEntryUI : MonoBehaviour
     [SerializeField] private TMP_Text playerNameText;
     [SerializeField] private TMP_Text gradeText;
 
-    // º»ÀÎÀÇ Á¤º¸ ¶Ç´Â ±âÁ¸ ÇÃ·¹ÀÌ¾î Á¤º¸ Ç¥½Ã¿ë
+    // ë³¸ì¸ì˜ ì •ë³´ ë˜ëŠ” ê¸°ì¡´ í”Œë ˆì´ì–´ ì •ë³´ í‘œì‹œìš©
     public void SetData(
         string playerName,
         bool showGrade,
@@ -24,7 +24,7 @@ public class PlayerEntryUI : MonoBehaviour
         }
     }
 
-    // ÀÍ¸í ¼øÀ§ÆÇ Ç¥½Ã¿ë
+    // ìµëª… ìˆœìœ„íŒ í‘œì‹œìš©
     public void SetAnonymousData(int rank, int grade)
     {
         playerNameText.text = $"RANK {rank}";

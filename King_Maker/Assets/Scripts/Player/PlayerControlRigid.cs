@@ -1,4 +1,4 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 using Unity.Cinemachine;
 
@@ -70,6 +70,9 @@ public class PlayerControlRigid : NetworkBehaviour
     private static readonly int IsRunningHash = Animator.StringToHash("isRun");
     private static readonly int IsJumpingHash = Animator.StringToHash("isJump");
 
+    //이동 제한
+    private PlayerMovementLock movementLock;
+    private bool IsLockedNow => movementLock != null && movementLock.IsLocked.Value;
 
     private void Awake()
     {
@@ -78,6 +81,7 @@ public class PlayerControlRigid : NetworkBehaviour
         playerState = GetComponent<PlayerStateList>();
         combat = GetComponent<PlayerCombat>();
         animator = GetComponentInChildren<Animator>();
+        movementLock = GetComponent<PlayerMovementLock>();
 
         GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
         if (camearObj != null)
@@ -114,9 +118,15 @@ public class PlayerControlRigid : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
- 
-        HandleLook();
-        
+
+        HandleLook();   // 잠겨도 고개는 움직임
+
+        if (IsLockedNow)
+        {
+            StopInputWhileLocked();
+            return;
+        }
+
         InputMove();
         UpdateRunState();
         InputJump();
@@ -124,7 +134,25 @@ public class PlayerControlRigid : NetworkBehaviour
         TrytoInteract();
         PutDownObject();
         combat.TryAttack();
-      
+    }
+
+    // 잠긴 동안 입력으로 생긴 움직임을 모두 멈춤
+    private void StopInputWhileLocked()
+    {
+        horizontalVelocity = Vector3.zero;
+        knockbackVelocity = Vector3.zero;
+        jumpBufferCounter = 0f;
+        isMoving = false;
+
+        animator.SetBool(IsMovingHash, false);
+        animator.SetBool(IsRunningHash, false);
+
+        // 달리던 중에 잠기면 서버 스태미나 계산도 멈춰야 함
+        if (isRunning)
+        {
+            isRunning = false;
+            SetRunningServerRpc(false);
+        }
     }
     private void FixedUpdate()
     {
@@ -132,7 +160,7 @@ public class PlayerControlRigid : NetworkBehaviour
 
         CheckGround();
         Move();
-        Jump();
+        if (!IsLockedNow) Jump(); 
         ApplyGravity();
     }
 
@@ -142,6 +170,7 @@ public class PlayerControlRigid : NetworkBehaviour
     }
     private void HandleLook()
     {
+        if (Cursor.lockState != CursorLockMode.Locked) return;   
         Vector2 delta = InputManager.lookDelta * mouseSensitivity;
         transform.Rotate(Vector3.up * delta.x);
 
@@ -358,4 +387,19 @@ public class PlayerControlRigid : NetworkBehaviour
         isGrounded = false;
     }
 
+    // 서버가 호출하는 순간이동 시 Rigidbody 쪽도 같이 정리
+    public void ResetPhysicsAt(Vector3 position, Quaternion rotation)
+    {
+        if (rb == null) return;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        knockbackVelocity = Vector3.zero;
+        horizontalVelocity = Vector3.zero;
+
+        rb.position = position;
+        rb.rotation = rotation;
+
+        Physics.SyncTransforms();
+    }
 }

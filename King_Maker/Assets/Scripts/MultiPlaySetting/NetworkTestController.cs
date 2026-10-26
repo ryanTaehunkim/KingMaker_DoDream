@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
 
@@ -9,21 +9,21 @@ public class NetworkTestController : MonoBehaviour
         if (NetworkManager.Singleton == null)
             return;
 
-        // ÀÌ¹Ì Host/Client°¡ ½ÃÀÛµÈ »óÅÂ¶ó¸é ÀÔ·ÂÇÏÁö ¾ÊÀ½
+        // ì´ë¯¸ Host/Clientê°€ ì‹œì‘ëœ ìƒíƒœë¼ë©´ ì…ë ¥í•˜ì§€ ì•ŠìŒ
         if (NetworkManager.Singleton.IsListening)
             return;
 
         if (Keyboard.current == null)
             return;
 
-        // H Å° = Host
+        // H í‚¤ = Host
         if (Keyboard.current.hKey.wasPressedThisFrame)
         {
             Debug.Log("Starting Host...");
             NetworkManager.Singleton.StartHost();
         }
 
-        // C Å° = Client
+        // C í‚¤ = Client
         if (Keyboard.current.cKey.wasPressedThisFrame)
         {
             Debug.Log("Starting Client...");

@@ -1,4 +1,4 @@
-
+ï»¿
 using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -9,7 +9,7 @@ public class GameFlowManager : NetworkBehaviour
 {
     public static GameFlowManager Instance { get; private set; }
 
-    // °ÔÀÓÀ» ½ÃÀÛÇÑ ÀûÀÌ ÀÖ´ÂÁö
+    // ê²Œì„ì„ ì‹œì‘í•œ ì ì´ ìˆëŠ”ì§€
     public NetworkVariable<bool> HasGameStarted =
         new NetworkVariable<bool>(
             false,
@@ -17,7 +17,7 @@ public class GameFlowManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    // ÇöÀç °ÔÀÓÀÌ ÁøÇà ÁßÀÎÁö
+    // í˜„ì¬ ê²Œì„ì´ ì§„í–‰ ì¤‘ì¸ì§€
     public NetworkVariable<bool> IsGameInProgress =
         new NetworkVariable<bool>(
             false,
@@ -25,15 +25,15 @@ public class GameFlowManager : NetworkBehaviour
             NetworkVariableWritePermission.Server
         );
 
-    [Header("±âÁ¸ ¸Å´ÏÀú")]
+    [Header("ê¸°ì¡´ ë§¤ë‹ˆì €")]
     [SerializeField] private RoleManager roleManager;
     [SerializeField] private GameTimeManager gameTimeManager;
     [SerializeField] private GameCheckManager gameCheckManager;
 
-    [Header("°ÔÀÓ ½ÃÀÛ ÈÄ ÇÊµå À§Ä¡")]
+    [Header("ê²Œì„ ì‹œì‘ í›„ í•„ë“œ ìœ„ì¹˜")]
     [SerializeField] private Transform[] fieldSpawnPoints;
 
-    [Header("ºí¶óÀÎµå µå·Ó À§Ä¡")]
+    [Header("ë¸”ë¼ì¸ë“œ ë“œë¡­ ìœ„ì¹˜")]
     [SerializeField] private Transform[] blindDropSpawnPoints;
 
     private int lastHandledPhase =
@@ -61,7 +61,7 @@ public class GameFlowManager : NetworkBehaviour
         if (Instance != null && Instance != this)
         {
             Debug.LogError(
-                "[GameFlow] GameFlowManager°¡ Áßº¹À¸·Î Á¸ÀçÇÕ´Ï´Ù."
+                "[GameFlow] GameFlowManagerê°€ ì¤‘ë³µìœ¼ë¡œ ì¡´ì¬í•©ë‹ˆë‹¤."
             );
             return;
         }
@@ -94,7 +94,7 @@ public class GameFlowManager : NetworkBehaviour
         if (!IsSpawned || !IsServer)
             return;
 
-        // È£½ºÆ®¸¸ Z·Î ½ÃÀÛ
+        // í˜¸ìŠ¤íŠ¸ë§Œ Zë¡œ ì‹œì‘
         if (!HasGameStarted.Value)
         {
             if (Keyboard.current != null &&
@@ -109,7 +109,7 @@ public class GameFlowManager : NetworkBehaviour
         if (!IsGameInProgress.Value)
             return;
 
-        // ½ÂÆĞ°¡ °áÁ¤µÇ¸é °ÔÀÓ Á¾·á
+        // ìŠ¹íŒ¨ê°€ ê²°ì •ë˜ë©´ ê²Œì„ ì¢…ë£Œ
         if (gameCheckManager != null &&
             gameCheckManager.result.Value != GameResult.None)
         {
@@ -138,16 +138,16 @@ public class GameFlowManager : NetworkBehaviour
         if (!ValidateSetup())
             return;
 
-        // ÀÌÀü °á°ú ÃÊ±âÈ­
+        // ì´ì „ ê²°ê³¼ ì´ˆê¸°í™”
         gameCheckManager.ResetResultServer();
 
-        // ±âÁ¸ RoleManagerÀÇ ¿ªÇÒ ¹èÁ¤ ±â´É »ç¿ë
+        // ê¸°ì¡´ RoleManagerì˜ ì—­í•  ë°°ì • ê¸°ëŠ¥ ì‚¬ìš©
         roleManager.AssignRoles();
 
         if (!roleManager.RolesAssigned)
         {
             Debug.LogError(
-                "[GameFlow] ¿ªÇÒ ¹èÁ¤¿¡ ½ÇÆĞÇß½À´Ï´Ù."
+                "[GameFlow] ì—­í•  ë°°ì •ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤."
             );
             return;
         }
@@ -157,18 +157,18 @@ public class GameFlowManager : NetworkBehaviour
 
         lastHandledPhase = GameTimeManager.PhaseDay1Field;
 
-        // ¸ğµç ÇÃ·¹ÀÌ¾î¸¦ ÇÊµå·Î ÀÌµ¿
+        // ëª¨ë“  í”Œë ˆì´ì–´ë¥¼ í•„ë“œë¡œ ì´ë™
         MovePlayersToSpawnPoints(
             fieldSpawnPoints,
             false,
             false
         );
 
-        // ¿ªÇÒ ¹èÁ¤ ¹× ÀÌµ¿ ÀÌÈÄ Å¸ÀÌ¸Ó ½ÃÀÛ
+        // ì—­í•  ë°°ì • ë° ì´ë™ ì´í›„ íƒ€ì´ë¨¸ ì‹œì‘
         gameTimeManager.StartGameTimer();
 
         Debug.Log(
-            "[GameFlow] °ÔÀÓ ½ÃÀÛ: 1ÀÏÂ÷ ÇÊµå Å½»ö ¹× ¹Ì¼Ç"
+            "[GameFlow] ê²Œì„ ì‹œì‘: 1ì¼ì°¨ í•„ë“œ íƒìƒ‰ ë° ë¯¸ì…˜"
         );
     }
 
@@ -179,7 +179,7 @@ public class GameFlowManager : NetworkBehaviour
             gameCheckManager == null)
         {
             Debug.LogError(
-                "[GameFlow] ±âÁ¸ ¸Å´ÏÀú ÂüÁ¶°¡ ´©¶ôµÇ¾ú½À´Ï´Ù."
+                "[GameFlow] ê¸°ì¡´ ë§¤ë‹ˆì € ì°¸ì¡°ê°€ ëˆ„ë½ë˜ì—ˆìŠµë‹ˆë‹¤."
             );
             return false;
         }
@@ -189,7 +189,7 @@ public class GameFlowManager : NetworkBehaviour
             !gameCheckManager.IsSpawned)
         {
             Debug.LogError(
-                "[GameFlow] ¸Å´ÏÀúÀÇ NetworkObject°¡ ½ºÆùµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "[GameFlow] ë§¤ë‹ˆì €ì˜ NetworkObjectê°€ ìŠ¤í°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
             return false;
         }
@@ -198,7 +198,7 @@ public class GameFlowManager : NetworkBehaviour
             !HasAnySpawnPoint(blindDropSpawnPoints))
         {
             Debug.LogError(
-                "[GameFlow] ÇÊµå ¶Ç´Â µå·Ó À§Ä¡¸¦ ¼³Á¤ÇØ ÁÖ¼¼¿ä."
+                "[GameFlow] í•„ë“œ ë˜ëŠ” ë“œë¡­ ìœ„ì¹˜ë¥¼ ì„¤ì •í•´ ì£¼ì„¸ìš”."
             );
             return false;
         }
@@ -208,19 +208,19 @@ public class GameFlowManager : NetworkBehaviour
 
         if (NetworkManager.Singleton.ConnectedClientsIds.Count == 0)
         {
-            Debug.LogError("[GameFlow] Á¢¼ÓÇÑ ÇÃ·¹ÀÌ¾î°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogError("[GameFlow] ì ‘ì†í•œ í”Œë ˆì´ì–´ê°€ ì—†ìŠµë‹ˆë‹¤.");
             return false;
         }
 
-        // ¸ğµç Á¢¼ÓÀÚÀÇ ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ® È®ÀÎ
+        // ëª¨ë“  ì ‘ì†ìì˜ í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ í™•ì¸
         foreach (NetworkClient client in
                  NetworkManager.Singleton.ConnectedClientsList)
         {
             if (client.PlayerObject == null)
             {
                 Debug.LogError(
-                    $"[GameFlow] Client {client.ClientId}ÀÇ " +
-                    "PlayerObject°¡ ¾ø½À´Ï´Ù."
+                    $"[GameFlow] Client {client.ClientId}ì˜ " +
+                    "PlayerObjectê°€ ì—†ìŠµë‹ˆë‹¤."
                 );
                 return false;
             }
@@ -234,8 +234,8 @@ public class GameFlowManager : NetworkBehaviour
             if (state == null || movementLock == null)
             {
                 Debug.LogError(
-                    $"[GameFlow] Client {client.ClientId}ÀÇ " +
-                    "PlayerStateList ¶Ç´Â PlayerMovementLockÀÌ ¾ø½À´Ï´Ù."
+                    $"[GameFlow] Client {client.ClientId}ì˜ " +
+                    "PlayerStateList ë˜ëŠ” PlayerMovementLockì´ ì—†ìŠµë‹ˆë‹¤."
                 );
                 return false;
             }
@@ -250,33 +250,34 @@ public class GameFlowManager : NetworkBehaviour
         {
             case GameTimeManager.PhaseDay1Drop:
                 StartBlindDrop();
-                Debug.Log("[GameFlow] 1ÀÏÂ÷ µå·Ó ½ÃÀÛ");
+                Debug.Log("[GameFlow] 1ì¼ì°¨ ë“œë¡­ ì‹œì‘");
                 break;
 
             case GameTimeManager.PhaseDay2Field:
                 EndBlindDrop();
-                Debug.Log("[GameFlow] 2ÀÏÂ÷ ÇÊµå ½ÃÀÛ");
+                Debug.Log("[GameFlow] 2ì¼ì°¨ í•„ë“œ ì‹œì‘");
                 break;
 
             case GameTimeManager.PhaseDay2Drop:
                 StartBlindDrop();
-                Debug.Log("[GameFlow] 2ÀÏÂ÷ µå·Ó ½ÃÀÛ");
+                Debug.Log("[GameFlow] 2ì¼ì°¨ ë“œë¡­ ì‹œì‘");
                 break;
 
             case GameTimeManager.PhaseDay3Field:
                 EndBlindDrop();
-                Debug.Log("[GameFlow] 3ÀÏÂ÷ ÇÊµå ½ÃÀÛ");
+                Debug.Log("[GameFlow] 3ì¼ì°¨ í•„ë“œ ì‹œì‘");
                 break;
 
             case GameTimeManager.PhaseDay4Final:
-                Debug.Log("[GameFlow] 4ÀÏÂ÷ ÃÖÁ¾ ÁøÇà ½ÃÀÛ");
+                Debug.Log("[GameFlow] 4ì¼ì°¨ ìµœì¢… ì§„í–‰ ì‹œì‘");
                 break;
 
             case GameTimeManager.PhaseFinished:
                 IsGameInProgress.Value = false;
+                BlindDropManager.Instance?.ServerEndBlindDrop();
                 LockAllPlayers(true);
 
-                Debug.Log("[GameFlow] °ÔÀÓ ½Ã°£ Á¾·á");
+                Debug.Log("[GameFlow] ê²Œì„ ì‹œê°„ ì¢…ë£Œ");
                 break;
         }
     }
@@ -298,7 +299,7 @@ public class GameFlowManager : NetworkBehaviour
             PlayerStateList state =
                 playerObject.GetComponent<PlayerStateList>();
 
-            // »ıÁ¸ÀÚ¸¸ ÀÌµ¿
+            // ìƒì¡´ìë§Œ ì´ë™
             if (state == null || !state.isAlive.Value)
                 continue;
 
@@ -308,21 +309,21 @@ public class GameFlowManager : NetworkBehaviour
             if (target == null)
                 continue;
 
-            // ¹Ì´Ï°ÔÀÓ Àü À§Ä¡¸¦ ÀúÀå
+            // ë¯¸ë‹ˆê²Œì„ ì „ ìœ„ì¹˜ë¥¼ ì €ì¥
             returnPoints[playerObject.OwnerClientId] =
                 new ReturnPoint(
                     playerObject.transform.position,
                     playerObject.transform.rotation
                 );
 
-            // µå·Ó Àå¼Ò·Î ÀÌµ¿
+            // ë“œë¡­ ì¥ì†Œë¡œ ì´ë™
             TeleportPlayer(
                 playerObject,
                 target.position,
                 target.rotation
             );
 
-            // ÀÌµ¿ ¹× Çàµ¿ Àá±İ
+            // ì´ë™ ë° í–‰ë™ ì ê¸ˆ
             PlayerMovementLock movementLock =
                 playerObject.GetComponent<PlayerMovementLock>();
 
@@ -330,10 +331,14 @@ public class GameFlowManager : NetworkBehaviour
 
             spawnIndex++;
         }
+
+        BlindDropManager.Instance?.ServerBeginBlindDrop(gameTimeManager.currentDay.Value);
     }
 
     private void EndBlindDrop()
     {
+        BlindDropManager.Instance?.ServerEndBlindDrop();
+
         foreach (NetworkClient client in
                  NetworkManager.Singleton.ConnectedClientsList)
         {
@@ -345,7 +350,7 @@ public class GameFlowManager : NetworkBehaviour
             PlayerStateList state =
                 playerObject.GetComponent<PlayerStateList>();
 
-            // »ıÁ¸ÀÚ¸¸ º¹±Í
+            // ìƒì¡´ìë§Œ ë³µê·€
             if (state == null || !state.isAlive.Value)
                 continue;
 
@@ -429,7 +434,7 @@ public class GameFlowManager : NetworkBehaviour
         if (!IsServer || playerObject == null)
             return;
 
-        // ÇØ´ç ÇÃ·¹ÀÌ¾î¸¦ ¼ÒÀ¯ÇÑ Å¬¶óÀÌ¾ğÆ®¿¡ ¼ø°£ÀÌµ¿ ¿äÃ»
+        // í•´ë‹¹ í”Œë ˆì´ì–´ë¥¼ ì†Œìœ í•œ í´ë¼ì´ì–¸íŠ¸ì— ìˆœê°„ì´ë™ ìš”ì²­
         TeleportPlayerClientRpc(
             new NetworkObjectReference(playerObject),
             position,
@@ -459,12 +464,12 @@ public class GameFlowManager : NetworkBehaviour
         if (!playerReference.TryGet(out NetworkObject playerObject))
         {
             Debug.LogWarning(
-                "[GameFlow] ¼ø°£ÀÌµ¿ÇÒ ÇÃ·¹ÀÌ¾î¸¦ Ã£Áö ¸øÇß½À´Ï´Ù."
+                "[GameFlow] ìˆœê°„ì´ë™í•  í”Œë ˆì´ì–´ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤."
             );
             return;
         }
 
-        // ½ÇÁ¦ ¼ÒÀ¯ÀÚ¸¸ ¼ø°£ÀÌµ¿ Ã³¸®
+        // ì‹¤ì œ ì†Œìœ ìë§Œ ìˆœê°„ì´ë™ ì²˜ë¦¬
         if (!playerObject.IsOwner)
             return;
 
@@ -474,10 +479,16 @@ public class GameFlowManager : NetworkBehaviour
         if (networkTransform == null)
         {
             Debug.LogError(
-                "[GameFlow] ÇÃ·¹ÀÌ¾îÀÇ NetworkTransformÀÌ ¾ø½À´Ï´Ù."
+                "[GameFlow] í”Œë ˆì´ì–´ì˜ NetworkTransformì´ ì—†ìŠµë‹ˆë‹¤."
             );
             return;
         }
+
+        PlayerControlRigid rigidControl =
+        playerObject.GetComponent<PlayerControlRigid>();
+
+        if (rigidControl != null)
+            rigidControl.ResetPhysicsAt(position, rotation);
 
         networkTransform.Teleport(
             position,
@@ -486,11 +497,11 @@ public class GameFlowManager : NetworkBehaviour
         );
 
         Debug.Log(
-            $"[GameFlow] ÇÃ·¹ÀÌ¾î ¼ø°£ÀÌµ¿ ¿Ï·á: " +
+            $"[GameFlow] í”Œë ˆì´ì–´ ìˆœê°„ì´ë™ ì™„ë£Œ: " +
             $"ClientId={playerObject.OwnerClientId}"
         );
     }
-
+    
 
     private void LockAllPlayers(bool locked)
     {
@@ -545,12 +556,12 @@ public class GameFlowManager : NetworkBehaviour
         IsGameInProgress.Value = false;
 
         gameTimeManager.FinishGameTimer();
-
-        // °á°ú È®Á¤ ÈÄ Ãß°¡ Çàµ¿ ¹æÁö
+        BlindDropManager.Instance?.ServerEndBlindDrop();
+        // ê²°ê³¼ í™•ì • í›„ ì¶”ê°€ í–‰ë™ ë°©ì§€
         LockAllPlayers(true);
 
         Debug.Log(
-            $"[GameFlow] °ÔÀÓ Á¾·á: {gameCheckManager.result.Value}"
+            $"[GameFlow] ê²Œì„ ì¢…ë£Œ: {gameCheckManager.result.Value}"
         );
     }
 }

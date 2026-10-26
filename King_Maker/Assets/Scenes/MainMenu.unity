@@ -179,7 +179,7 @@ MonoBehaviour:
   m_text: START GAME
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -768,7 +768,7 @@ MonoBehaviour:
   m_text: 'Room Code:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -905,7 +905,7 @@ MonoBehaviour:
   m_text: Join Room
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1042,7 +1042,7 @@ MonoBehaviour:
   m_text: 'Status: Waiting...'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1179,7 +1179,7 @@ MonoBehaviour:
   m_text: King Maker
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1604,7 +1604,7 @@ MonoBehaviour:
   m_text: "\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1762,7 +1762,7 @@ MonoBehaviour:
   m_text: ENTER ROOM CODE
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2366,7 +2366,7 @@ MonoBehaviour:
   m_text: Create Room
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

@@ -1,4 +1,4 @@
-
+ï»¿
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -17,11 +17,11 @@ public class AnonymousScoreboardManager : NetworkBehaviour
     [SerializeField] private KeyCode showBoardKey = KeyCode.F8;
     [SerializeField] private KeyCode hideBoardKey = KeyCode.F9;
 
-    // ÀÌ¹ø ÀÏÂ÷¿¡ Á¡¼öÆÇ °ø°³ ÀÚ°İÀ» ¹ŞÀº ÇÃ·¹ÀÌ¾î
+    // ì´ë²ˆ ì¼ì°¨ì— ì ìˆ˜íŒ ê³µê°œ ìê²©ì„ ë°›ì€ í”Œë ˆì´ì–´
     private readonly HashSet<ulong> eligibleClients =
         new HashSet<ulong>();
 
-    // °¢ Å¬¶óÀÌ¾ğÆ®¿¡¼­¸¸ °ü¸®ÇÏ´Â ÀÍ¸í µî±Ş ¸ñ·Ï
+    // ê° í´ë¼ì´ì–¸íŠ¸ì—ì„œë§Œ ê´€ë¦¬í•˜ëŠ” ìµëª… ë“±ê¸‰ ëª©ë¡
     private readonly List<int> localAnonymousGrades =
         new List<int>();
 
@@ -40,7 +40,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         if (Instance != null && Instance != this)
         {
             Debug.LogError(
-                "[AnonymousScoreboardManager] Áßº¹À¸·Î Á¸ÀçÇÕ´Ï´Ù."
+                "[AnonymousScoreboardManager] ì¤‘ë³µìœ¼ë¡œ ì¡´ì¬í•©ë‹ˆë‹¤."
             );
             return;
         }
@@ -64,7 +64,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         else
         {
             Debug.LogError(
-                "[AnonymousScoreboardManager] GameTimeManager¸¦ Ã£Áö ¸øÇß½À´Ï´Ù."
+                "[AnonymousScoreboardManager] GameTimeManagerë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤."
             );
         }
 
@@ -100,28 +100,28 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         if (keyboard == null)
             return;
 
-        // F8: ÇöÀç ÇÃ·¹ÀÌ¾î¿¡°Ô Å×½ºÆ® Á¡¼öÆÇ °ø°³ ¿äÃ»
+        // F8: í˜„ì¬ í”Œë ˆì´ì–´ì—ê²Œ í…ŒìŠ¤íŠ¸ ì ìˆ˜íŒ ê³µê°œ ìš”ì²­
         if (keyboard.f8Key.wasPressedThisFrame)
         {
             Debug.Log(
-                $"[Scoreboard Test] F8 ÀÔ·Â °¨Áö / " +
+                $"[Scoreboard Test] F8 ì…ë ¥ ê°ì§€ / " +
                 $"IsSpawned={IsSpawned} / IsServer={IsServer}"
             );
 
             RequestTestBoardRpc();
         }
 
-        // F9: ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ Á¡¼öÆÇ ¼û±è ¿äÃ»
+        // F9: í˜„ì¬ í”Œë ˆì´ì–´ì˜ ì ìˆ˜íŒ ìˆ¨ê¹€ ìš”ì²­
         if (keyboard.f9Key.wasPressedThisFrame)
         {
-            Debug.Log("[Scoreboard Test] F9 ÀÔ·Â °¨Áö");
+            Debug.Log("[Scoreboard Test] F9 ì…ë ¥ ê°ì§€");
 
             RequestHideTestBoardRpc();
         }
     }
     // =====================================================
     // Mission success
-    // ¼­¹ö¿¡¼­ ¹Ì¼Ç ¼º°øÀÌ È®Á¤µÈ ÇÃ·¹ÀÌ¾î¿¡°Ô È£Ãâ
+    // ì„œë²„ì—ì„œ ë¯¸ì…˜ ì„±ê³µì´ í™•ì •ëœ í”Œë ˆì´ì–´ì—ê²Œ í˜¸ì¶œ
     // =====================================================
 
     public void GrantBoardToPlayerServer(ulong clientId)
@@ -141,14 +141,14 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         if (gameTimeManager == null)
             return;
 
-        // ÇöÀç ÀÏÂ÷¿¡ °ø°³ ÀÚ°İ µî·Ï
+        // í˜„ì¬ ì¼ì°¨ì— ê³µê°œ ìê²© ë“±ë¡
         eligibleClients.Add(clientId);
 
-        // ÇØ´ç ÇÃ·¹ÀÌ¾î¿¡°Ô¸¸ ÀÍ¸í Á¡¼öÆÇ Àü¼Û
+        // í•´ë‹¹ í”Œë ˆì´ì–´ì—ê²Œë§Œ ìµëª… ì ìˆ˜íŒ ì „ì†¡
         SendBoardToPlayerServer(clientId);
     }
 
-    // ¿©·¯ ÇÃ·¹ÀÌ¾î°¡ ¹Ì¼Ç ¼º°ø º¸»óÀ» ¹Ş´Â °æ¿ì
+    // ì—¬ëŸ¬ í”Œë ˆì´ì–´ê°€ ë¯¸ì…˜ ì„±ê³µ ë³´ìƒì„ ë°›ëŠ” ê²½ìš°
     public void GrantBoardToPlayersServer(
         IEnumerable<ulong> clientIds)
     {
@@ -161,7 +161,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         }
     }
 
-    // ±âÈ¹»ó ¸ğµç Âü°¡ÀÚ°¡ Á¡¼öÆÇÀ» º¼ ¼ö ÀÖ´Â ¹Ì¼Ç¿¡ »ç¿ë
+    // ê¸°íšìƒ ëª¨ë“  ì°¸ê°€ìê°€ ì ìˆ˜íŒì„ ë³¼ ìˆ˜ ìˆëŠ” ë¯¸ì…˜ì— ì‚¬ìš©
     public void GrantBoardToAllConnectedPlayersServer()
     {
         if (!IsServer || !IsSpawned ||
@@ -182,7 +182,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
     // Debug test RPCs
     // =====================================================
 
-    // F8: ¿äÃ»ÇÑ ÇÃ·¹ÀÌ¾î¿¡°Ô¸¸ Á¡¼öÆÇ °ø°³
+    // F8: ìš”ì²­í•œ í”Œë ˆì´ì–´ì—ê²Œë§Œ ì ìˆ˜íŒ ê³µê°œ
     [Rpc(
         SendTo.Server,
         InvokePermission = RpcInvokePermission.Everyone)]
@@ -194,13 +194,13 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         ulong senderId = rpcParams.Receive.SenderClientId;
 
         Debug.Log(
-            $"[Scoreboard Test] Client {senderId} °ø°³ ¿äÃ»"
+            $"[Scoreboard Test] Client {senderId} ê³µê°œ ìš”ì²­"
         );
 
         GrantBoardToPlayerServer(senderId);
     }
 
-    // F9: ¿äÃ»ÇÑ ÇÃ·¹ÀÌ¾îÀÇ °ø°³ ÀÚ°İ ÇØÁ¦ ¹× Á¡¼öÆÇ ¼û±è
+    // F9: ìš”ì²­í•œ í”Œë ˆì´ì–´ì˜ ê³µê°œ ìê²© í•´ì œ ë° ì ìˆ˜íŒ ìˆ¨ê¹€
     [Rpc(
         SendTo.Server,
         InvokePermission = RpcInvokePermission.Everyone)]
@@ -219,7 +219,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         );
 
         Debug.Log(
-            $"[Scoreboard Test] Client {senderId} Á¡¼öÆÇ ¼û±è"
+            $"[Scoreboard Test] Client {senderId} ì ìˆ˜íŒ ìˆ¨ê¹€"
         );
     }
 
@@ -247,11 +247,11 @@ public class AnonymousScoreboardManager : NetworkBehaviour
             if (state == null)
                 continue;
 
-            // ÇöÀç ÇÁ·ÎÁ§Æ®¿¡¼­´Â Ä«µå µî±ŞÀ» ¼øÀ§ ±âÁØÀ¸·Î »ç¿ë
+            // í˜„ì¬ í”„ë¡œì íŠ¸ì—ì„œëŠ” ì¹´ë“œ ë“±ê¸‰ì„ ìˆœìœ„ ê¸°ì¤€ìœ¼ë¡œ ì‚¬ìš©
             grades.Add(state.cardGrade.Value);
         }
 
-        // ³ôÀº µî±ŞºÎÅÍ Á¤·Ä
+        // ë†’ì€ ë“±ê¸‰ë¶€í„° ì •ë ¬
         grades.Sort((a, b) => b.CompareTo(a));
 
         return grades;
@@ -277,14 +277,14 @@ public class AnonymousScoreboardManager : NetworkBehaviour
 
         List<int> grades = BuildAnonymousGradesServer();
 
-        // ÇØ´ç Å¬¶óÀÌ¾ğÆ®¿¡°Ô ¸ñ·Ï ½ÃÀÛ Á¤º¸ Àü¼Û
+        // í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ëª©ë¡ ì‹œì‘ ì •ë³´ ì „ì†¡
         BeginBoardRpc(
             gameTimeManager.currentDay.Value,
             grades.Count,
             RpcTarget.Single(clientId, RpcTargetUse.Temp)
         );
 
-        // ÀÌ¸§°ú ClientId ¾øÀÌ µî±Ş¸¸ Àü¼Û
+        // ì´ë¦„ê³¼ ClientId ì—†ì´ ë“±ê¸‰ë§Œ ì „ì†¡
         for (int i = 0; i < grades.Count; i++)
         {
             AddBoardEntryRpc(
@@ -295,7 +295,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         }
     }
 
-    // µî±Ş º¯°æ ½Ã °ø°³ ÀÚ°İÀÌ ÀÖ´Â ÇÃ·¹ÀÌ¾îÀÇ Á¡¼öÆÇ °»½Å
+    // ë“±ê¸‰ ë³€ê²½ ì‹œ ê³µê°œ ìê²©ì´ ìˆëŠ” í”Œë ˆì´ì–´ì˜ ì ìˆ˜íŒ ê°±ì‹ 
     public void RefreshBoardForEligibleClientsServer()
     {
         if (!IsServer || !IsSpawned)
@@ -347,17 +347,17 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         if (index < 0 || index >= expectedEntryCount)
             return;
 
-        // Áßº¹ Ç×¸ñ ¹æÁö
+        // ì¤‘ë³µ í•­ëª© ë°©ì§€
         if (index < localAnonymousGrades.Count)
             return;
 
-        // Ç×¸ñÀº ¼ø¼­´ë·Î ¼ö½Å
+        // í•­ëª©ì€ ìˆœì„œëŒ€ë¡œ ìˆ˜ì‹ 
         if (index != localAnonymousGrades.Count)
             return;
 
         localAnonymousGrades.Add(grade);
 
-        // ÀüÃ¼ ¸ñ·Ï ¼ö½ÅÀÌ ³¡³­ µÚ UI °»½Å
+        // ì „ì²´ ëª©ë¡ ìˆ˜ì‹ ì´ ëë‚œ ë’¤ UI ê°±ì‹ 
         if (localAnonymousGrades.Count == expectedEntryCount)
         {
             OnLocalBoardChanged?.Invoke();
@@ -376,19 +376,19 @@ public class AnonymousScoreboardManager : NetworkBehaviour
 
     private void OnDayChanged(int oldDay, int newDay)
     {
-        // ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡¼­ ·ÎÄÃ Á¡¼öÆÇ ÃÊ±âÈ­
+        // ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë¡œì»¬ ì ìˆ˜íŒ ì´ˆê¸°í™”
         ClearLocalBoard();
 
         if (!IsServer)
             return;
 
-        // »õ ÀÏÂ÷¿¡´Â ÀÌÀü °ø°³ ÀÚ°İ ÃÊ±âÈ­
+        // ìƒˆ ì¼ì°¨ì—ëŠ” ì´ì „ ê³µê°œ ìê²© ì´ˆê¸°í™”
         eligibleClients.Clear();
 
         if (NetworkManager.Singleton == null)
             return;
 
-        // ¿¬°áµÈ Å¬¶óÀÌ¾ğÆ®¿¡°Ô Á¡¼öÆÇ ¼û±è Àü´Ş
+        // ì—°ê²°ëœ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ì ìˆ˜íŒ ìˆ¨ê¹€ ì „ë‹¬
         foreach (
             ulong clientId
             in NetworkManager.Singleton.ConnectedClientsIds)
@@ -399,7 +399,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         }
 
         Debug.Log(
-            $"[Scoreboard] DAY {newDay} ½ÃÀÛ: Á¡¼öÆÇ ÃÊ±âÈ­"
+            $"[Scoreboard] DAY {newDay} ì‹œì‘: ì ìˆ˜íŒ ì´ˆê¸°í™”"
         );
     }
 
