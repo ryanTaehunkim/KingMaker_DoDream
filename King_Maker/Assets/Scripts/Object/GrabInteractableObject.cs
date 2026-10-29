@@ -48,6 +48,12 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         GameObject newItemObj = Instantiate(heldItemPrefab);
         Rigidbody objRigid = newItemObj.GetComponent<Rigidbody>();
         Collider collider = newItemObj.GetComponent<Collider>();
+        Collider[] colliders = newItemObj.GetComponentsInChildren<Collider>(true);
+
+        foreach (Collider col in colliders)
+        {
+            col.isTrigger = true;
+        }
         if (objRigid != null)
         {
             objRigid.isKinematic = true;

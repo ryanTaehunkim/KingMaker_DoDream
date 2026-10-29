@@ -26,6 +26,7 @@ public class PlayerCombat : NetworkBehaviour
     [SerializeField] private float knockbackForce = 6f;
     [SerializeField] private float knockbackUpward = 3f;
     private PlayerControlRigid controlRigid;
+    private PlayerControlForNetwork control;
     private Animator animator;
     // 서버 거리 검증 디버그용
     private Vector3 dbgStart;
@@ -37,6 +38,9 @@ public class PlayerCombat : NetworkBehaviour
     private void Awake() {
         state = GetComponent<PlayerStateList>();
         controlRigid = GetComponent<PlayerControlRigid>();
+        if (controlRigid == null) {
+            control = GetComponent<PlayerControlForNetwork>();
+        }
         animator = GetComponentInChildren<Animator>();
     }
 
@@ -56,13 +60,21 @@ public class PlayerCombat : NetworkBehaviour
 
         for(int i = 0; i<count; i++)
         {
-            var rbHit = hits[i].collider.attachedRigidbody;
-            if (rbHit != null && rbHit.gameObject == gameObject) continue;
-            if (hits[i].distance >= best) continue;
-            
-            best = hits[i].distance;
-            target = rbHit != null ? rbHit.GetComponent<PlayerStateList>() : null;
-            blocked = target == null;
+            //var rbHit = hits[i].collider.attachedRigidbody;
+            //if (rbHit != null && rbHit.gameObject == gameObject) continue;
+            //if (hits[i].distance >= best) continue;
+            var h = hits[i];
+            var candidate = h.collider.GetComponentInParent<PlayerStateList>();
+
+            if (candidate == state) continue;          // 자기 자신 제외
+            if (h.distance >= best) continue;
+
+            //best = hits[i].distance;
+            //target = rbHit != null ? rbHit.GetComponent<PlayerStateList>() : null;
+            //blocked = target == null;
+            best = h.distance;
+            target = candidate;                        // 벽이 먼저 맞으면 null이 들어가 blocked 처리
+            blocked = candidate == null;
         }
         //공격 시 모션과 데미지 등 
 
@@ -111,7 +123,9 @@ public class PlayerCombat : NetworkBehaviour
     [Rpc(SendTo.SpecifiedInParams)]
     public void KnockbackRpc(Vector3 horizontal, float upward,RpcParams rpcParams = default)
     {
-        controlRigid.ApplyKnockback(horizontal, upward);
+        if (controlRigid != null)
+            controlRigid.ApplyKnockback(horizontal, upward);
+        else control.ApplyKnockback(horizontal, upward);
     }
 
     private void OnDrawGizmos()

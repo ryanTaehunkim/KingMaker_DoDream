@@ -8,27 +8,36 @@ public class PlayerControlForNetwork : NetworkBehaviour
     
 
     [Header("Move Settings")]
-    [SerializeField] private float walkSpeed = 4.0f;
-    [SerializeField] private float sprintSpeed = 7.0f;
+    [SerializeField] private float walkSpeed = 20f;
+    [SerializeField] private float sprintSpeed = 35.0f;
 
     [Header("Jump / Gravity")]
-    [SerializeField] private float jumpHeight = 1.2f; //점프 높이
-    [SerializeField] private float gravity = -9.8f; //중력
+    [SerializeField] private float jumpHeight = 6f; //점프 높이
+    [SerializeField] private float gravity = -98f; //중력
+    [SerializeField] private float jumpBufferTime = 0.15f;
+    private float jumpBufferCounter;
 
     [Header("Look Settings")]
     [SerializeField] private float mouseSensitivity = 0.12f;
     [SerializeField] private float minPitch = -85f; //고개 최대 내림 각도
     [SerializeField] private float maxPitch = 85f; //고개 최대 올림 각도
     [SerializeField] private Transform headTransform; //돌릴 머리 위치
-    [SerializeField] private CinemachineCamera virtualCamera;
-    [SerializeField] private Transform cameraTransform;
+    private CinemachineCamera virtualCamera;
+    [SerializeField] private Transform faceTransform;//실제 카메라 추적대상
 
     [Header("Interaction")]
-    [SerializeField] private float interactionDistance = 3f;
+    [SerializeField] private float interactionDistance = 9f;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private LayerMask interactMask;
+
     private bool canInteract;
     private GameObject currentInteractable;
     private GameObject holdItem;
+
+    [Header("Attack&&knockback")]
+    [SerializeField] private float knockbackDecay = 8f;
+    private Vector3 knockbackVelocity;
+    private PlayerCombat combat;
 
     private CharacterController characterController;
     private Vector3 currentVelocity;
@@ -36,16 +45,24 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private float pitch;
 
     //뛰는 중인지 서버에 보내기 위한 변수
-    private PlayerStateList playerState; 
-    private bool isRunning;
+    private PlayerStateList playerState;
 
-    
+    public  Animator animator;
+    private bool isGrounded;
+    private bool isRunning;
+    private static readonly int IsWalkHash = Animator.StringToHash("isWalk");
+    private static readonly int IsRunHash = Animator.StringToHash("isRun");
+    private static readonly int IsJumpHash = Animator.StringToHash("isJump");
+
+
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController> ();
         virtualCamera = FindFirstObjectByType<CinemachineCamera> ();
         playerState = GetComponent<PlayerStateList>();
+        combat = GetComponent<PlayerCombat>();
+        animator = GetComponentInChildren<Animator>();
 
         GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
         if(camearObj != null)
@@ -58,11 +75,12 @@ public class PlayerControlForNetwork : NetworkBehaviour
     {
         if (!IsOwner)
         {
+            
             return;
         }
         if(virtualCamera != null)
         {
-            virtualCamera.Follow = cameraTransform;
+            virtualCamera.Follow = faceTransform;
         }
         CursorLock();
     }
@@ -75,17 +93,21 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
-        Debug.Log(playerState.stamina.Value.ToString());
+        //사망시 추가 코드
+
+
         HandleLook();
         UpdateRunState();
         Move();
         Jump();
+        
         DetectInteractable();
         TrytoInteract();
         PutDownObject();
+        combat.TryAttack();
 
-        Vector3 finalMove = currentVelocity + Vector3.up * verticalVelocity;
-        characterController.Move(finalMove * Time.deltaTime);
+        ApplyMovement();
+        UpdateAnimation();
     }
     private void HandleLook()
     {
@@ -119,7 +141,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
     private void UpdateRunState()
     {
-        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value > 5f;
+        bool newRunningState = InputManager.sprintHeld && playerState.stamina.Value > 0f;
         
 
         if (isRunning != newRunningState)
@@ -137,44 +159,69 @@ public class PlayerControlForNetwork : NetworkBehaviour
        
     }
 
+    private void ApplyMovement()
+    {
+        Vector3 horizontal = currentVelocity + knockbackVelocity;
+        Vector3 finalMove = horizontal + Vector3.up * verticalVelocity;
+        characterController.Move(finalMove * Time.deltaTime);
+
+        isGrounded = characterController.isGrounded;
+        knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, knockbackDecay * Time.deltaTime);
+        if (knockbackVelocity.sqrMagnitude < 0.01f) knockbackVelocity = Vector3.zero;
+    }
+    public void ApplyKnockback(Vector3 horizontal, float upward)
+    {
+        if (!IsOwner) return;
+        horizontal.y = 0f;
+        knockbackVelocity = horizontal;
+        verticalVelocity = upward;
+    }
     private void Jump()
     {
         bool isGrounded = characterController.isGrounded;
+
+        if (InputManager.jumpPressed) jumpBufferCounter = jumpBufferTime;
+        else jumpBufferCounter -= Time.deltaTime;
+
         if (isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
         }
 
-        if (InputManager.jumpPressed && isGrounded)
+        if (jumpBufferCounter>0f && isGrounded)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumpBufferCounter = 0f;
         }
+        
 
         verticalVelocity += gravity * Time.deltaTime;
     }
 
+    private void UpdateAnimation()
+    {
+        Vector2 input = InputManager.moveDir;
+        bool moving = input.sqrMagnitude > 0.01f;
+
+        animator.SetBool(IsWalkHash, moving);
+        animator.SetBool(IsRunHash, isRunning && moving);
+        animator.SetBool(IsJumpHash, !isGrounded&& knockbackVelocity.sqrMagnitude < 0.01f);
+    }
     private void DetectInteractable()
     {
         currentInteractable = null;
+        canInteract = false;
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
         Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.red);
 
-        if(Physics.Raycast(ray,out RaycastHit hit, interactionDistance)){
-            
-            if (hit.collider.CompareTag("Interactable"))
-            {
-                canInteract = true;
-                currentInteractable = hit.collider.gameObject;
-                Debug.Log("상호작용 가능: " + currentInteractable.name);
-
-            }
-            else
-            {
-                canInteract = false;
-                currentInteractable = null;
-            }
+        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, interactMask, QueryTriggerInteraction.Ignore)
+        && hit.collider.CompareTag("Interactable")) {
+            Debug.Log("감지");
+            canInteract = true;
+            currentInteractable = hit.collider.gameObject;
+                
         }
     }
 
@@ -184,7 +231,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
         {
             if(currentInteractable != null)
             {
-                IInteractable interactobj = currentInteractable.GetComponent<IInteractable>();
+                IInteractable interactobj = currentInteractable.GetComponentInParent<IInteractable>();
                 if (interactobj != null) {
                     interactobj.Interact(playerState);
                     
