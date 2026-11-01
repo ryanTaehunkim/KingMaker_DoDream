@@ -1528,7 +1528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerSessionManager
   maxPlayers: 8
-  gameSceneName: Game2
+  gameSceneName: Game
 --- !u!4 &1492463940
 Transform:
   m_ObjectHideFlags: 0

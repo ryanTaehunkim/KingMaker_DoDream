@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +10,7 @@ public class FadeManager : MonoBehaviour
     private Coroutine fadeRoutine;
 
     public bool IsFading { get; private set; }
-
+    public bool IsBlack => fadeImage != null && fadeImage.color.a >= 0.99f;
 
     private void Awake()
     {

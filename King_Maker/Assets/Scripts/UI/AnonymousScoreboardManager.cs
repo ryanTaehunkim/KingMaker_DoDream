@@ -1,9 +1,21 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+// 익명 PT 정보판에 표시할 한 줄 (등급 / 그 등급의 인원 수)
+public struct GradeCount
+{
+    public int grade;
+    public int count;
+
+    public GradeCount(int grade, int count)
+    {
+        this.grade = grade;
+        this.count = count;
+    }
+}
 
 public class AnonymousScoreboardManager : NetworkBehaviour
 {
@@ -21,17 +33,17 @@ public class AnonymousScoreboardManager : NetworkBehaviour
     private readonly HashSet<ulong> eligibleClients =
         new HashSet<ulong>();
 
-    // 각 클라이언트에서만 관리하는 익명 등급 목록
-    private readonly List<int> localAnonymousGrades =
-        new List<int>();
+    // 각 클라이언트에서만 관리하는 "등급별 인원수" 목록
+    private readonly List<GradeCount> localGradeCounts =
+        new List<GradeCount>();
 
     private int expectedEntryCount;
 
     public bool LocalBoardVisible { get; private set; }
     public int LocalBoardDay { get; private set; }
 
-    public IReadOnlyList<int> LocalAnonymousGrades =>
-        localAnonymousGrades;
+    public IReadOnlyList<GradeCount> LocalGradeCounts =>
+        localGradeCounts;
 
     public event Action OnLocalBoardChanged;
 
@@ -227,12 +239,16 @@ public class AnonymousScoreboardManager : NetworkBehaviour
     // Anonymous scoreboard data
     // =====================================================
 
-    private List<int> BuildAnonymousGradesServer()
+    // 등급별 인원수를 계산한다. (높은 등급이 위로 오도록 정렬)
+    // 예: 4등급-1명, 3등급-1명, 2등급-2명
+    private List<GradeCount> BuildGradeCountsServer()
     {
-        List<int> grades = new List<int>();
+        List<GradeCount> result = new List<GradeCount>();
 
         if (!IsServer || NetworkManager.Singleton == null)
-            return grades;
+            return result;
+
+        Dictionary<int, int> counts = new Dictionary<int, int>();
 
         foreach (
             NetworkClient client
@@ -247,14 +263,23 @@ public class AnonymousScoreboardManager : NetworkBehaviour
             if (state == null)
                 continue;
 
-            // 현재 프로젝트에서는 카드 등급을 순위 기준으로 사용
-            grades.Add(state.cardGrade.Value);
+            int grade = state.cardGrade.Value;
+
+            counts.TryGetValue(grade, out int current);
+            counts[grade] = current + 1;
+        }
+
+        foreach (var pair in counts)
+        {
+            result.Add(new GradeCount(pair.Key, pair.Value));
         }
 
         // 높은 등급부터 정렬
-        grades.Sort((a, b) => b.CompareTo(a));
+        // (낮은 등급부터 보여주려면 b.grade.CompareTo(a.grade)를
+        //  a.grade.CompareTo(b.grade)로 바꾸면 된다)
+        result.Sort((a, b) => b.grade.CompareTo(a.grade));
 
-        return grades;
+        return result;
     }
 
     private void SendBoardToPlayerServer(ulong clientId)
@@ -275,21 +300,22 @@ public class AnonymousScoreboardManager : NetworkBehaviour
             return;
         }
 
-        List<int> grades = BuildAnonymousGradesServer();
+        List<GradeCount> entries = BuildGradeCountsServer();
 
         // 해당 클라이언트에게 목록 시작 정보 전송
         BeginBoardRpc(
             gameTimeManager.currentDay.Value,
-            grades.Count,
+            entries.Count,
             RpcTarget.Single(clientId, RpcTargetUse.Temp)
         );
 
-        // 이름과 ClientId 없이 등급만 전송
-        for (int i = 0; i < grades.Count; i++)
+        // 이름과 ClientId 없이 "등급 / 인원수"만 전송
+        for (int i = 0; i < entries.Count; i++)
         {
             AddBoardEntryRpc(
                 i,
-                grades[i],
+                entries[i].grade,
+                entries[i].count,
                 RpcTarget.Single(clientId, RpcTargetUse.Temp)
             );
         }
@@ -326,7 +352,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         LocalBoardVisible = true;
         LocalBoardDay = day;
 
-        localAnonymousGrades.Clear();
+        localGradeCounts.Clear();
         expectedEntryCount = entryCount;
 
         if (expectedEntryCount <= 0)
@@ -339,6 +365,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
     private void AddBoardEntryRpc(
         int index,
         int grade,
+        int count,
         RpcParams rpcParams = default)
     {
         if (!LocalBoardVisible)
@@ -348,17 +375,17 @@ public class AnonymousScoreboardManager : NetworkBehaviour
             return;
 
         // 중복 항목 방지
-        if (index < localAnonymousGrades.Count)
+        if (index < localGradeCounts.Count)
             return;
 
         // 항목은 순서대로 수신
-        if (index != localAnonymousGrades.Count)
+        if (index != localGradeCounts.Count)
             return;
 
-        localAnonymousGrades.Add(grade);
+        localGradeCounts.Add(new GradeCount(grade, count));
 
         // 전체 목록 수신이 끝난 뒤 UI 갱신
-        if (localAnonymousGrades.Count == expectedEntryCount)
+        if (localGradeCounts.Count == expectedEntryCount)
         {
             OnLocalBoardChanged?.Invoke();
         }
@@ -409,7 +436,7 @@ public class AnonymousScoreboardManager : NetworkBehaviour
         LocalBoardDay = 0;
         expectedEntryCount = 0;
 
-        localAnonymousGrades.Clear();
+        localGradeCounts.Clear();
 
         OnLocalBoardChanged?.Invoke();
     }

@@ -8,11 +8,12 @@ using UnityEngine.UI;
 public enum BlindDropStep
 {
     None,
-    Intro,      // 시작 대사
-    Meeting,    // 회의 진행 (안내창)
-    Choice,     // 참가 / 폴드 버튼
-    SeedPoker,  // 시드 포커 (실제 게임은 추후 구현)
-    Result      // 결과창 (안내창)
+    Intro,          // 시작 대사
+    Meeting,        // 회의 진행 (안내창)
+    Choice,         // 참가 / 폴드 버튼
+    SeedPoker,      // 시드 포커 (실제 게임은 추후 구현)
+    Result,         // 결과창 (안내창)
+    Investigation   // 정체 조사권 (최상위 등급자가 한 명을 지목)
 }
 
 // 블라인드 드롭 한 번의 진행 흐름을 관리한다.
@@ -25,12 +26,17 @@ public class BlindDropManager : NetworkBehaviour
 {
     public static BlindDropManager Instance { get; private set; }
 
-    [Header("단계별 시간(초) - 합계는 GameTimeManager의 드롭 시간(90초) 이하")]
+    [Header("단계별 시간(초) - 합계는 GameTimeManager의 드롭 시간(90초)보다 조금 작게")]
     [SerializeField] private float introDuration = 5f;
-    [SerializeField] private float meetingDuration = 45f;
-    [SerializeField] private float choiceDuration = 15f;
+    [SerializeField] private float meetingDuration = 38f;
+    [SerializeField] private float choiceDuration = 10f;
     [SerializeField] private float seedPokerDuration = 10f;
-    [SerializeField] private float resultDuration = 10f;
+    [SerializeField] private float resultDuration = 7f;
+    [SerializeField] private float investigationDuration = 15f;
+
+    [Header("정체 조사권")]
+    [SerializeField] private float investigationRange = 20f;     // 지목 가능 거리
+    [SerializeField] private float investigationResultHold = 3f; // 결과를 보여주고 기다리는 시간
 
     [Header("시작 대사")]
     [SerializeField]
@@ -59,8 +65,14 @@ public class BlindDropManager : NetworkBehaviour
     [SerializeField] private GameObject seedPokerPanel;
     [SerializeField] private TMP_Text seedPokerText;
 
+    [Header("UI - 정체 조사권 (화면 상단에 작게 배치)")]
+    [SerializeField] private GameObject investigationPanel;
+    [SerializeField] private TMP_Text investigationText;
+
     // ---------- 서버 전용 ----------
     private readonly Dictionary<ulong, bool> choices = new Dictionary<ulong, bool>();
+    private readonly HashSet<ulong> investigators = new HashSet<ulong>();   // 조사권을 받은 사람
+    private readonly HashSet<ulong> investigated = new HashSet<ulong>();    // 이미 사용한 사람
     private BlindDropStep serverStep = BlindDropStep.None;
     private Coroutine flowRoutine;
 
@@ -68,6 +80,7 @@ public class BlindDropManager : NetworkBehaviour
     private int myChoice = -1;      // -1 미선택 / 0 폴드 / 1 참가
     private bool timerActive;
     private float timerEndTime;
+    private bool canInvestigate;    // 내가 지금 조사권을 쓸 수 있는지
 
     // =========================================================
     // Unity
@@ -106,6 +119,12 @@ public class BlindDropManager : NetworkBehaviour
 
     private void Update()
     {
+        UpdateTimerText();
+        HandleInvestigationInput();
+    }
+
+    private void UpdateTimerText()
+    {
         if (!timerActive || timerText == null)
             return;
 
@@ -140,6 +159,8 @@ public class BlindDropManager : NetworkBehaviour
         }
 
         choices.Clear();
+        investigators.Clear();
+        investigated.Clear();
         serverStep = BlindDropStep.None;
 
         EndFlowClientRpc();
@@ -152,6 +173,8 @@ public class BlindDropManager : NetworkBehaviour
     private IEnumerator ServerFlow(int day)
     {
         choices.Clear();
+        investigators.Clear();
+        investigated.Clear();
 
         // 1) 시작 대사
         SetStep(BlindDropStep.Intro, introDuration, day);
@@ -191,6 +214,9 @@ public class BlindDropManager : NetworkBehaviour
         ShowResultClientRpc(BuildResultText(participants), resultDuration);
         yield return new WaitForSeconds(resultDuration);
 
+        // 6) 정체 조사권 (드롭 직후, 최상위 등급자)
+        yield return RunInvestigationServer(day);
+
         flowRoutine = null;
     }
 
@@ -209,6 +235,36 @@ public class BlindDropManager : NetworkBehaviour
             return "전원 폴드했습니다.\n블라인드 드롭이 진행되지 않았습니다.";
 
         return "블라인드 드롭이 종료되었습니다.\n(시드 포커 결과는 추후 연결)";
+    }
+
+    // 정체 조사권: 생존자 중 등급이 가장 높은 사람(동점이면 전원)이 한 명을 지목한다.
+    private IEnumerator RunInvestigationServer(int day)
+    {
+        investigators.Clear();
+        investigated.Clear();
+
+        foreach (ulong id in GetTopGradeAliveClientIds())
+            investigators.Add(id);
+
+        if (investigators.Count == 0)
+            yield break;
+
+        Debug.Log($"[BlindDrop] 정체 조사권 대상 {investigators.Count}명");
+
+        // 모두에게 단계 알림 → 그 다음 자격자에게만 조사권 지급
+        SetStep(BlindDropStep.Investigation, investigationDuration, day);
+
+        foreach (ulong id in investigators)
+            GrantInvestigationRpc(RpcTarget.Single(id, RpcTargetUse.Temp));
+
+        // 제한 시간 또는 전원 사용 완료까지 대기
+        float end = Time.time + investigationDuration;
+        while (Time.time < end && investigated.Count < investigators.Count)
+            yield return null;
+
+        // 결과를 읽을 시간을 조금 준다
+        if (investigated.Count > 0)
+            yield return new WaitForSeconds(investigationResultHold);
     }
 
     private void SetStep(BlindDropStep step, float duration, int day)
@@ -237,6 +293,42 @@ public class BlindDropManager : NetworkBehaviour
 
             if (state != null && state.isAlive.Value)
                 result.Add(client.ClientId);
+        }
+
+        return result;
+    }
+
+    // 생존자 중 카드 등급이 가장 높은 사람들 (동점이면 모두)
+    private List<ulong> GetTopGradeAliveClientIds()
+    {
+        List<ulong> result = new List<ulong>();
+        int topGrade = int.MinValue;
+
+        if (NetworkManager.Singleton == null)
+            return result;
+
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.PlayerObject == null)
+                continue;
+
+            PlayerStateList state = client.PlayerObject.GetComponent<PlayerStateList>();
+
+            if (state == null || !state.isAlive.Value)
+                continue;
+
+            int grade = state.cardGrade.Value;
+
+            if (grade > topGrade)
+            {
+                topGrade = grade;
+                result.Clear();
+                result.Add(client.ClientId);
+            }
+            else if (grade == topGrade)
+            {
+                result.Add(client.ClientId);
+            }
         }
 
         return result;
@@ -276,6 +368,41 @@ public class BlindDropManager : NetworkBehaviour
         choices[sender] = participate;
     }
 
+    // 정체 조사 요청 (조사권을 가진 플레이어가 대상을 지목)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestInvestigateServerRpc(ulong targetObjectId, RpcParams rpcParams = default)
+    {
+        // 정체 조사 단계에서만 받는다
+        if (serverStep != BlindDropStep.Investigation)
+            return;
+
+        ulong sender = rpcParams.Receive.SenderClientId;
+
+        // 조사권이 없거나 이미 사용했으면 거부
+        if (!investigators.Contains(sender)) return;
+        if (investigated.Contains(sender)) return;
+
+        if (!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(targetObjectId, out NetworkObject targetObj))
+            return;
+
+        if (!targetObj.TryGetComponent(out PlayerStateList target))
+            return;
+
+        // 자기 자신은 지목할 수 없고, 사망자도 지목할 수 없다
+        if (targetObj.OwnerClientId == sender) return;
+        if (!target.isAlive.Value) return;
+
+        investigated.Add(sender);
+
+        // 조사한 본인에게만 결과 전송
+        SendInvestigationResultRpc(
+            target.role.Value,
+            RpcTarget.Single(sender, RpcTargetUse.Temp)
+        );
+
+        Debug.Log($"[BlindDrop] Client {sender}가 정체 조사 사용");
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     private void ShowStepClientRpc(BlindDropStep step, float duration, int day)
     {
@@ -295,6 +422,31 @@ public class BlindDropManager : NetworkBehaviour
         ShowNotice("블라인드 드롭 결과", body);
     }
 
+    // 조사권 지급 (자격자 본인에게만 전송됨)
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void GrantInvestigationRpc(RpcParams rpcParams = default)
+    {
+        canInvestigate = true;
+
+        if (investigationText != null)
+        {
+            investigationText.text =
+                "정체 조사권을 얻었습니다.\n조사할 플레이어를 바라보고 좌클릭하세요.";
+        }
+    }
+
+    // 조사 결과 (조사한 본인에게만 전송됨)
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void SendInvestigationResultRpc(Role role, RpcParams rpcParams = default)
+    {
+        canInvestigate = false;
+
+        string roleName = role == Role.Joker ? "조커" : "시민";
+
+        if (investigationText != null)
+            investigationText.text = $"조사 결과: 지목한 플레이어는 [{roleName}] 입니다.";
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     private void EndFlowClientRpc()
     {
@@ -303,6 +455,50 @@ public class BlindDropManager : NetworkBehaviour
 
         // 화면 대사 + 저장된 대사 기록 삭제
         DialogueManager.Instance?.ClearAll();
+    }
+
+    // =========================================================
+    // 클라이언트: 정체 조사 입력 (좌클릭으로 지목)
+    // =========================================================
+
+    private void HandleInvestigationInput()
+    {
+        if (!canInvestigate)
+            return;
+
+        if (!InputManager.attackPressed)
+            return;
+
+        Camera cam = Camera.main;
+        if (cam == null)
+            return;
+
+        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+
+        RaycastHit[] hits = Physics.RaycastAll(
+            ray,
+            investigationRange,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (RaycastHit hit in hits)
+        {
+            PlayerStateList target = hit.collider.GetComponentInParent<PlayerStateList>();
+
+            // 내 몸에 맞은 것은 무시
+            if (target != null && target.IsOwner)
+                continue;
+
+            // 플레이어가 아닌 물체(벽 등)가 먼저 맞으면 지목 실패
+            if (target == null)
+                return;
+
+            RequestInvestigateServerRpc(target.NetworkObjectId);
+            return;
+        }
     }
 
     // =========================================================
@@ -367,6 +563,14 @@ public class BlindDropManager : NetworkBehaviour
                         : "폴드했습니다.\n시드 포커가 끝날 때까지 기다려주세요.";
                 }
                 break;
+
+            case BlindDropStep.Investigation:
+                // 기본 문구. 조사권이 있는 사람은 GrantInvestigationRpc가 문구를 덮어쓴다.
+                SetActiveSafe(investigationPanel, true);
+
+                if (investigationText != null)
+                    investigationText.text = "최상위 플레이어가 정체를 조사하고 있습니다.";
+                break;
         }
     }
 
@@ -412,7 +616,9 @@ public class BlindDropManager : NetworkBehaviour
         SetActiveSafe(noticePanel, false);
         SetActiveSafe(choicePanel, false);
         SetActiveSafe(seedPokerPanel, false);
+        SetActiveSafe(investigationPanel, false);
 
+        canInvestigate = false;
         timerActive = false;
 
         if (timerText != null)
