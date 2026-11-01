@@ -49,6 +49,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
     public  Animator animator;
     private bool isGrounded;
+    private bool isJumping;
     private bool isRunning;
     private static readonly int IsWalkHash = Animator.StringToHash("isWalk");
     private static readonly int IsRunHash = Animator.StringToHash("isRun");
@@ -186,12 +187,14 @@ public class PlayerControlForNetwork : NetworkBehaviour
         if (isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
+            isJumping = false;
         }
 
         if (jumpBufferCounter>0f && isGrounded)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpBufferCounter = 0f;
+            isJumping = true;
         }
         
 
@@ -205,7 +208,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
         animator.SetBool(IsWalkHash, moving);
         animator.SetBool(IsRunHash, isRunning && moving);
-        animator.SetBool(IsJumpHash, !isGrounded&& knockbackVelocity.sqrMagnitude < 0.01f);
+        animator.SetBool(IsJumpHash, isJumping);
     }
     private void DetectInteractable()
     {
