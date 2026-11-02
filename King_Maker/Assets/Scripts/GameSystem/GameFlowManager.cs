@@ -1,4 +1,4 @@
-﻿
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -36,8 +36,15 @@ public class GameFlowManager : NetworkBehaviour
     [Header("블라인드 드롭 위치")]
     [SerializeField] private Transform[] blindDropSpawnPoints;
 
+    [Header("화면 전환(페이드)")]
+    [SerializeField] private float startFadeDuration = 1f;  // 게임 시작 시 암전 시간
+    [SerializeField] private float fadeDuration = 0.5f;     // 드롭 입장/복귀 시 암전 시간
+
     private int lastHandledPhase =
         GameTimeManager.PhaseWaiting;
+
+    // 게임 시작 연출이 진행 중인지 (Z를 연타해도 한 번만 시작되게)
+    private bool isStarting;
 
     private struct ReturnPoint
     {
@@ -97,7 +104,8 @@ public class GameFlowManager : NetworkBehaviour
         // 호스트만 Z로 시작
         if (!HasGameStarted.Value)
         {
-            if (Keyboard.current != null &&
+            if (!isStarting &&
+                Keyboard.current != null &&
                 Keyboard.current.zKey.wasPressedThisFrame)
             {
                 StartGame();
@@ -130,18 +138,32 @@ public class GameFlowManager : NetworkBehaviour
         HandlePhaseChanged(phase);
     }
 
+    // =========================================================
+    // 게임 시작
+    // =========================================================
+
     private void StartGame()
     {
-        if (!IsServer || HasGameStarted.Value)
+        if (!IsServer || HasGameStarted.Value || isStarting)
             return;
 
         if (!ValidateSetup())
             return;
 
-        // 이전 결과 초기화
-        gameCheckManager.ResetResultServer();
+        StartCoroutine(StartGameRoutine());
+    }
 
-        // 기존 RoleManager의 역할 배정 기능 사용
+    // 화면을 검게 덮고 → 역할 배정 + 필드로 이동 → (역할 표시 후 RoleManager가 화면을 밝힘)
+    private IEnumerator StartGameRoutine()
+    {
+        isStarting = true;
+
+        // 1) 모든 플레이어 화면 암전
+        FadeClientRpc(true, startFadeDuration);
+        yield return new WaitForSeconds(startFadeDuration);
+
+        // 2) 이전 결과 초기화 + 역할 배정
+        gameCheckManager.ResetResultServer();
         roleManager.AssignRoles();
 
         if (!roleManager.RolesAssigned)
@@ -149,7 +171,11 @@ public class GameFlowManager : NetworkBehaviour
             Debug.LogError(
                 "[GameFlow] 역할 배정에 실패했습니다."
             );
-            return;
+
+            // 암전 상태로 멈추지 않도록 화면 복구
+            FadeClientRpc(false, startFadeDuration);
+            isStarting = false;
+            yield break;
         }
 
         HasGameStarted.Value = true;
@@ -157,15 +183,17 @@ public class GameFlowManager : NetworkBehaviour
 
         lastHandledPhase = GameTimeManager.PhaseDay1Field;
 
-        // 모든 플레이어를 필드로 이동
+        // 3) 모든 플레이어를 필드로 이동 (화면이 검은 동안)
         MovePlayersToSpawnPoints(
             fieldSpawnPoints,
             false,
             false
         );
 
-        // 역할 배정 및 이동 이후 타이머 시작
+        // 4) 타이머 시작
         gameTimeManager.StartGameTimer();
+
+        isStarting = false;
 
         Debug.Log(
             "[GameFlow] 게임 시작: 1일차 필드 탐색 및 미션"
@@ -244,27 +272,31 @@ public class GameFlowManager : NetworkBehaviour
         return true;
     }
 
+    // =========================================================
+    // 단계 전환
+    // =========================================================
+
     private void HandlePhaseChanged(int phase)
     {
         switch (phase)
         {
             case GameTimeManager.PhaseDay1Drop:
-                StartBlindDrop();
+                StartCoroutine(StartBlindDropRoutine());
                 Debug.Log("[GameFlow] 1일차 드롭 시작");
                 break;
 
             case GameTimeManager.PhaseDay2Field:
-                EndBlindDrop();
+                StartCoroutine(EndBlindDropRoutine());
                 Debug.Log("[GameFlow] 2일차 필드 시작");
                 break;
 
             case GameTimeManager.PhaseDay2Drop:
-                StartBlindDrop();
+                StartCoroutine(StartBlindDropRoutine());
                 Debug.Log("[GameFlow] 2일차 드롭 시작");
                 break;
 
             case GameTimeManager.PhaseDay3Field:
-                EndBlindDrop();
+                StartCoroutine(EndBlindDropRoutine());
                 Debug.Log("[GameFlow] 3일차 필드 시작");
                 break;
 
@@ -282,11 +314,13 @@ public class GameFlowManager : NetworkBehaviour
         }
     }
 
-    private void StartBlindDrop()
+    // 필드 → 블라인드 드롭 장소
+    // 순서: 위치 저장 + 잠금 → 암전 → 이동 → 화면 밝힘 → 드롭 진행 시작
+    private IEnumerator StartBlindDropRoutine()
     {
         returnPoints.Clear();
 
-        int spawnIndex = 0;
+        List<NetworkObject> movers = new List<NetworkObject>();
 
         foreach (NetworkClient client in
                  NetworkManager.Singleton.ConnectedClientsList)
@@ -303,12 +337,6 @@ public class GameFlowManager : NetworkBehaviour
             if (state == null || !state.isAlive.Value)
                 continue;
 
-            Transform target =
-                PickSpawnPoint(blindDropSpawnPoints, spawnIndex);
-
-            if (target == null)
-                continue;
-
             // 미니게임 전 위치를 저장
             returnPoints[playerObject.OwnerClientId] =
                 new ReturnPoint(
@@ -316,27 +344,73 @@ public class GameFlowManager : NetworkBehaviour
                     playerObject.transform.rotation
                 );
 
-            // 드롭 장소로 이동
+            // 암전되는 동안 움직이지 못하게 먼저 잠금
+            PlayerMovementLock movementLock =
+                playerObject.GetComponent<PlayerMovementLock>();
+
+            if (movementLock != null)
+                movementLock.SetLockedServer(true);
+
+            movers.Add(playerObject);
+        }
+
+        // 화면 암전
+        FadeClientRpc(true, fadeDuration);
+        yield return new WaitForSeconds(fadeDuration);
+
+        // 암전 중 게임이 끝났다면 중단
+        if (!IsGameInProgress.Value)
+        {
+            FadeClientRpc(false, fadeDuration);
+            yield break;
+        }
+
+        // 드롭 장소로 이동
+        int spawnIndex = 0;
+
+        foreach (NetworkObject playerObject in movers)
+        {
+            if (playerObject == null)
+                continue;
+
+            Transform target =
+                PickSpawnPoint(blindDropSpawnPoints, spawnIndex);
+
+            if (target == null)
+                continue;
+
             TeleportPlayer(
                 playerObject,
                 target.position,
                 target.rotation
             );
 
-            // 이동 및 행동 잠금
-            PlayerMovementLock movementLock =
-                playerObject.GetComponent<PlayerMovementLock>();
-
-            movementLock.SetLockedServer(true);
-
             spawnIndex++;
         }
 
-        BlindDropManager.Instance?.ServerBeginBlindDrop(gameTimeManager.currentDay.Value);
+        // 화면 밝힘 + 드롭 진행 시작
+        FadeClientRpc(false, fadeDuration);
+
+        BlindDropManager.Instance?.ServerBeginBlindDrop(
+            gameTimeManager.currentDay.Value
+        );
     }
 
-    private void EndBlindDrop()
+    // 블라인드 드롭 장소 → 필드 (다음 일차 시작)
+    // 순서: 암전 → 드롭 정리 + 복귀 + 잠금 해제 → 화면 밝힘
+    private IEnumerator EndBlindDropRoutine()
     {
+        FadeClientRpc(true, fadeDuration);
+        yield return new WaitForSeconds(fadeDuration);
+
+        // 암전 중 게임이 끝났다면 잠금을 풀지 않고 중단
+        if (!IsGameInProgress.Value)
+        {
+            FadeClientRpc(false, fadeDuration);
+            yield break;
+        }
+
+        // 드롭 UI / 대사 정리 (화면이 검은 동안 처리)
         BlindDropManager.Instance?.ServerEndBlindDrop();
 
         foreach (NetworkClient client in
@@ -377,6 +451,8 @@ public class GameFlowManager : NetworkBehaviour
         }
 
         returnPoints.Clear();
+
+        FadeClientRpc(false, fadeDuration);
     }
 
     private void MovePlayersToSpawnPoints(
@@ -425,6 +501,22 @@ public class GameFlowManager : NetworkBehaviour
         }
     }
 
+    // =========================================================
+    // 페이드 / 순간이동 RPC
+    // =========================================================
+
+    // 모든 플레이어 화면을 어둡게(true) 또는 밝게(false)
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FadeClientRpc(bool toBlack, float duration)
+    {
+        if (FadeManager.Instance == null)
+            return;
+
+        if (toBlack)
+            FadeManager.Instance.FadeOut(duration);
+        else
+            FadeManager.Instance.FadeIn(duration);
+    }
 
     private void TeleportPlayer(
         NetworkObject playerObject,
@@ -501,7 +593,7 @@ public class GameFlowManager : NetworkBehaviour
             $"ClientId={playerObject.OwnerClientId}"
         );
     }
-    
+
 
     private void LockAllPlayers(bool locked)
     {

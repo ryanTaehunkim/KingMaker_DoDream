@@ -1,5 +1,4 @@
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -50,6 +49,10 @@ public class RoleManager : NetworkBehaviour
             roleText.alpha = 0f;
             roleText.text = "";
         }
+        else
+        {
+            Debug.LogError("[RoleManager] roleText가 연결되어 있지 않습니다.");
+        }
     }
 
     private void Update()
@@ -58,14 +61,14 @@ public class RoleManager : NetworkBehaviour
         // 역할 배정은 서버에서만 가능
         if (!IsServer)
             return;
-        
+
     }
 
     public override void OnNetworkSpawn()
     {
         // 테스트용:
         // Host에서 Z를 누르면 역할 배정
-        
+
         if (Keyboard.current != null &&
             Keyboard.current.zKey.wasPressedThisFrame)
         {
@@ -85,12 +88,13 @@ public class RoleManager : NetworkBehaviour
     }
 
     // 기존 등급 상승 버튼에서 호출
+    // 주의: 테스트용 코드. E(상호작용) 키를 누를 때마다 등급이 오른다.
     public void UpGradeBtn()
     {
         if (!IsSpawned)
             return;
 
-        if(InputManager.interactPressed)
+        if (InputManager.interactPressed)
             UpGradeBtnRpc();
     }
 
@@ -206,10 +210,19 @@ public class RoleManager : NetworkBehaviour
 
             playerState.role.Value = assignedRole;
 
-            AssignRoleRpc(
-                assignedRole,
-                RpcTarget.Single(clientId, RpcTargetUse.Temp)
-            );
+            // 호스트는 "자기 자신에게 보내는 RPC" 대신 직접 호출한다.
+            // (호스트 화면에서만 역할 텍스트가 안 보이던 문제 대응)
+            if (clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                ApplyMyRole(assignedRole);
+            }
+            else
+            {
+                AssignRoleRpc(
+                    assignedRole,
+                    RpcTarget.Single(clientId, RpcTargetUse.Temp)
+                );
+            }
 
             Debug.Log(
                 $"[RoleManager] Client {clientId} = {assignedRole}"
@@ -227,6 +240,12 @@ public class RoleManager : NetworkBehaviour
         Role role,
         RpcParams rpcParams = default)
     {
+        ApplyMyRole(role);
+    }
+
+    // 내 역할을 저장하고 화면에 보여준다. (호스트/클라이언트 공통)
+    private void ApplyMyRole(Role role)
+    {
         myRole = role;
 
         Debug.Log($"[RoleManager] 내 역할: {myRole}");
@@ -239,7 +258,10 @@ public class RoleManager : NetworkBehaviour
     private void ShowRoleUI(Role role)
     {
         if (roleText == null)
+        {
+            Debug.LogError("[RoleManager] roleText가 없어서 역할을 표시할 수 없습니다.");
             return;
+        }
 
         string label = role switch
         {
@@ -256,11 +278,17 @@ public class RoleManager : NetworkBehaviour
 
     private IEnumerator RevealRoutine(string label)
     {
-        bool done = false;
-        FadeManager.Instance.FadeOut(fadeoutTime, () => done = true);
         InputManager.DeactivatePlayerControls();
-        yield return new WaitUntil(() => done);
-        yield return new WaitForSeconds(1f);
+
+        // 게임 시작 연출에서 이미 화면이 검게 덮여 있으면 페이드 아웃은 생략
+        if (FadeManager.Instance != null && !FadeManager.Instance.IsBlack)
+        {
+            bool done = false;
+            FadeManager.Instance.FadeOut(fadeoutTime, () => done = true);
+            yield return new WaitUntil(() => done);
+        }
+
+        yield return new WaitForSecondsRealtime(1f);
         roleText.text = label;
 
         yield return FadeTextRoutine(0f, 1f, fadeDuration);
@@ -269,7 +297,7 @@ public class RoleManager : NetworkBehaviour
 
         yield return FadeTextRoutine(1f, 0f, fadeDuration);
 
-        FadeManager.Instance.FadeIn(fadeoutTime);
+        FadeManager.Instance?.FadeIn(fadeoutTime);
         InputManager.ActivatePlayerControls();
         revealRoutine = null;
     }

@@ -10,8 +10,14 @@ public class PlayerHUD : MonoBehaviour
     [SerializeField] private Slider hpBar;
     [SerializeField] private Slider staminaBar;
     [SerializeField] private TMP_Text cardGradeText;
+    [SerializeField] private TMP_Text roleLabelText;   // 본인 정체 (조커 / 시민)
     [SerializeField] private TMP_Text dayText;
     [SerializeField] private TMP_Text timeText;
+
+    [Header("정체 표시 색")]
+    [SerializeField] private Color citizenColor = new Color(0.45f, 0.85f, 0.55f);
+    [SerializeField] private Color jokerColor = new Color(0.95f, 0.25f, 0.25f);
+    [SerializeField] private Color unknownColor = new Color(0.8f, 0.8f, 0.8f);
 
     private PlayerStateList localPlayerState;
     private GameTimeManager gameTimeManager;
@@ -37,11 +43,13 @@ public class PlayerHUD : MonoBehaviour
             localPlayerState.health.OnValueChanged += OnHealthChanged;
             localPlayerState.stamina.OnValueChanged += OnStaminaChanged;
             localPlayerState.cardGrade.OnValueChanged += OnCardGradeChanged;
+            localPlayerState.role.OnValueChanged += OnRoleChanged;
 
             // 처음 들어왔을 때 현재값 바로 표시
             UpdateHealth(localPlayerState.health.Value);
             UpdateStamina(localPlayerState.stamina.Value);
             UpdateCardGrade(localPlayerState.cardGrade.Value);
+            UpdateRole(localPlayerState.role.Value);
         }
 
         // 게임 시간 관리자 찾기
@@ -64,6 +72,7 @@ public class PlayerHUD : MonoBehaviour
             localPlayerState.health.OnValueChanged -= OnHealthChanged;
             localPlayerState.stamina.OnValueChanged -= OnStaminaChanged;
             localPlayerState.cardGrade.OnValueChanged -= OnCardGradeChanged;
+            localPlayerState.role.OnValueChanged -= OnRoleChanged;
         }
 
         if (gameTimeManager != null)
@@ -88,6 +97,21 @@ public class PlayerHUD : MonoBehaviour
         UpdateCardGrade(newValue);
     }
 
+    private void OnRoleChanged(Role oldValue, Role newValue)
+    {
+        UpdateRole(newValue);
+    }
+
+    private void OnDayChanged(int oldValue, int newValue)
+    {
+        UpdateDay(newValue);
+    }
+
+    private void OnTimeChanged(float oldValue, float newValue)
+    {
+        UpdateTime(newValue);
+    }
+
     private void UpdateHealth(float value)
     {
         if (hpBar != null)
@@ -106,14 +130,29 @@ public class PlayerHUD : MonoBehaviour
             cardGradeText.text = $"GRADE {value}";
     }
 
-    private void OnDayChanged(int oldValue, int newValue)
+    // 본인 정체 표시 (역할 배정 전에는 "?")
+    private void UpdateRole(Role role)
     {
-        UpdateDay(newValue);
-    }
+        if (roleLabelText == null)
+            return;
 
-    private void OnTimeChanged(float oldValue, float newValue)
-    {
-        UpdateTime(newValue);
+        switch (role)
+        {
+            case Role.Joker:
+                roleLabelText.text = "정체: 조커";
+                roleLabelText.color = jokerColor;
+                break;
+
+            case Role.Citizen:
+                roleLabelText.text = "정체: 시민";
+                roleLabelText.color = citizenColor;
+                break;
+
+            default:
+                roleLabelText.text = "정체: ?";
+                roleLabelText.color = unknownColor;
+                break;
+        }
     }
 
     private void UpdateDay(int value)

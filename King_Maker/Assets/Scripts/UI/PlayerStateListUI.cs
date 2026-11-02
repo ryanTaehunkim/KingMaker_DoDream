@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -69,20 +68,21 @@ public class PlayerStateListUI : MonoBehaviour
         if (scoreboardPanel != null)
             scoreboardPanel.SetActive(true);
 
-        IReadOnlyList<int> grades =
-            scoreboardManager.LocalAnonymousGrades;
+        IReadOnlyList<GradeCount> gradeCounts =
+            scoreboardManager.LocalGradeCounts;
 
-        for (int i = 0; i < grades.Count; i++)
+        // 한 줄 = "N등급 - M명"
+        for (int i = 0; i < gradeCounts.Count; i++)
         {
-            PlayerEntryUI anonymousEntry =
+            PlayerEntryUI entry =
                 Instantiate(playerEntryPrefab, content);
 
-            anonymousEntry.SetAnonymousData(
-                i + 1,
-                grades[i]
+            entry.SetGradeCountData(
+                gradeCounts[i].grade,
+                gradeCounts[i].count
             );
 
-            entries.Add(anonymousEntry);
+            entries.Add(entry);
         }
     }
 
