@@ -151,6 +151,11 @@ public class MultiplayerSessionManager : MonoBehaviour
             SetError("Already joined a room.");
             return;
         }
+        if (!LocalPlayerProfile.HasNickname)
+        {
+            SetError("닉네임을 먼저 확정하세요.");
+            return;
+        }
 
         isBusy = true;
 
@@ -264,7 +269,11 @@ public class MultiplayerSessionManager : MonoBehaviour
             SetError("Please enter a room code.");
             return;
         }
-
+        if (!LocalPlayerProfile.HasNickname)
+        {
+            SetError("닉네임을 먼저 확정하세요.");
+            return;
+        }
         isBusy = true;
 
         try

@@ -1,5 +1,6 @@
-using UnityEngine;
+using Unity.Collections;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PlayerStateList : NetworkBehaviour
 {
@@ -83,7 +84,14 @@ public class PlayerStateList : NetworkBehaviour
 
     // 현재 달리는 중인지
     private bool isRunning;
-
+    [Header("Profile")]
+    // 닉네임은 모두에게 공개. 쓰기는 서버만.
+    public NetworkVariable<FixedString32Bytes> nickname =
+    new NetworkVariable<FixedString32Bytes>(
+        default,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
     private void Awake()
     {
@@ -108,6 +116,11 @@ public class PlayerStateList : NetworkBehaviour
         cardGrade.OnValueChanged += OnCardGradeChanged;
         role.OnValueChanged += OnRoleChanged;
         isAlive.OnValueChanged += OnAliveChanged;
+        // 내 캐릭터가 스폰되면 로컬에 확정된 닉네임을 서버에 제출
+        if (IsOwner)
+        {
+            SubmitNicknameRpc(LocalPlayerProfile.Nickname);
+        }
     }
 
 
@@ -346,4 +359,16 @@ public class PlayerStateList : NetworkBehaviour
     //            stamina.Value = serverStamina;
     //    }
     //}
+    // 클라이언트는 "요청"만 하고, 값은 서버가 검증 후 확정
+    [Rpc(SendTo.Server)]
+    private void SubmitNicknameRpc(string requestedName, RpcParams rpcParams = default)
+    {
+        // 서버에서도 반드시 다시 정제 (클라이언트 값은 신뢰하지 않음)
+        string clean = LocalPlayerProfile.Sanitize(requestedName);
+
+        if (string.IsNullOrEmpty(clean))
+            clean = $"Player{OwnerClientId}";
+
+        nickname.Value = clean;
+    }
 }

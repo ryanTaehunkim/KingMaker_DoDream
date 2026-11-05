@@ -51,6 +51,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private bool isGrounded;
     private bool isJumping;
     private bool isRunning;
+    [HideInInspector]public bool isMoving;
     private static readonly int IsWalkHash = Animator.StringToHash("isWalk");
     private static readonly int IsRunHash = Animator.StringToHash("isRun");
     private static readonly int IsJumpHash = Animator.StringToHash("isJump");
@@ -109,6 +110,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
 
         ApplyMovement();
         UpdateAnimation();
+        Debug.Log(isMoving);
     }
     private void HandleLook()
     {
@@ -169,6 +171,8 @@ public class PlayerControlForNetwork : NetworkBehaviour
         isGrounded = characterController.isGrounded;
         knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, knockbackDecay * Time.deltaTime);
         if (knockbackVelocity.sqrMagnitude < 0.01f) knockbackVelocity = Vector3.zero;
+        if (horizontal.magnitude < 0.01f&&!isJumping) isMoving = false;
+        else isMoving = true;
     }
     public void ApplyKnockback(Vector3 horizontal, float upward)
     {

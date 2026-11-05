@@ -855,7 +855,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9161238083650154580, guid: 3aca58a5db8825a4ab5fa346f64de9ba, type: 3}
       propertyPath: m_InScenePlacedDisabledByDefault
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9161238083650154580, guid: 3aca58a5db8825a4ab5fa346f64de9ba, type: 3}
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
@@ -2257,7 +2257,7 @@ MonoBehaviour:
   m_DisconnectTimeoutMS: 30000
   ConnectionData:
     Address: 127.0.0.1
-    Port: 7777
+    Port: 7778
     WebSocketPath: /
     ServerListenAddress: 127.0.0.1
     ClientBindPort: 0
@@ -3338,7 +3338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 916318310131637467, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
       propertyPath: m_InScenePlacedDisabledByDefault
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 916318310131637467, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
       propertyPath: InScenePlacedSourceGlobalObjectIdHash

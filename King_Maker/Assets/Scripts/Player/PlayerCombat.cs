@@ -77,7 +77,15 @@ public class PlayerCombat : NetworkBehaviour
             blocked = candidate == null;
         }
         //공격 시 모션과 데미지 등 
-
+        if (control.isMoving)
+        {
+            animator.SetTrigger("upperAttack");
+        }
+        else
+        {
+            animator.SetTrigger("isAttack");
+        }
+        
         if (target != null && !blocked) AttackServerRpc(target.NetworkObjectId);
 
     }
