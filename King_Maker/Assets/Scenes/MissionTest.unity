@@ -349,7 +349,7 @@ MonoBehaviour:
   m_text: "\uCE74\uB4DC \uC9DD \uB9DE\uCD94\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -368,7 +368,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -446,7 +446,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  - {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -530,7 +530,7 @@ MonoBehaviour:
   m_text: "\uC640\uC778\uC794 \uB2E6\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -549,7 +549,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -627,7 +627,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  - {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1565,7 +1565,7 @@ MonoBehaviour:
   m_text: "CCTV \uBAA8\uB2C8\uD130 \uCF1C\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1584,7 +1584,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1662,7 +1662,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  - {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1778,7 +1778,7 @@ MonoBehaviour:
   m_text: "\uCF54\uB974\uD06C \uBCD1 \uB530\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1797,7 +1797,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1875,7 +1875,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  - {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1976,7 +1976,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -2273,7 +2273,7 @@ MonoBehaviour:
     \uC9C0\uAE09 / F4: \uD53C\uACA9 \uD14C\uC2A4\uD2B8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2292,7 +2292,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2627,7 +2627,7 @@ MonoBehaviour:
   m_text: "\uC7AD\uD31F \uC22B\uC790 \uB9DE\uCD94\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
-  m_sharedMaterial: {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  m_sharedMaterial: {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2646,7 +2646,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2724,7 +2724,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -9172146921406102552, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
+  - {fileID: -8602493860777887310, guid: 9e8b41e309a423241b48f379a4e07cb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2786,9 +2786,9 @@ MonoBehaviour:
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 0
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -2982,7 +2982,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 2109828843}
-    PlayerPrefab: {fileID: 5266217302069297866, guid: d5e8e885a82dc2647a75b87979a714a7, type: 3}
+    PlayerPrefab: {fileID: 3123606538843095852, guid: 3aca58a5db8825a4ab5fa346f64de9ba, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: d99a6e75aefa8fb4f8b2138a604e7756, type: 2}
