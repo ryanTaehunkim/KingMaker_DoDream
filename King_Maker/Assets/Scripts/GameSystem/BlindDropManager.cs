@@ -69,6 +69,10 @@ public class BlindDropManager : NetworkBehaviour
     [SerializeField] private GameObject investigationPanel;
     [SerializeField] private TMP_Text investigationText;
 
+    [Header("UI - 조준선 (블라인드 드롭 중에는 숨기고, 정체 조사 때만 표시)")]
+    [SerializeField] private GameObject crosshairRoot;
+    [SerializeField] private Color crosshairTargetColor = new Color(1f, 0.25f, 0.25f);
+
     // ---------- 서버 전용 ----------
     private readonly Dictionary<ulong, bool> choices = new Dictionary<ulong, bool>();
     private readonly HashSet<ulong> investigators = new HashSet<ulong>();   // 조사권을 받은 사람
@@ -81,6 +85,10 @@ public class BlindDropManager : NetworkBehaviour
     private bool timerActive;
     private float timerEndTime;
     private bool canInvestigate;    // 내가 지금 조사권을 쓸 수 있는지
+
+    private Graphic[] crosshairGraphics;
+    private Color[] crosshairBaseColors;
+    private readonly RaycastHit[] aimHits = new RaycastHit[16];
 
     // =========================================================
     // Unity
@@ -101,6 +109,8 @@ public class BlindDropManager : NetworkBehaviour
 
         if (foldButton != null)
             foldButton.onClick.AddListener(() => SendChoice(false));
+
+        CacheCrosshair();
 
         HideAllUI();
     }
@@ -413,6 +423,7 @@ public class BlindDropManager : NetworkBehaviour
     private void ShowResultClientRpc(string body, float duration)
     {
         HideAllUI();
+        SetCrosshairVisible(false);
 
         if (!IsLocalPlayerAlive())
             return;
@@ -427,6 +438,7 @@ public class BlindDropManager : NetworkBehaviour
     private void GrantInvestigationRpc(RpcParams rpcParams = default)
     {
         canInvestigate = true;
+        SetCrosshairVisible(true);
 
         if (investigationText != null)
         {
@@ -440,6 +452,7 @@ public class BlindDropManager : NetworkBehaviour
     private void SendInvestigationResultRpc(Role role, RpcParams rpcParams = default)
     {
         canInvestigate = false;
+        SetCrosshairVisible(false);
 
         string roleName = role == Role.Joker ? "조커" : "시민";
 
@@ -452,6 +465,9 @@ public class BlindDropManager : NetworkBehaviour
     {
         HideAllUI();
         SetCursorLocked(true);
+
+        // 필드로 돌아가므로 조준선을 원래대로 표시
+        SetCrosshairVisible(true);
 
         // 화면 대사 + 저장된 대사 기록 삭제
         DialogueManager.Instance?.ClearAll();
@@ -466,39 +482,118 @@ public class BlindDropManager : NetworkBehaviour
         if (!canInvestigate)
             return;
 
-        if (!InputManager.attackPressed)
+        // 조사 시간이 끝났으면 조준선을 숨기고 종료
+        if (timerActive && Time.time > timerEndTime)
+        {
+            canInvestigate = false;
+            SetCrosshairVisible(false);
+
+            if (investigationText != null)
+                investigationText.text = "조사 시간이 끝났습니다.";
+
+            return;
+        }
+
+        PlayerStateList target = FindAimedPlayer();
+        bool valid = target != null && target.isAlive.Value;
+
+        // 지목 가능한 대상 위에 조준선이 있으면 색을 바꿔서 알려준다
+        SetCrosshairColor(valid);
+
+        if (valid && InputManager.attackPressed)
+            RequestInvestigateServerRpc(target.NetworkObjectId);
+    }
+
+    // =========================================================
+    // 조준선
+    // =========================================================
+
+    // 조준선 오브젝트(자식 포함)의 원래 색을 저장해 둔다
+    private void CacheCrosshair()
+    {
+        if (crosshairRoot == null)
             return;
 
+        crosshairGraphics = crosshairRoot.GetComponentsInChildren<Graphic>(true);
+        crosshairBaseColors = new Color[crosshairGraphics.Length];
+
+        for (int i = 0; i < crosshairGraphics.Length; i++)
+            crosshairBaseColors[i] = crosshairGraphics[i].color;
+    }
+
+    private void SetCrosshairVisible(bool visible)
+    {
+        if (crosshairRoot == null)
+            return;
+
+        crosshairRoot.SetActive(visible);
+
+        // 다시 보일 때는 원래 색으로
+        if (visible)
+            SetCrosshairColor(false);
+    }
+
+    // onTarget이 true면 대상 색, false면 원래 색
+    private void SetCrosshairColor(bool onTarget)
+    {
+        if (crosshairGraphics == null)
+            return;
+
+        for (int i = 0; i < crosshairGraphics.Length; i++)
+        {
+            if (crosshairGraphics[i] == null)
+                continue;
+
+            Color baseColor = crosshairBaseColors[i];
+
+            crosshairGraphics[i].color = onTarget
+                ? new Color(
+                    crosshairTargetColor.r,
+                    crosshairTargetColor.g,
+                    crosshairTargetColor.b,
+                    baseColor.a)
+                : baseColor;
+        }
+    }
+
+    // 조준선이 가리키는 가장 가까운 플레이어 (내 몸은 제외, 벽에 막히면 null)
+    private PlayerStateList FindAimedPlayer()
+    {
         Camera cam = Camera.main;
         if (cam == null)
-            return;
+            return null;
 
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
 
-        RaycastHit[] hits = Physics.RaycastAll(
+        int count = Physics.RaycastNonAlloc(
             ray,
+            aimHits,
             investigationRange,
             ~0,
             QueryTriggerInteraction.Ignore
         );
 
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        float best = float.MaxValue;
+        PlayerStateList bestTarget = null;
 
-        foreach (RaycastHit hit in hits)
+        for (int i = 0; i < count; i++)
         {
+            RaycastHit hit = aimHits[i];
             PlayerStateList target = hit.collider.GetComponentInParent<PlayerStateList>();
 
             // 내 몸에 맞은 것은 무시
             if (target != null && target.IsOwner)
                 continue;
 
-            // 플레이어가 아닌 물체(벽 등)가 먼저 맞으면 지목 실패
-            if (target == null)
-                return;
+            if (hit.distance >= best)
+                continue;
 
-            RequestInvestigateServerRpc(target.NetworkObjectId);
-            return;
+            // 가장 가까운 물체가 플레이어가 아니면(벽 등) null이 들어가 지목 불가 처리
+            best = hit.distance;
+            bestTarget = target;
         }
+
+        return bestTarget;
     }
 
     // =========================================================
@@ -508,6 +603,9 @@ public class BlindDropManager : NetworkBehaviour
     private void ApplyStepLocal(BlindDropStep step, float duration)
     {
         HideAllUI();
+
+        // 블라인드 드롭 중에는 조준선을 숨긴다. (정체 조사권을 받은 사람만 GrantInvestigationRpc에서 다시 표시)
+        SetCrosshairVisible(false);
 
         // 사망자는 드롭에 참여하지 않으므로 UI를 보여주지 않는다
         if (!IsLocalPlayerAlive())
