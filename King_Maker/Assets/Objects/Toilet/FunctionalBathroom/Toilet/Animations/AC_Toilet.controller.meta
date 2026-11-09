@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f0244df1032cc8a628286a68033c3778
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 402394
+  packageName: Functional Low Poly Toilet (Animated Flush + Water)
+  packageVersion: 1.0
+  assetPath: Assets/EZPZ Games/FunctionalBathroom/Toilet/Animations/AC_Toilet.controller
+  uploadId: 980726
