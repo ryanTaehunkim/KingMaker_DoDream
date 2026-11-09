@@ -304321,7 +304321,15 @@ MonoBehaviour:
   investigationText: {fileID: 1987298910}
   crosshairRoot: {fileID: 1707841310}
   crosshairTargetColor: {r: 1, g: 0.25, b: 0.25, a: 1}
-  seedPokerConfigs: []
+  seedPokerConfigs:
+  - day: 1
+    enabled: 1
+    minCard: 3
+    maxCard: 5
+  - day: 2
+    enabled: 1
+    minCard: 5
+    maxCard: 8
   seedCardCount: 3
   penaltyPerDay: 2
   maxGradeFromSeedPoker: 16
