@@ -71965,7 +71965,7 @@ MonoBehaviour:
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
   roleManager: {fileID: 418415292}
-  gameTimeManager: {fileID: 1158339208}
+  gameTimeManager: {fileID: 1158339211}
   gameCheckManager: {fileID: 418415291}
   fieldSpawnPoints:
   - {fileID: 2137306988}
@@ -189790,6 +189790,7 @@ GameObject:
   - component: {fileID: 1158339210}
   - component: {fileID: 1158339209}
   - component: {fileID: 1158339208}
+  - component: {fileID: 1158339211}
   m_Layer: 0
   m_Name: GameTimeManager
   m_TagString: Untagged
@@ -189804,7 +189805,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1158339207}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1690b284314c1284098270a0885229f9, type: 3}
   m_Name: 
@@ -189877,6 +189878,57 @@ Transform:
   m_Children: []
   m_Father: {fileID: 973453671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1158339211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158339207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59897c41886328a41a6e7ea6320da4b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameTimeManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  days:
+  - enabled: 1
+    fieldDuration: 210
+    dropDuration: 90
+  - enabled: 1
+    fieldDuration: 210
+    dropDuration: 90
+  - enabled: 1
+    fieldDuration: 240
+    dropDuration: 0
+  - enabled: 1
+    fieldDuration: 240
+    dropDuration: 0
+  currentDay:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 1
+  remainingTime:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  elapsedTime:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  currentPhase:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  timerRunning:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
 --- !u!1001 &1158533883
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -226300,7 +226352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AnonymousScoreboardManager
   ShowTopMostFoldoutHeaderGroup: 1
-  gameTimeManager: {fileID: 1158339208}
+  gameTimeManager: {fileID: 0}
   enableDebugHotkeys: 1
   showBoardKey: 289
   hideBoardKey: 290
@@ -304269,6 +304321,10 @@ MonoBehaviour:
   investigationText: {fileID: 1987298910}
   crosshairRoot: {fileID: 1707841310}
   crosshairTargetColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  seedPokerConfigs: []
+  seedCardCount: 3
+  penaltyPerDay: 2
+  maxGradeFromSeedPoker: 16
 --- !u!114 &1902994221
 MonoBehaviour:
   m_ObjectHideFlags: 0
