@@ -371,4 +371,10 @@ public class PlayerStateList : NetworkBehaviour
 
         nickname.Value = clean;
     }
+
+    public void ServerSetCardGradeRaw(int newGrade)
+    {
+        if (!IsServer) return;
+        cardGrade.Value = newGrade;
+    }
 }

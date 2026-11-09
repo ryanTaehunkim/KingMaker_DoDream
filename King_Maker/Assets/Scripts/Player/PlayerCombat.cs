@@ -28,6 +28,7 @@ public class PlayerCombat : NetworkBehaviour
     private PlayerControlRigid controlRigid;
     private PlayerControlForNetwork control;
     private Animator animator;
+    private OwnerNetworkAnimator networkAnimator;
     // 서버 거리 검증 디버그용
     private Vector3 dbgStart;
     private Vector3 dbgEnd;
@@ -41,14 +42,21 @@ public class PlayerCombat : NetworkBehaviour
         if (controlRigid == null) {
             control = GetComponent<PlayerControlForNetwork>();
         }
-        animator = GetComponentInChildren<Animator>();
+        //animator = GetComponentInChildren<Animator>();
+        networkAnimator = GetComponentInChildren<OwnerNetworkAnimator>();
     }
 
     public void TryAttack()
     {
         if(!InputManager.attackPressed) return;
         if(!state.isAlive.Value)     return;
-        if (Time.time - lastLocalAttackTime < attackCoolDown) return;
+        if (Time.time - lastLocalAttackTime < attackCoolDown)
+        {
+         
+            return;
+
+        }
+      
 
         lastLocalAttackTime = Time.time;
 
@@ -77,15 +85,8 @@ public class PlayerCombat : NetworkBehaviour
             blocked = candidate == null;
         }
         //공격 시 모션과 데미지 등 
-        if (control.isMoving)
-        {
-            animator.SetTrigger("upperAttack");
-        }
-        else
-        {
-            animator.SetTrigger("isAttack");
-        }
-        
+        networkAnimator.SetTrigger("isAttack");
+
         if (target != null && !blocked) AttackServerRpc(target.NetworkObjectId);
 
     }

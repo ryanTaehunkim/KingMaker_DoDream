@@ -81,7 +81,53 @@ public class BlindDropManager : NetworkBehaviour
     private bool timerActive;
     private float timerEndTime;
     private bool canInvestigate;    // 내가 지금 조사권을 쓸 수 있는지
+    //
 
+
+    [System.Serializable]
+    public class SeedPokerDayConfig
+    {
+        public int day = 1;
+        public bool enabled = true;
+        public int minCard = 1;
+        public int maxCard = 5;
+    }
+
+    [Header("시드 포커")]
+    [SerializeField] private SeedPokerDayConfig[] seedPokerConfigs;
+    [SerializeField] private int seedCardCount = 3;
+    [SerializeField] private int penaltyPerDay = 2;
+    [SerializeField] private int maxGradeFromSeedPoker = 16; // 이 값 이상이면 참가 불가
+
+    private readonly Dictionary<ulong, SeedPokerPlayerResult> seedResults = new();
+    private readonly List<ulong> pendingDeaths = new();
+    private SeedPokerDayConfig GetConfig(int day)
+    {
+        if (seedPokerConfigs == null) return null;
+        foreach (var c in seedPokerConfigs)
+            if (c.day == day) return c;
+        return null;
+    }
+
+    // GameFlowManager에서도 사용. 설정이 없는 일차는 꺼진 것으로 취급
+    public bool IsSeedPokerEnabled(int day)
+    {
+        var c = GetConfig(day);
+        return c != null && c.enabled;
+    }
+
+    private List<int> DrawSeedCards(SeedPokerDayConfig cfg)
+    {
+        var pool = new List<int>();
+        for (int v = cfg.minCard; v <= cfg.maxCard; v++) pool.Add(v);
+
+        for (int i = pool.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (pool[i], pool[j]) = (pool[j], pool[i]);
+        }
+        return pool.GetRange(0, Mathf.Min(seedCardCount, pool.Count));
+    }
     // =========================================================
     // Unity
     // =========================================================
@@ -161,6 +207,8 @@ public class BlindDropManager : NetworkBehaviour
         choices.Clear();
         investigators.Clear();
         investigated.Clear();
+        seedResults.Clear();  
+        pendingDeaths.Clear();
         serverStep = BlindDropStep.None;
 
         EndFlowClientRpc();
@@ -175,6 +223,8 @@ public class BlindDropManager : NetworkBehaviour
         choices.Clear();
         investigators.Clear();
         investigated.Clear();
+        seedResults.Clear();
+        pendingDeaths.Clear();
 
         // 1) 시작 대사
         SetStep(BlindDropStep.Intro, introDuration, day);
@@ -206,13 +256,27 @@ public class BlindDropManager : NetworkBehaviour
         if (participants.Count > 0)
         {
             SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
-            yield return RunSeedPokerServer(participants);
+            yield return RunSeedPokerServer(participants, day);
         }
 
         // 5) 결과창 (안내창)
         serverStep = BlindDropStep.Result;
-        ShowResultClientRpc(BuildResultText(participants), resultDuration);
+        foreach (ulong id in GetAliveClientIds())
+        {
+            ShowResultRpc(
+                BuildPersonalResultText(id, participants.Count),
+                resultDuration,
+                RpcTarget.Single(id, RpcTargetUse.Temp));
+        }
         yield return new WaitForSeconds(resultDuration);
+
+        // 사망 처리 (결과창이 끝난 뒤)
+        foreach (ulong id in pendingDeaths)
+        {
+            var ps = GetPlayerState(id);
+            if (ps != null && ps.isAlive.Value) ps.isAlive.Value = false;
+        }
+        pendingDeaths.Clear();
 
         // 6) 정체 조사권 (드롭 직후, 최상위 등급자)
         yield return RunInvestigationServer(day);
@@ -220,12 +284,72 @@ public class BlindDropManager : NetworkBehaviour
         flowRoutine = null;
     }
 
+    private string BuildPersonalResultText(ulong id, int participantCount)
+    {
+        if (participantCount == 0)
+            return "전원 폴드했습니다.\n블라인드 드롭이 진행되지 않았습니다.";
+
+        if (!seedResults.TryGetValue(id, out var r))
+            return "이번 블라인드 드롭에 참가하지 않았습니다.";
+
+        switch (r.outcome)
+        {
+            case SeedPokerOutcome.Won:
+                return $"당신은 이번 결과로 시드카드 {r.cardValue}를 획득하였습니다.";
+            case SeedPokerOutcome.Void:
+                return "당신은 이번 결과로 시드카드 획득에 실패하였습니다.";
+            default:
+                return $"당신은 이번 결과로 시드카드 획득에 실패하였습니다.\n추가로 {-r.gradeDelta}등급이 하락하였습니다.";
+        }
+    }
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void ShowResultRpc(string body, float duration, RpcParams rpcParams = default)
+    {
+        HideAllUI();
+        if (!IsLocalPlayerAlive()) return;
+
+        SetCursorLocked(true);
+        StartLocalTimer(duration);
+        ShowNotice("블라인드 드롭 결과", body);
+    }
     // 실제 시드 포커 게임은 여기에 구현하면 된다.
     // participants: 참가를 선택한 생존자의 clientId 목록
-    private IEnumerator RunSeedPokerServer(List<ulong> participants)
+    private IEnumerator RunSeedPokerServer(List<ulong> participants, int day)
     {
         // TODO: 시드 포커 로직 연결 (카드 배분, 승패 판정, PT 적용 등)
+        seedResults.Clear();
+        pendingDeaths.Clear();
+
+        var cfg = GetConfig(day);
+        if (cfg == null || !cfg.enabled)
+        {
+            yield return new WaitForSeconds(seedPokerDuration);
+            yield break;
+        }
+        var cards = DrawSeedCards(cfg);
+
+        var list = new List<SeedPokerParticipant>();
+        foreach (ulong id in participants)
+        {
+            var ps = GetPlayerState(id);
+            if (ps != null && ps.isAlive.Value)
+                list.Add(new SeedPokerParticipant(id, ps.cardGrade.Value));
+        }
+
+        var results = SeedPokerResolver.Resolve(list, cards, day, penaltyPerDay, maxGradeFromSeedPoker);
+
         yield return new WaitForSeconds(seedPokerDuration);
+
+        // 전부 계산한 뒤 한 번에 적용
+        foreach (var r in results)
+        {
+            seedResults[r.clientId] = r;
+            var ps = GetPlayerState(r.clientId);
+            if (ps == null) continue;
+
+            if (r.gradeDelta != 0) ps.ServerSetCardGradeRaw(r.newGrade);
+            if (r.newGrade < 1) pendingDeaths.Add(r.clientId);
+        }
     }
 
     // 결과창에 표시할 문구. 시드 포커 구현 후 실제 결과로 교체하면 된다.
@@ -272,7 +396,17 @@ public class BlindDropManager : NetworkBehaviour
         serverStep = step;
         ShowStepClientRpc(step, duration, day);
     }
+    private PlayerStateList GetPlayerState(ulong clientId)
+    {
+        if (NetworkManager.Singleton == null) return null;
 
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client)
+            && client.PlayerObject != null)
+        {
+            return client.PlayerObject.GetComponent<PlayerStateList>();
+        }
+        return null;
+    }
     // =========================================================
     // 서버: 생존자 / 선택 확인
     // =========================================================
@@ -365,7 +499,14 @@ public class BlindDropManager : NetworkBehaviour
         if (choices.ContainsKey(sender))
             return;
 
-        choices[sender] = participate;
+        bool join = participate;
+        if (join)
+        {
+            var ps = GetPlayerState(sender);
+            if (ps == null || ps.cardGrade.Value >= maxGradeFromSeedPoker)
+                join = false;
+        }
+        choices[sender] = join;
     }
 
     // 정체 조사 요청 (조사권을 가진 플레이어가 대상을 지목)
@@ -543,16 +684,31 @@ public class BlindDropManager : NetworkBehaviour
                 );
                 break;
 
+            //case BlindDropStep.Choice:
+            //    myChoice = -1;
+            //    SetActiveSafe(choicePanel, true);
+
+            //    if (participateButton != null) participateButton.interactable = true;
+            //    if (foldButton != null) foldButton.interactable = true;
+            //    if (choiceStatusText != null)
+            //        choiceStatusText.text = "블라인드 드롭에 참가할지 선택하세요.";
+            //    break;
             case BlindDropStep.Choice:
                 myChoice = -1;
                 SetActiveSafe(choicePanel, true);
 
-                if (participateButton != null) participateButton.interactable = true;
+                bool blocked = false;
+                var localObj = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+                if (localObj != null && localObj.TryGetComponent(out PlayerStateList me))
+                    blocked = me.cardGrade.Value >= maxGradeFromSeedPoker;
+
+                if (participateButton != null) participateButton.interactable = !blocked;
                 if (foldButton != null) foldButton.interactable = true;
                 if (choiceStatusText != null)
-                    choiceStatusText.text = "블라인드 드롭에 참가할지 선택하세요.";
+                    choiceStatusText.text = blocked
+                        ? "등급이 너무 높아 참가할 수 없습니다.\n폴드만 선택할 수 있습니다."
+                        : "블라인드 드롭에 참가할지 선택하세요.";
                 break;
-
             case BlindDropStep.SeedPoker:
                 SetActiveSafe(seedPokerPanel, true);
 
@@ -563,6 +719,7 @@ public class BlindDropManager : NetworkBehaviour
                         : "폴드했습니다.\n시드 포커가 끝날 때까지 기다려주세요.";
                 }
                 break;
+            
 
             case BlindDropStep.Investigation:
                 // 기본 문구. 조사권이 있는 사람은 GrantInvestigationRpc가 문구를 덮어쓴다.

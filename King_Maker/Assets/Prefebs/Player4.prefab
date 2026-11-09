@@ -1489,6 +1489,7 @@ GameObject:
   - component: {fileID: 1676560501057367569}
   - component: {fileID: 173971692408476795}
   - component: {fileID: 7103207775820321891}
+  - component: {fileID: 8508952107626072789}
   m_Layer: 6
   m_Name: Player4
   m_TagString: Untagged
@@ -1558,7 +1559,7 @@ MonoBehaviour:
   attackDamage: 10
   attackRange: 10
   attackRadius: 0.5
-  attackCoolDown: 0.6
+  attackCoolDown: 0.8
   hitMask:
     serializedVersion: 2
     m_Bits: 64
@@ -1634,6 +1635,44 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
+  nickname:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue:
+      utf8LengthInBytes: 0
+      bytes:
+        offset0000:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0016: 0
+        byte0017: 0
+        byte0018: 0
+        byte0019: 0
+        byte0020: 0
+        byte0021: 0
+        byte0022: 0
+        byte0023: 0
+        byte0024: 0
+        byte0025: 0
+        byte0026: 0
+        byte0027: 0
+        byte0028: 0
+        byte0029: 0
 --- !u!114 &5949942440396266475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1753,6 +1792,7 @@ MonoBehaviour:
     m_Bits: 128
   knockbackDecay: 8
   animator: {fileID: 0}
+  isMoving: 0
 --- !u!114 &173971692408476795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1790,7 +1830,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNameTag
   ShowTopMostFoldoutHeaderGroup: 1
   nameText: {fileID: 7858094936943149885}
-  nickname: Player
+  defaultName: Player
+--- !u!114 &8508952107626072789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123606538843095852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73c0ab029bc01540be4eb77249d852d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHitFlash
+  ShowTopMostFoldoutHeaderGroup: 1
+  targetRenderers:
+  - {fileID: 8757055672634197961}
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  emissionIntensity: 0.5
+  flashCount: 3
+  flashOnTime: 0.08
+  flashOffTime: 0.08
 --- !u!1 &3130541005783242218
 GameObject:
   m_ObjectHideFlags: 0
@@ -3546,6 +3606,10 @@ MonoBehaviour:
       ParameterType: 4
     - name: isAttack
       NameHash: -2035800095
+      Synchronize: 1
+      ParameterType: 9
+    - name: upperAttack
+      NameHash: -263524509
       Synchronize: 1
       ParameterType: 9
   AnimatorParametersExpanded: 0

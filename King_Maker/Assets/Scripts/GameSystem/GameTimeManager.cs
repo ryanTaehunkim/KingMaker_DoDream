@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class GameTimeManager : NetworkBehaviour
+public class GameTimeManager2 : NetworkBehaviour
 {
     // 진행 단계
     public const int PhaseWaiting = 0;
