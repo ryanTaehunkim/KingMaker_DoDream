@@ -576,6 +576,18 @@ public class GameFlowManager : NetworkBehaviour
             return;
         }
 
+        // CharacterController 프리팹: CC를 잠시 끄고 이동해야 옛 위치로 되돌아가지 않는다.
+        // (NetworkTransform.Teleport까지 TeleportTo 안에서 함께 처리한다)
+        PlayerControlForNetwork ccControl =
+            playerObject.GetComponent<PlayerControlForNetwork>();
+
+        if (ccControl != null)
+        {
+            ccControl.TeleportTo(position, rotation);
+            return;
+        }
+
+        // (이전 Rigidbody 프리팹 방식 - 유지)
         PlayerControlRigid rigidControl =
         playerObject.GetComponent<PlayerControlRigid>();
 
