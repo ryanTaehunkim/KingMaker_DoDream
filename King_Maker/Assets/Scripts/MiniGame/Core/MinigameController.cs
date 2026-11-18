@@ -237,6 +237,7 @@ public class MinigameController : MonoBehaviour
             InputManager.sprintHeld = false;
             InputManager.attackPressed = false;
             InputManager.interactPressed = false;
+            InputManager.interactIsHeld = false;
             InputManager.putDownPressed = false;
         }
         else if (pausedInputManager != null)
