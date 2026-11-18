@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d7a2c43d7efbe548afb9217ec559440, type: 3}
+  m_Name: Mission_P9_Bulb
+  m_EditorClassIdentifier: Assembly-CSharp::BulbMissionData
+  missionId: 109
+  displayName: "\uC804\uAD6C \uBD88 \uCF1C\uAE30"
+  ruleText: "\uC2A4\uD398\uC774\uC2A4\uBC14\uB97C \uC5F0\uD0C0\uD574 \uAEBC\uC838\uAC00\uB294
+    \uC804\uAD6C\uB97C \uB05D\uAE4C\uC9C0 \uBC1D\uD788\uC138\uC694."
+  type: 0
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 1
+  gradeReward: 2
+  suitBonusEligible: 1
+  timeLimit: 12
+  minClearTime: 1.5
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 6340378091444326365, guid: dc171084cf182774c9d7b5fabd78be89, type: 3}
+  chargePerPress: 0.07
+  drainPerSecond: 0.3
+  startCharge: 0.2

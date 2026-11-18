@@ -39,7 +39,13 @@ public enum MissionDenyReason
     OnCooldown,
     AlreadyInMission,
     NotEnoughPlayers,
-    TooFar
+    TooFar,
+    NotActivated,      // 아이템을 아직 올려놓지 않음 (MissionItemSocket)
+    CoopSlotTaken,     // 협동: 이 자리는 이미 누군가 수행함
+    CoopAlreadyJoined, // 협동: 이미 다른 자리를 맡고 있음 (한 명이 두 자리 불가)
+    NotEnoughGrade,    // 도박: 배팅할 등급이 부족
+    NeedItem,          // 협동 C2: 숫자 패널을 들고 있어야 함
+    RoleNotAllowed     // 자리 조건 불충족 (예: Q 전용 자리)
 }
 
 public enum MissionPenaltyType

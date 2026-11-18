@@ -21,6 +21,9 @@ public static class MissionEvents
     // [서버] 해당 일차 공용 미션 전부 클리어 (day) → 등급 분포 공개
     public static event Action<int> AllSharedMissionsCleared;
 
+    // [서버] 협동 미션 클리어 (day, 참여자 clientIds) → PT 정보판 해금
+    public static event Action<int, ulong[]> CoopMissionCleared;
+
     // [서버+로컬] 일차 시작/종료 (day)
     public static event Action<int> DayStarted;
     public static event Action<int> DayEnded;
@@ -40,6 +43,7 @@ public static class MissionEvents
     internal static void RaiseGradeChangeRequested(ulong clientId, int amount, bool suitEligible, MissionData data) => GradeChangeRequested?.Invoke(clientId, amount, suitEligible, data);
     internal static void RaiseAllPersonalMissionsCleared(ulong clientId, int day) => AllPersonalMissionsCleared?.Invoke(clientId, day);
     internal static void RaiseAllSharedMissionsCleared(int day) => AllSharedMissionsCleared?.Invoke(day);
+    internal static void RaiseCoopMissionCleared(int day, ulong[] clientIds) => CoopMissionCleared?.Invoke(day, clientIds);
     internal static void RaiseDayStarted(int day) => DayStarted?.Invoke(day);
     internal static void RaiseDayEnded(int day) => DayEnded?.Invoke(day);
     internal static void RaiseLocalMinigameOpened(MissionData data) => LocalMinigameOpened?.Invoke(data);
@@ -56,6 +60,7 @@ public static class MissionEvents
         GradeChangeRequested = null;
         AllPersonalMissionsCleared = null;
         AllSharedMissionsCleared = null;
+        CoopMissionCleared = null;
         DayStarted = null;
         DayEnded = null;
         LocalMinigameOpened = null;

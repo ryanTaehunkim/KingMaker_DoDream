@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd5a00eedf8e8204f93e4532a964112b, type: 3}
+  m_Name: Mission_P7_NeonWire
+  m_EditorClassIdentifier: Assembly-CSharp::NeonWireMissionData
+  missionId: 107
+  displayName: "\uB124\uC628\uC0AC\uC778 \uC120 \uC5F0\uACB0"
+  ruleText: "\uC67C\uCABD \uB2E8\uC790\uB97C \uB4DC\uB798\uADF8\uD574 \uAC19\uC740
+    \uC0C9 \uB2E8\uC790\uC5D0 \uC5F0\uACB0\uD558\uC138\uC694."
+  type: 0
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 1
+  gradeReward: 1
+  suitBonusEligible: 1
+  timeLimit: 15
+  minClearTime: 2
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 1941085192126748019, guid: cf4765e5589321e45975720cc81a58b9, type: 3}
+  wireCount: 4
+  failOnWrong: 0

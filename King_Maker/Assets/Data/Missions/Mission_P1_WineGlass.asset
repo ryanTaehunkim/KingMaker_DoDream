@@ -18,10 +18,10 @@ MonoBehaviour:
     \uC5BC\uB8E9\uC744 \uC9C0\uC6B0\uC138\uC694."
   type: 0
   isShared: 0
-  requiredToolId: cloth
-  requiredToolName: "\uD589\uC8FC"
+  requiredToolId: 
+  requiredToolName: 
   requiredPlayers: 1
-  gradeReward: 1
+  gradeReward: 2
   suitBonusEligible: 1
   timeLimit: 15
   minClearTime: 3

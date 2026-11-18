@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04b0e00175009b841ba1096ab9df58d6, type: 3}
+  m_Name: Mission_C4_Billiards
+  m_EditorClassIdentifier: Assembly-CSharp::AimPowerMissionData
+  missionId: 204
+  displayName: "2\uC778 \uB2F9\uAD6C"
+  ruleText: "A\uB294 \uAC01\uB3C4, B\uB294 \uD798! \uB458 \uB2E4 \uB9DE\uC544\uC57C
+    \uACF5\uC774 \uAD6C\uBA4D\uC5D0 \uB4E4\uC5B4\uAC11\uB2C8\uB2E4."
+  type: 1
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 2
+  gradeReward: 2
+  suitBonusEligible: 1
+  timeLimit: 6
+  minClearTime: 0
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 1970635505487901722, guid: 50c4a270eda61264a9019a02a6ca9787, type: 3}
+  mode: 2
+  syncWindow: 20
+  resetDelay: 3
+  slotActionText: "\uCC38\uAC00"
+  slotDoneText: "\uC644\uB8CC"
+  joinedMessage: "\uCC38\uAC00\uD588\uC2B5\uB2C8\uB2E4! {0:0}\uCD08 \uC548\uC5D0
+    \uC0C1\uB300\uAC00 \uB2E4\uB978 \uC790\uB9AC\uC5D0 \uCC38\uAC00\uD574\uC57C \uC2DC\uC791\uD569\uB2C8\uB2E4."
+  failMessage: "\uBBF8\uC158 \uC2E4\uD328!"
+  roleDeniedMessage: 
+  sumItemId: number_panel
+  style: 0
+  goalsNeeded: 1
+  angleRange: 40
+  angleTolerance: 6
+  powerWindow: 0.22
+  aimSpeed: 45
+  powerCycle: 1.4
+  shotShowTime: 1

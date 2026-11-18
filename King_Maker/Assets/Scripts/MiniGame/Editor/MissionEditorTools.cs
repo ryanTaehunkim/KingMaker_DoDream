@@ -72,7 +72,7 @@ public static class MissionEditorTools
         {
             d.missionId = 103;
             d.displayName = "잭팟 숫자 맞추기";
-            d.ruleText = "▲▼ 버튼으로 모든 칸을 9로 맞추세요.";
+            d.ruleText = "돌아가는 첫 번째 숫자가 9일 때 STOP(또는 스페이스)을 누르세요.";
             d.timeLimit = 10f;
             d.minClearTime = 0.5f;
         });
@@ -95,6 +95,109 @@ public static class MissionEditorTools
 
         AssetDatabase.SaveAssets();
         Debug.Log("[Mission] 기본 미션 에셋 생성 완료");
+    }
+
+    // 3차 기획서 추가 개인 미션 (이미 있으면 건너뜀) + P3 규칙 문구 갱신
+    [MenuItem("KingMaker/Missions/Create 3rd Plan Mission Assets")]
+    public static void Create3rdPlanAssets()
+    {
+        EnsureFolder(PrefabFolder);
+        EnsureFolder(DataFolder);
+
+        var keySeq = CreatePrefab<KeySequenceMinigame>("Minigame_KeySequence");
+        var bulb = CreatePrefab<BulbMinigame>("Minigame_Bulb");
+
+        CreateData<KeySequenceMissionData>("Mission_P6_KeySequence", keySeq, d =>
+        {
+            d.missionId = 106;
+            d.displayName = "키보드 조작 게임";
+            d.ruleText = "화면의 방향키를 순서대로 누르세요. 틀리면 처음부터!";
+            d.gradeReward = 1;
+            d.timeLimit = 15f;
+            d.minClearTime = 1.5f;
+        });
+        CreateData<BulbMissionData>("Mission_P9_Bulb", bulb, d =>
+        {
+            d.missionId = 109;
+            d.displayName = "전구 불 켜기";
+            d.ruleText = "스페이스바를 연타해 꺼져가는 전구를 끝까지 밝히세요.";
+            d.gradeReward = 2;
+            d.timeLimit = 12f;
+            d.minClearTime = 1.5f;
+        });
+
+        var neon = CreatePrefab<NeonWireMinigame>("Minigame_NeonWire");
+        var trash = CreatePrefab<TrashMinigame>("Minigame_Trash");
+        var safe = CreatePrefab<SafePatternMinigame>("Minigame_SafePattern");
+
+        CreateData<NeonWireMissionData>("Mission_P7_NeonWire", neon, d =>
+        {
+            d.missionId = 107;
+            d.displayName = "네온사인 선 연결";
+            d.ruleText = "왼쪽 단자를 드래그해 같은 색 단자에 연결하세요.";
+            d.gradeReward = 1;
+            d.timeLimit = 15f;
+            d.minClearTime = 2f;
+        });
+        CreateData<TrashMissionData>("Mission_P8_Trash", trash, d =>
+        {
+            d.missionId = 108;
+            d.displayName = "청소 게임";
+            d.ruleText = "책상 위 쓰레기를 끌어서 쓰레기통에 모두 넣으세요.";
+            d.gradeReward = 1;
+            d.timeLimit = 15f;
+            d.minClearTime = 2f;
+        });
+        CreateData<SafePatternMissionData>("Mission_P10_SafePattern", safe, d =>
+        {
+            d.missionId = 110;
+            d.displayName = "금고 패턴 맞추기";
+            d.ruleText = "2초간 보이는 패턴을 기억했다가 그대로 따라 그리세요.";
+            d.gradeReward = 1;
+            d.timeLimit = 15f;
+            d.minClearTime = 2.5f;
+        });
+
+        var jackpot = AssetDatabase.LoadAssetAtPath<JackpotMissionData>($"{DataFolder}/Mission_P3_Jackpot.asset");
+        if (jackpot != null)
+        {
+            jackpot.ruleText = "돌아가는 첫 번째 숫자가 9일 때 STOP(또는 스페이스)을 누르세요.";
+            jackpot.minClearTime = 0.5f;
+            EditorUtility.SetDirty(jackpot);
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("[Mission] 3차 기획 미션 에셋 생성 완료 (P6~P10) + P3 규칙 갱신");
+    }
+
+    // 협동 미션 C1 라디오 끄기: 데이터 + 라디오 스테이션 프리팹 (이미 있으면 건너뜀)
+    [MenuItem("KingMaker/Missions/Create Coop Mission Assets (C1)")]
+    public static void CreateCoopAssets()
+    {
+        EnsureFolder(DataFolder);
+
+        CreateData<CoopMissionData>("Mission_C1_Radio", null, d =>
+        {
+            d.missionId = 201;
+            d.displayName = "라디오 끄기";
+            d.ruleText = "맵 양 끝의 라디오를 5초 안에 둘 다 끄세요. (2인 협동)";
+            d.type = MissionType.Coop;
+            d.requiredPlayers = 2;
+            d.gradeReward = 3;
+            d.mode = CoopMode.SyncAction;
+            d.syncWindow = 5f;
+            d.resetDelay = 4f;
+            d.failRetryCooldown = 3f;
+            d.slotActionText = "라디오 끄기";
+            d.slotDoneText = "꺼짐";
+            d.joinedMessage = "라디오를 껐습니다! {0:0}초 안에 반대편 라디오도 꺼야 합니다.";
+            d.failMessage = "시간 초과! 라디오가 다시 켜졌습니다.";
+        });
+        AssetDatabase.SaveAssets();
+
+        MissionItemPrefabTools.CreateCoopRadioStation(false);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[Mission] 협동 미션 C1 에셋 생성 완료 → Prefebs/MissionStations/Station_C1_Radio 2개를 맵 양 끝에 배치");
     }
 
     private static MinigameBase CreatePrefab<T>(string name) where T : MinigameBase

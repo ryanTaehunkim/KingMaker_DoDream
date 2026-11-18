@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4529d97aab053954eaaa4edc8bcb68fd, type: 3}
+  m_Name: Mission_Q_Shoot
+  m_EditorClassIdentifier: Assembly-CSharp::QShootMissionData
+  missionId: 401
+  displayName: "Q \uC804\uC6A9: \uBE14\uB77C\uC778\uB4DC \uC0AC\uACA9"
+  ruleText: "Q\uB294 \uAC00\uB824\uC9C4 \uD654\uBA74\uC73C\uB85C \uC870\uC900, \uB3C4\uC6B0\uBBF8\uB294
+    \uB9D0\uB85C \uC548\uB0B4! \uACF5 3\uAC1C\uB97C \uB9DE\uD788\uBA74 K \uB2EC\uC131."
+  type: 2
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 2
+  gradeReward: 0
+  suitBonusEligible: 0
+  timeLimit: 30
+  minClearTime: 0
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 5805452750211607289, guid: e190237e43cbafe4c94e88c4d8ded3c6, type: 3}
+  mode: 2
+  syncWindow: 30
+  resetDelay: 3
+  slotActionText: "\uCC38\uAC00"
+  slotDoneText: "\uC644\uB8CC"
+  joinedMessage: "\uCC38\uAC00\uD588\uC2B5\uB2C8\uB2E4! {0:0}\uCD08 \uC548\uC5D0
+    \uC0C1\uB300\uAC00 \uB2E4\uB978 \uC790\uB9AC\uC5D0 \uCC38\uAC00\uD574\uC57C \uC2DC\uC791\uD569\uB2C8\uB2E4."
+  failMessage: "\uBBF8\uC158 \uC2E4\uD328!"
+  roleDeniedMessage: "Q \uB4F1\uAE09(16 PT \uC774\uC0C1)\uB9CC \uC774 \uC790\uB9AC\uC5D0
+    \uC549\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  sumItemId: number_panel
+  qMinGrade: 16
+  kGrade: 19
+  helperReward: 0
+  targetCount: 3
+  hitRadius: 45
+  area: {x: 700, y: 320}
+  fireCooldown: 0.35

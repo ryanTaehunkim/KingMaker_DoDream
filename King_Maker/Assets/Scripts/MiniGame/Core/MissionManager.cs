@@ -7,7 +7,7 @@ using UnityEngine;
 // - 검증 항목: 일차 진행 여부, 일차 중복 클리어, 도구 보유, 스테이션 점유, 실패 쿨다운, 거리, 최소 소요시간
 // - 네트워크가 시작되지 않은 상태(오프라인 테스트)에서는 같은 검증을 로컬에서 수행한다.
 // 씬에 NetworkObject와 함께 1개 배치한다.
-public class MissionManager : NetworkBehaviour
+public partial class MissionManager : NetworkBehaviour
 {
     public static MissionManager Instance { get; private set; }
 
@@ -42,6 +42,13 @@ public class MissionManager : NetworkBehaviour
         public ulong clientId;
         public MissionStation station;
         public double startTime;
+
+        // 도박 미션(G1/G2) 전용 — 서버가 정한 값
+        public int gambleSetup;
+        public int gambleMaxBet;
+        public bool gambleResolved;
+        public bool gambleWin;
+        public int gambleDelta;
     }
 
     private readonly Dictionary<int, Session> sessionsByStation = new Dictionary<int, Session>();
@@ -122,6 +129,7 @@ public class MissionManager : NetworkBehaviour
 
     private void Update()
     {
+        if (IsAuthority) ServerUpdateCoop();
         if (requestPending && Time.unscaledTime - requestSentTime > RequestTimeout)
         {
             requestPending = false;
@@ -136,6 +144,13 @@ public class MissionManager : NetworkBehaviour
     {
         if (station == null || station.Mission == null) return;
         if (requestPending || activeStation != null || MinigameController.IsBusy) return;
+
+        // 협동 미션은 별도 흐름 (MissionManager.Coop.cs)
+        if (station.Mission is CoopMissionData)
+        {
+            RequestCoopAction(station);
+            return;
+        }
 
         // 즉시 피드백용 로컬 사전 검사 (최종 판정은 서버)
         if (!IsDayActive) { ShowDenied(station, MissionDenyReason.DayNotActive); return; }
@@ -152,7 +167,11 @@ public class MissionManager : NetworkBehaviour
         else
         {
             var reason = ServerTryStart(OfflineClientId, station.StationId);
-            if (reason == MissionDenyReason.None) OnStartApproved(station.StationId);
+            if (reason == MissionDenyReason.None)
+            {
+                OnStartApproved(station.StationId);
+                ServerSendGambleSetup(OfflineClientId, station.StationId);
+            }
             else OnStartDenied(station.StationId, reason);
         }
     }
@@ -215,7 +234,12 @@ public class MissionManager : NetworkBehaviour
         var mission = station != null ? station.Mission : null;
 
         var controller = MinigameController.Instance;
-        if (controller != null)
+        if (controller != null && mission is GambleMissionData)
+        {
+            if (gradeDelta > 0) controller.ShowToast($"승리! 등급 +{gradeDelta}", 3f);
+            else if (gradeDelta < 0) controller.ShowToast($"패배... 등급 {gradeDelta}", 3f);
+        }
+        else if (controller != null)
         {
             if (final == MinigameResult.Success)
                 controller.ShowToast(gradeDelta != 0 ? $"미션 성공! 등급 +{gradeDelta}" : "미션 성공!");
@@ -256,6 +280,17 @@ public class MissionManager : NetworkBehaviour
             case MissionDenyReason.OnCooldown: msg = "잠시 후 다시 시도하세요."; break;
             case MissionDenyReason.NotEnoughPlayers: msg = "함께할 플레이어가 필요합니다."; break;
             case MissionDenyReason.TooFar: msg = "너무 멀리 있습니다."; break;
+            case MissionDenyReason.NotEnoughGrade: msg = "배팅할 등급(PT)이 부족합니다."; break;
+            case MissionDenyReason.NeedItem: msg = "필요한 아이템을 들고 와야 합니다."; break;
+            case MissionDenyReason.RoleNotAllowed:
+                msg = mission is CoopMissionData cm && !string.IsNullOrEmpty(cm.roleDeniedMessage) ? cm.roleDeniedMessage : "이 자리에 참가할 수 없습니다.";
+                break;
+            case MissionDenyReason.CoopSlotTaken: msg = "이 자리는 이미 수행됐습니다. 반대편을 맡으세요."; break;
+            case MissionDenyReason.CoopAlreadyJoined: msg = "반대편은 다른 플레이어가 맡아야 합니다."; break;
+            case MissionDenyReason.NotActivated:
+                string item = station != null && station.ActivationSocket != null ? station.ActivationSocket.AcceptedItemName : "아이템";
+                msg = $"{item}을(를) 먼저 올려놓아야 합니다.";
+                break;
             default: msg = "지금은 시작할 수 없습니다."; break;
         }
         MinigameController.GetOrCreate().ShowToast(msg);
@@ -279,7 +314,11 @@ public class MissionManager : NetworkBehaviour
         ulong sender = rpcParams.Receive.SenderClientId;
         var reason = ServerTryStart(sender, stationId);
         var target = RpcTarget.Single(sender, RpcTargetUse.Temp);
-        if (reason == MissionDenyReason.None) StartApprovedRpc(stationId, target);
+        if (reason == MissionDenyReason.None)
+        {
+            StartApprovedRpc(stationId, target);
+            ServerSendGambleSetup(sender, stationId);
+        }
         else StartDeniedRpc(stationId, reason, target);
     }
 
@@ -315,13 +354,14 @@ public class MissionManager : NetworkBehaviour
 
         var mission = station.Mission;
         if (!IsDayActive) return MissionDenyReason.DayNotActive;
-        if (sessionsByClient.ContainsKey(clientId)) return MissionDenyReason.AlreadyInMission;
+        if (!station.IsActivated) return MissionDenyReason.NotActivated;
+        if (sessionsByClient.ContainsKey(clientId) || IsInCoopGame(clientId)) return MissionDenyReason.AlreadyInMission;
         if (IsCleared(clientId, mission.missionId)) return MissionDenyReason.AlreadyCleared;
         if (sessionsByStation.ContainsKey(stationId)) return MissionDenyReason.Occupied;
         if (retryAvailableAt.TryGetValue((clientId, mission.missionId), out double t) && Now < t)
             return MissionDenyReason.OnCooldown;
-        // 협동 미션(2인 이상)은 11주차에 별도 흐름으로 구현 예정
-        if (mission.requiredPlayers > 1) return MissionDenyReason.NotEnoughPlayers;
+        // 협동 미션은 RequestCoopAction 흐름으로만 진행
+        if (mission is CoopMissionData || mission.requiredPlayers > 1) return MissionDenyReason.NotEnoughPlayers;
 
         var player = GetPlayerObject(clientId);
         if (player != null && player.TryGetComponent(out PlayerStateList ps) && !ps.isAlive.Value)
@@ -333,6 +373,8 @@ public class MissionManager : NetworkBehaviour
             if (holder == null && !IsOnline) holder = FindFirstObjectByType<MissionToolInventory>();
             if (holder == null || !holder.HasTool(mission.requiredToolId)) return MissionDenyReason.MissingTool;
         }
+        if (mission is GambleMissionData gamble && ServerMaxBet(clientId, gamble.config) < 1)
+            return MissionDenyReason.NotEnoughGrade;
         if (player != null && station.TryGetComponent<Collider>(out var col))
         {
             Vector3 closest = col.ClosestPoint(player.transform.position);
@@ -343,6 +385,8 @@ public class MissionManager : NetworkBehaviour
         var session = new Session { clientId = clientId, station = station, startTime = Now };
         sessionsByStation[stationId] = session;
         sessionsByClient[clientId] = session;
+
+        if (mission is GambleMissionData g) ServerPrepareGamble(session, g);
 
         MissionEvents.RaiseMissionStarted(clientId, station);
         return MissionDenyReason.None;
@@ -356,6 +400,14 @@ public class MissionManager : NetworkBehaviour
 
         var mission = session.station.Mission;
         float serverElapsed = (float)(Now - session.startTime);
+
+        // 도박: 결과는 배팅 시점에 서버가 이미 정했다 (등급도 그때 반영)
+        if (mission is GambleMissionData gambleMission)
+        {
+            ServerFinishGamble(clientId, session, gambleMission, reported, clientElapsed, serverElapsed);
+            return;
+        }
+
         var final = reported;
 
         if (final == MinigameResult.Success)
@@ -428,6 +480,7 @@ public class MissionManager : NetworkBehaviour
         if (!IsAuthority) return;
 
         ServerCancelAllSessions(MinigameCancelReason.DayEnded);
+        ServerResetCoop();
         clearedByClient.Clear();
         retryAvailableAt.Clear();
         tracker.ResetDay();
@@ -460,6 +513,7 @@ public class MissionManager : NetworkBehaviour
         else offlineDayActive = false;
 
         ServerCancelAllSessions(MinigameCancelReason.DayEnded);
+        ServerResetCoop();
         MissionEvents.RaiseDayEnded(CurrentDay);
     }
 
@@ -493,6 +547,7 @@ public class MissionManager : NetworkBehaviour
     private void OnClientDisconnected(ulong clientId)
     {
         if (sessionsByClient.TryGetValue(clientId, out var session)) EndSession(session);
+        ServerCoopClientLeft(clientId);
     }
 
     private void EndSession(Session session)
@@ -508,6 +563,8 @@ public class MissionManager : NetworkBehaviour
         clearedByClient.Clear();
         retryAvailableAt.Clear();
         tracker.ResetDay();
+        coopRuns.Clear();
+        offlineCoopSlots.Clear();
     }
 
     private bool IsCleared(ulong clientId, int missionId)

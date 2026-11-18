@@ -1,135 +1,139 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-// P3 잭팟 숫자 맞추기: 랜덤 칸을 ▲/▼ 버튼으로 굴려 모든 칸을 목표 숫자로 맞춘다. (예: 7 9 9 → ▲ 2회)
+// P3 잭팟 숫자 맞추기 (3차 기획서)
+// 첫 번째 숫자가 계속 회전한다. 상단 STOP 버튼(또는 스페이스)으로 멈춰 목표 숫자(9)에 맞춘다.
+// 2·3번째 칸은 목표 숫자로 고정. 회전 칸이 여러 개면 앞에서부터 하나씩 멈춘다.
 public class JackpotMinigame : MinigameBase
 {
     private int[] values;
-    private bool[] adjustable;
     private TextMeshProUGUI[] digitTexts;
-    private Button[] buttons;
-    private int targetDigit;
-    private float rollDuration;
+    private Image[] slotImages;
+    private Button stopButton;
+    private TextMeshProUGUI feedback;
 
-    private int rollingSlot = -1;
-    private int rollTarget;
-    private float rollTimer;
-    private float rollFlickerTimer;
-    private float successDelay = -1f;
+    private int targetDigit;
+    private int spinCount;
+    private float spinInterval;
+    private float stopPause;
+    private bool failOnMiss;
+
+    private int currentSlot;      // 지금 회전 중인 칸
+    private float spinTimer;
+    private float pauseTimer = -1f;
+    private bool pauseIsSuccess;
 
     public override string StatusText => $"목표: {new string((char)('0' + targetDigit), values.Length)}";
 
     protected override void OnBegin()
     {
-        var settings = DataAs<JackpotMissionData>();
-        int slotCount = settings != null ? settings.slotCount : 3;
-        int randomCount = settings != null ? Mathf.Clamp(settings.randomSlotCount, 1, slotCount) : 1;
-        targetDigit = settings != null ? settings.targetDigit : 9;
-        rollDuration = settings != null ? settings.rollDuration : 0.3f;
-        bool allowDown = settings == null || settings.allowDownButton;
+        var s = DataAs<JackpotMissionData>();
+        int slotCount = s != null ? s.slotCount : 3;
+        spinCount = s != null ? Mathf.Clamp(s.randomSlotCount, 1, slotCount) : 1;
+        targetDigit = s != null ? s.targetDigit : 9;
+        spinInterval = s != null ? Mathf.Max(0.03f, s.spinInterval) : 0.12f;
+        stopPause = s != null ? s.stopPause : 0.6f;
+        failOnMiss = s != null && s.failOnMiss;
 
         values = new int[slotCount];
-        adjustable = new bool[slotCount];
         digitTexts = new TextMeshProUGUI[slotCount];
-        var buttonList = new System.Collections.Generic.List<Button>();
+        slotImages = new Image[slotCount];
 
-        var frame = MinigameUI.Image(Board, "Machine", new Color(0.35f, 0.08f, 0.10f), new Vector2(0f, 10f),
-            new Vector2(slotCount * 170f + 60f, 400f));
-        MinigameUI.Text(frame.transform, "Title", "JACKPOT", 40f, MinigameUI.Gold, new Vector2(0f, 178f), new Vector2(400f, 44f))
+        var frame = MinigameUI.Image(Board, "Machine", new Color(0.35f, 0.08f, 0.10f), new Vector2(0f, -25f),
+            new Vector2(slotCount * 170f + 60f, 370f));
+        MinigameUI.Text(frame.transform, "Title", "JACKPOT", 40f, MinigameUI.Gold, new Vector2(0f, 155f), new Vector2(400f, 44f))
             .fontStyle = FontStyles.Bold;
+
+        // 상단 STOP 버튼
+        stopButton = MinigameUI.Button(frame.transform, "Stop", "STOP", MinigameUI.Bad, new Vector2(0f, 100f),
+            new Vector2(220f, 60f), Stop, 36f);
 
         for (int i = 0; i < slotCount; i++)
         {
             float x = (i - (slotCount - 1) * 0.5f) * 170f;
-            adjustable[i] = i < randomCount;
-            values[i] = adjustable[i] ? RandomNonTarget() : targetDigit;
+            values[i] = i < spinCount ? Random.Range(0, 10) : targetDigit;
 
-            var slot = MinigameUI.Image(frame.transform, $"Slot{i}", MinigameUI.PanelColor, new Vector2(x, 0f), new Vector2(140f, 180f));
-            digitTexts[i] = MinigameUI.Text(slot.transform, "Digit", values[i].ToString(), 130f, MinigameUI.TextColor, Vector2.zero, new Vector2(140f, 180f));
+            slotImages[i] = MinigameUI.Image(frame.transform, $"Slot{i}", MinigameUI.PanelColor, new Vector2(x, -35f), new Vector2(140f, 160f));
+            digitTexts[i] = MinigameUI.Text(slotImages[i].transform, "Digit", values[i].ToString(), 130f, MinigameUI.TextColor,
+                Vector2.zero, new Vector2(140f, 180f));
             digitTexts[i].fontStyle = FontStyles.Bold;
-
-            if (!adjustable[i]) continue;
-            int index = i;
-            buttonList.Add(MinigameUI.Button(frame.transform, $"Up{i}", "▲", MinigameUI.ButtonColor, new Vector2(x, 125f),
-                new Vector2(120f, 56f), () => Roll(index, +1)));
-            if (allowDown)
-            {
-                buttonList.Add(MinigameUI.Button(frame.transform, $"Down{i}", "▼", MinigameUI.ButtonColor, new Vector2(x, -125f),
-                    new Vector2(120f, 56f), () => Roll(index, -1)));
-            }
         }
-        buttons = buttonList.ToArray();
+
+        MinigameUI.Text(frame.transform, "Hint", "[ SPACE ] 또는 STOP", 24f, new Color(1f, 1f, 1f, 0.6f),
+            new Vector2(0f, -150f), new Vector2(400f, 36f));
+        feedback = MinigameUI.Text(Board, "Feedback", "", 34f, MinigameUI.Good, new Vector2(0f, -250f), new Vector2(400f, 50f));
+
+        currentSlot = 0;
         RefreshColors();
-    }
-
-    private int RandomNonTarget()
-    {
-        int v = Random.Range(0, 9);
-        return v >= targetDigit ? v + 1 : v;
-    }
-
-    private void Roll(int slot, int direction)
-    {
-        if (IsFinished || rollingSlot >= 0 || successDelay >= 0f) return;
-        rollingSlot = slot;
-        rollTarget = (values[slot] + direction + 10) % 10;
-        rollTimer = rollDuration;
-        rollFlickerTimer = 0f;
-        SetButtonsInteractable(false);
     }
 
     protected override void OnTick(float deltaTime)
     {
-        if (successDelay >= 0f)
+        if (pauseTimer >= 0f)
         {
-            successDelay -= deltaTime;
-            if (successDelay < 0f) Finish(MinigameResult.Success);
-            return;
+            pauseTimer -= deltaTime;
+            if (pauseTimer >= 0f) return;
+
+            if (pauseIsSuccess) { Finish(MinigameResult.Success); return; }
+            feedback.text = "";
+            stopButton.interactable = true;
+            RefreshColors();
         }
 
-        if (rollingSlot < 0) return;
-
-        rollTimer -= deltaTime;
-        rollFlickerTimer -= deltaTime;
-        if (rollFlickerTimer <= 0f)
+        spinTimer -= deltaTime;
+        if (spinTimer <= 0f)
         {
-            rollFlickerTimer = 0.05f;
-            digitTexts[rollingSlot].text = Random.Range(0, 10).ToString();
+            spinTimer = spinInterval;
+            values[currentSlot] = (values[currentSlot] + 1) % 10;
+            digitTexts[currentSlot].text = values[currentSlot].ToString();
         }
 
-        if (rollTimer > 0f) return;
+        var keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.spaceKey.wasPressedThisFrame) Stop();
+    }
 
-        values[rollingSlot] = rollTarget;
-        digitTexts[rollingSlot].text = rollTarget.ToString();
-        rollingSlot = -1;
-        RefreshColors();
+    // STOP 1회 판정
+    public void Stop()
+    {
+        if (IsFinished || pauseTimer >= 0f) return;
 
-        if (AllMatched())
+        stopButton.interactable = false;
+        if (values[currentSlot] == targetDigit)
         {
-            // 맞춘 숫자를 잠깐 보여준 뒤 성공
-            successDelay = 0.3f;
+            RefreshColors();
+            currentSlot++;
+            if (currentSlot >= spinCount)
+            {
+                feedback.text = "JACKPOT!";
+                feedback.color = MinigameUI.Gold;
+                pauseIsSuccess = true;
+                pauseTimer = 0.4f;
+                return;
+            }
+            feedback.text = "좋아요!";
+            feedback.color = MinigameUI.Good;
+            pauseIsSuccess = false;
+            pauseTimer = 0.25f;
         }
         else
         {
-            SetButtonsInteractable(true);
+            digitTexts[currentSlot].color = MinigameUI.Bad;
+            feedback.text = "아깝다!";
+            feedback.color = MinigameUI.Bad;
+            if (failOnMiss) { Finish(MinigameResult.Fail); return; }
+            pauseIsSuccess = false;
+            pauseTimer = stopPause;
         }
-    }
-
-    private bool AllMatched()
-    {
-        foreach (int v in values) if (v != targetDigit) return false;
-        return true;
     }
 
     private void RefreshColors()
     {
         for (int i = 0; i < values.Length; i++)
-            digitTexts[i].color = values[i] == targetDigit ? MinigameUI.Gold : MinigameUI.TextColor;
-    }
-
-    private void SetButtonsInteractable(bool interactable)
-    {
-        foreach (var b in buttons) b.interactable = interactable;
+        {
+            bool locked = i >= spinCount || i < currentSlot || (i == currentSlot && values[i] == targetDigit);
+            digitTexts[i].color = locked && values[i] == targetDigit ? MinigameUI.Gold : MinigameUI.TextColor;
+        }
     }
 }

@@ -43,11 +43,14 @@ public abstract class MinigameBase : MonoBehaviour
         elapsed += Time.deltaTime;
         OnTick(Time.deltaTime);
 
-        if (!finished && elapsed >= data.timeLimit)
+        if (!finished && UseLocalTimeout && elapsed >= data.timeLimit)
         {
             Finish(MinigameResult.Fail);
         }
     }
+
+    // false면 제한시간이 지나도 스스로 끝내지 않는다 (서버가 끝을 알려주는 협동/도박 미니게임)
+    protected virtual bool UseLocalTimeout => true;
 
     public void Cancel() => Finish(MinigameResult.Cancelled);
 

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f97041d87e7736479a0b3a7c8449c20, type: 3}
+  m_Name: Mission_C2_Sum
+  m_EditorClassIdentifier: Assembly-CSharp::CoopMissionData
+  missionId: 202
+  displayName: "\uC0B0\uC218 \uBBF8\uC158"
+  ruleText: "\uBAA9\uD45C \uC22B\uC790\uC5D0 \uB9DE\uCDB0 \uAC01\uC790 \uC22B\uC790
+    \uD328\uB110\uC744 \uCC3E\uC544\uC640 \uB450 \uC790\uB9AC\uC5D0 \uC62C\uB824
+    \uD569\uC744 \uB9DE\uCD94\uC138\uC694."
+  type: 1
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 2
+  gradeReward: 3
+  suitBonusEligible: 1
+  timeLimit: 15
+  minClearTime: 0
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 0}
+  mode: 1
+  syncWindow: 60
+  resetDelay: 3
+  slotActionText: "\uC22B\uC790 \uD328\uB110 \uC62C\uB824\uB193\uAE30"
+  slotDoneText: "\uC62C\uB824\uB193\uC74C"
+  joinedMessage: "\uD328\uB110\uC744 \uC62C\uB838\uC2B5\uB2C8\uB2E4! {0:0}\uCD08
+    \uC548\uC5D0 \uC0C1\uB300\uB3C4 \uD328\uB110\uC744 \uC62C\uB824\uC57C \uD569\uB2C8\uB2E4."
+  failMessage: "\uD569\uC774 \uB9DE\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4!"
+  roleDeniedMessage: 
+  sumItemId: number_panel
