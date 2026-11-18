@@ -263,6 +263,10 @@ public class AnonymousScoreboardManager : NetworkBehaviour
             if (state == null)
                 continue;
 
+            // 사망한 플레이어는 정보판 집계에서 제외
+            if (!state.isAlive.Value)
+                continue;
+
             int grade = state.cardGrade.Value;
 
             counts.TryGetValue(grade, out int current);

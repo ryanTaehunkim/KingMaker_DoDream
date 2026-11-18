@@ -1,5 +1,4 @@
-
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 
 public enum GameResult
@@ -9,6 +8,15 @@ public enum GameResult
     JokerWin
 }
 
+// 게임이 끝난 이유 (결과 화면에 표시)
+public enum GameEndReason
+{
+    None,
+    KingAchieved,        // K 등급 달성
+    CitizensEliminated,  // 남은 시민이 기준 이하
+    TimeOver             // 제한 시간 종료
+}
+
 public class GameCheckManager : NetworkBehaviour
 {
     public static GameCheckManager Instance { get; private set; }
@@ -16,12 +24,16 @@ public class GameCheckManager : NetworkBehaviour
 
 
     [Header("Win Condition")]
- 
+
 
     public NetworkVariable<GameResult> result = new NetworkVariable<GameResult>(GameResult.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    // 게임이 끝난 이유 (result보다 먼저 서버에서 값을 넣는다)
+    public NetworkVariable<GameEndReason> endReason = new NetworkVariable<GameEndReason>(GameEndReason.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     [SerializeField] private int kingGrade;
     [SerializeField] private int citizenLossCount;
- 
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,11 +50,16 @@ public class GameCheckManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         result.OnValueChanged += OnResultChanged;
+        endReason.OnValueChanged += OnEndReasonChanged;
+
+        // 이미 결과가 나온 상태에서 접속한 경우를 위해 한 번 갱신
+        GameResultUI.Instance?.Refresh();
     }
 
     public override void OnNetworkDespawn()
     {
         result.OnValueChanged -= OnResultChanged;
+        endReason.OnValueChanged -= OnEndReasonChanged;
 
         if (Instance == this)
             Instance = null;
@@ -52,12 +69,18 @@ public class GameCheckManager : NetworkBehaviour
         GameResult previousResult,
         GameResult newResult)
     {
-        if (newResult == GameResult.None)
-            return;
-
         Debug.Log($"[GameCheckManager] 게임 결과: {newResult}");
 
-        // 추후 이곳에 결과 UI 연결
+        // 결과 화면 표시 (None이면 화면을 숨긴다)
+        GameResultUI.Instance?.Refresh();
+    }
+
+    private void OnEndReasonChanged(
+        GameEndReason previousReason,
+        GameEndReason newReason)
+    {
+        // result와 reason이 도착하는 순서가 바뀔 수 있어서, 둘 중 어느 쪽이 와도 다시 그린다
+        GameResultUI.Instance?.Refresh();
     }
 
     // GameFlowManager에서 새 게임 시작 시 호출
@@ -66,6 +89,7 @@ public class GameCheckManager : NetworkBehaviour
         if (!IsServer)
             return;
 
+        endReason.Value = GameEndReason.None;
         result.Value = GameResult.None;
 
         Debug.Log("[GameCheckManager] 게임 결과 초기화");
@@ -108,7 +132,9 @@ public class GameCheckManager : NetworkBehaviour
             if (state.cardGrade.Value < kingGrade)
                 continue;
 
-            EndGame(state.role.Value == Role.Joker ? GameResult.JokerWin : GameResult.CitizenWin);
+            EndGame(
+                state.role.Value == Role.Joker ? GameResult.JokerWin : GameResult.CitizenWin,
+                GameEndReason.KingAchieved);
             return;
         }
     }
@@ -124,7 +150,8 @@ public class GameCheckManager : NetworkBehaviour
             if (client.PlayerObject == null) continue;
             var state = client.PlayerObject.GetComponent<PlayerStateList>();
 
-           
+            if (state == null) continue;
+
             if (state.role.Value == Role.Citizen && state.isAlive.Value)
             {
                 currentAliveCount++;
@@ -133,17 +160,27 @@ public class GameCheckManager : NetworkBehaviour
 
         if (currentAliveCount <= citizenLossCount)
         {
-            EndGame(GameResult.JokerWin);
-        
+            EndGame(GameResult.JokerWin, GameEndReason.CitizensEliminated);
+
         }
-    
+
+    }
+
+    // 제한 시간이 끝날 때까지 승패가 나지 않으면 조커 팀 승리 (GameFlowManager가 호출)
+    public void ServerEndByTimeout()
+    {
+        if (!IsServer || result.Value != GameResult.None)
+            return;
+
+        EndGame(GameResult.JokerWin, GameEndReason.TimeOver);
     }
 
 
-    private void EndGame(GameResult finalResult)
+    private void EndGame(GameResult finalResult, GameEndReason reason)
     {
         if (!IsServer || result.Value != GameResult.None) return;
 
+        endReason.Value = reason;
         result.Value = finalResult;
         MissionManager.Instance?.ServerEndDay();
     }

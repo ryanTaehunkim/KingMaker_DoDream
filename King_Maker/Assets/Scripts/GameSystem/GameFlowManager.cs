@@ -46,6 +46,9 @@ public class GameFlowManager : NetworkBehaviour
     // 게임 시작 연출이 진행 중인지 (Z를 연타해도 한 번만 시작되게)
     private bool isStarting;
 
+    // 지금 플레이어들이 블라인드 드롭 장소에 있는지 (복귀를 한 번만 실행하기 위함)
+    private bool isInBlindDrop;
+
     private struct ReturnPoint
     {
         public Vector3 position;
@@ -301,6 +304,10 @@ public class GameFlowManager : NetworkBehaviour
                 break;
 
             case GameTimeManager.PhaseDay4Final:
+                // 드롭 구간 바로 뒤에 최종 일차가 오는 일차 설정이면 여기서 복귀시킨다
+                if (isInBlindDrop)
+                    StartCoroutine(EndBlindDropRoutine());
+
                 Debug.Log("[GameFlow] 4일차 최종 진행 시작");
                 break;
 
@@ -308,6 +315,9 @@ public class GameFlowManager : NetworkBehaviour
                 IsGameInProgress.Value = false;
                 BlindDropManager.Instance?.ServerEndBlindDrop();
                 LockAllPlayers(true);
+
+                // 제한 시간까지 승패가 나지 않았으면 조커 팀 승리
+                gameCheckManager?.ServerEndByTimeout();
 
                 Debug.Log("[GameFlow] 게임 시간 종료");
                 break;
@@ -318,6 +328,8 @@ public class GameFlowManager : NetworkBehaviour
     // 순서: 위치 저장 + 잠금 → 암전 → 이동 → 화면 밝힘 → 드롭 진행 시작
     private IEnumerator StartBlindDropRoutine()
     {
+        isInBlindDrop = true;
+
         returnPoints.Clear();
 
         List<NetworkObject> movers = new List<NetworkObject>();
@@ -400,11 +412,30 @@ public class GameFlowManager : NetworkBehaviour
     // 순서: 암전 → 드롭 정리 + 복귀 + 잠금 해제 → 화면 밝힘
     private IEnumerator EndBlindDropRoutine()
     {
+        // 드롭 중이 아니면(이미 복귀했거나 드롭이 없던 일차) 아무것도 하지 않는다
+        if (!isInBlindDrop)
+            yield break;
+
+        isInBlindDrop = false;
+
         FadeClientRpc(true, fadeDuration);
         yield return new WaitForSeconds(fadeDuration);
 
         // 암전 중 게임이 끝났다면 잠금을 풀지 않고 중단
         if (!IsGameInProgress.Value)
+        {
+            FadeClientRpc(false, fadeDuration);
+            yield break;
+        }
+
+        // 블라인드 드롭에서 등급이 0 이하가 된 플레이어는 일차가 넘어가는 지금 사망 처리한다.
+        // (ServerEndBlindDrop이 대기 목록을 비우므로 반드시 그보다 먼저 호출)
+        BlindDropManager.Instance?.ServerApplyPendingDeaths();
+
+        // 사망으로 게임이 끝났다면(남은 시민 부족 등) 복귀시키지 않고 중단.
+        // 이후 처리는 Update의 EndGameFromResult가 담당한다.
+        if (gameCheckManager != null &&
+            gameCheckManager.result.Value != GameResult.None)
         {
             FadeClientRpc(false, fadeDuration);
             yield break;
@@ -421,13 +452,8 @@ public class GameFlowManager : NetworkBehaviour
             if (playerObject == null)
                 continue;
 
-            PlayerStateList state =
-                playerObject.GetComponent<PlayerStateList>();
-
-            // 생존자만 복귀
-            if (state == null || !state.isAlive.Value)
-                continue;
-
+            // 드롭 장소로 이동했던 플레이어(returnPoints에 저장된 사람)만 복귀.
+            // 드롭 중 등급 0 이하로 방금 사망한 플레이어도 함께 돌아간다.
             ulong clientId = playerObject.OwnerClientId;
 
             if (!returnPoints.TryGetValue(

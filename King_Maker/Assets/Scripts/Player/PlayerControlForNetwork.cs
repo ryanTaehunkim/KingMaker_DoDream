@@ -64,7 +64,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
     private static readonly int IsRunHash = Animator.StringToHash("isRun");
     private static readonly int IsJumpHash = Animator.StringToHash("isJump");
 
-
+    private PlayerGhostState ghost;
 
     private void Awake()
     {
@@ -75,6 +75,7 @@ public class PlayerControlForNetwork : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         movementLock = GetComponent<PlayerMovementLock>();
         networkTransform = GetComponent<NetworkTransform>();
+        ghost = GetComponent<PlayerGhostState>();
 
         GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
         if (camearObj != null)
@@ -126,6 +127,13 @@ public class PlayerControlForNetwork : NetworkBehaviour
             UpdateLocked();
             return;
         }
+        if (ghost != null && ghost.IsGhost)
+        {
+            GhostMove();
+            UpdateGhostAnimation();
+            return; // 점프, 상호작용, 공격, 물건 놓기 전부 차단
+        }
+
 
         UpdateRunState();
         Move();
@@ -392,5 +400,29 @@ public class PlayerControlForNetwork : NetworkBehaviour
         }
     }
 
+    private void GhostMove()
+    {
+        Vector2 input = InputManager.moveDir;
 
+        // faceTransform이 카메라가 따라가는 대상이라 시선 방향을 그대로 가짐
+        // (pitch는 headTransform에만 적용되므로 headTransform 기준으로 계산)
+        Vector3 dir = headTransform.forward * input.y + headTransform.right * input.x;
+        dir = Vector3.ClampMagnitude(dir, 1f);
+
+        float speed = ghost.GhostSpeed;
+
+        // 중력, verticalVelocity, 넉백 전부 무시하고 시선 방향으로만 이동
+        characterController.Move(dir * speed * Time.deltaTime);
+
+        // 영혼 상태에서 이전 값이 남아 있다가 되살아날 때 튀지 않도록 초기화
+        verticalVelocity = 0f;
+        knockbackVelocity = Vector3.zero;
+    }
+
+    private void UpdateGhostAnimation()
+    {
+        animator.SetBool(IsWalkHash, false);
+        animator.SetBool(IsRunHash, false);
+        animator.SetBool(IsJumpHash, false);
+    }
 }

@@ -31,6 +31,7 @@ public class InputManager : MonoBehaviour
 
     //상호작용(미션)
     public static bool interactPressed;
+    public static bool interactIsHeld;
     private InputAction interactAction;
 
     //내려놓기
@@ -72,7 +73,7 @@ public class InputManager : MonoBehaviour
 
         attackPressed = attackAction.WasPressedThisFrame();
         interactPressed = interactAction.WasPressedThisFrame();
-
+        interactIsHeld = interactAction.IsPressed();
         putDownPressed = putDownAction.WasPressedThisFrame();
     }
 

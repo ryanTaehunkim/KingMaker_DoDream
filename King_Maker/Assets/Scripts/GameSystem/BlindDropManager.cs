@@ -11,7 +11,7 @@ public enum BlindDropStep
     Intro,          // 시작 대사
     Meeting,        // 회의 진행 (안내창)
     Choice,         // 참가 / 폴드 버튼
-    SeedPoker,      // 시드 포커 (실제 게임은 추후 구현)
+    SeedPoker,      // 시드 포커 (카드 배분 / 승패 판정)
     Result,         // 결과창 (안내창)
     Investigation   // 정체 조사권 (최상위 등급자가 한 명을 지목)
 }
@@ -19,9 +19,16 @@ public enum BlindDropStep
 // 블라인드 드롭 한 번의 진행 흐름을 관리한다.
 // 서버가 단계를 진행시키고, 각 클라이언트는 RPC로 받은 단계에 맞는 UI를 보여준다.
 //
+// 사용하는 스크립트
+//   SeedPokerResolver  : 카드 배분 / 동점 / 페널티 계산 (순수 계산)
+//   PlayerStateList    : 등급(cardGrade), 생존(isAlive) 값 읽기/쓰기
+//   DialogueManager    : 화면 하단 대사 (시작 대사, 시드 포커 진행 대사)
+//   GameFlowManager    : 드롭 시작/종료 호출, 일차가 넘어갈 때 사망 처리 호출
+//
 // GameFlowManager 연결
-//   드롭 시작 후:  BlindDropManager.Instance?.ServerBeginBlindDrop(day);
-//   드롭 종료 시:  BlindDropManager.Instance?.ServerEndBlindDrop();
+//   드롭 시작 후:   BlindDropManager.Instance?.ServerBeginBlindDrop(day);
+//   일차 넘어갈 때: BlindDropManager.Instance?.ServerApplyPendingDeaths();  (등급 0 이하 사망 처리)
+//   드롭 종료 시:   BlindDropManager.Instance?.ServerEndBlindDrop();
 public class BlindDropManager : NetworkBehaviour
 {
     public static BlindDropManager Instance { get; private set; }
@@ -35,7 +42,10 @@ public class BlindDropManager : NetworkBehaviour
     [SerializeField] private float investigationDuration = 15f;
 
     [Header("정체 조사권")]
-    [SerializeField] private float investigationRange = 20f;     // 지목 가능 거리
+    [Tooltip("조준선으로 지목할 수 있는 최대 거리. 월드 크기가 크면 더 늘려주세요.")]
+    [SerializeField] private float investigationAimRange = 100f; // 지목 가능 거리
+    [Tooltip("켜면 조사 단계에서 조준선이 맞은 물체와 거리를 콘솔에 찍고, Scene 뷰에 조준 선을 그린다.")]
+    [SerializeField] private bool showAimDebug = false;
     [SerializeField] private float investigationResultHold = 3f; // 결과를 보여주고 기다리는 시간
 
     [Header("시작 대사")]
@@ -64,6 +74,8 @@ public class BlindDropManager : NetworkBehaviour
     [Header("UI - 시드 포커")]
     [SerializeField] private GameObject seedPokerPanel;
     [SerializeField] private TMP_Text seedPokerText;
+    [Tooltip("PokerPanel에 붙인 BlindDropVisualizer. 비워두면 연출 없이 하단 대사로만 안내한다.")]
+    [SerializeField] private BlindDropVisualizer seedPokerVisualizer;
 
     [Header("UI - 정체 조사권 (화면 상단에 작게 배치)")]
     [SerializeField] private GameObject investigationPanel;
@@ -72,6 +84,8 @@ public class BlindDropManager : NetworkBehaviour
     [Header("UI - 조준선 (블라인드 드롭 중에는 숨기고, 정체 조사 때만 표시)")]
     [SerializeField] private GameObject crosshairRoot;
     [SerializeField] private Color crosshairTargetColor = new Color(1f, 0.25f, 0.25f);
+    [Tooltip("대상 위에 올라가면 조준선이 이 배율만큼 커진다. 색이 잘 안 보일 때를 대비한 표시. 1이면 변화 없음.")]
+    [SerializeField] private float crosshairTargetScale = 1.4f;
 
     // ---------- 서버 전용 ----------
     private readonly Dictionary<ulong, bool> choices = new Dictionary<ulong, bool>();
@@ -85,9 +99,11 @@ public class BlindDropManager : NetworkBehaviour
     private bool timerActive;
     private float timerEndTime;
     private bool canInvestigate;    // 내가 지금 조사권을 쓸 수 있는지
-    //
+    private Coroutine seedPokerNarrationRoutine;   // 시드 포커 하단 대사 진행
 
-
+    // =========================================================
+    // 시드 포커 설정
+    // =========================================================
 
     [System.Serializable]
     public class SeedPokerDayConfig
@@ -104,8 +120,9 @@ public class BlindDropManager : NetworkBehaviour
     [SerializeField] private int penaltyPerDay = 2;
     [SerializeField] private int maxGradeFromSeedPoker = 16; // 이 값 이상이면 참가 불가
 
-    private readonly Dictionary<ulong, SeedPokerPlayerResult> seedResults = new();
-    private readonly List<ulong> pendingDeaths = new();
+    private readonly Dictionary<ulong, SeedPokerPlayerResult> seedResults = new Dictionary<ulong, SeedPokerPlayerResult>();
+    private readonly List<ulong> pendingDeaths = new List<ulong>();
+
     private SeedPokerDayConfig GetConfig(int day)
     {
         if (seedPokerConfigs == null) return null;
@@ -114,11 +131,26 @@ public class BlindDropManager : NetworkBehaviour
         return null;
     }
 
-    // GameFlowManager에서도 사용. 설정이 없는 일차는 꺼진 것으로 취급
+    // GameFlowManager에서도 사용 가능. 설정이 없는 일차는 꺼진 것으로 취급
     public bool IsSeedPokerEnabled(int day)
     {
         var c = GetConfig(day);
         return c != null && c.enabled;
+    }
+
+    // 인스펙터에 설정이 비어 있으면 기획서 기본값(1일차 +1~3, 2일차 +4~6)을 쓴다
+    private void EnsureDefaultSeedPokerConfigs()
+    {
+        if (seedPokerConfigs != null && seedPokerConfigs.Length > 0)
+            return;
+
+        seedPokerConfigs = new[]
+        {
+            new SeedPokerDayConfig { day = 1, enabled = true, minCard = 1, maxCard = 3 },
+            new SeedPokerDayConfig { day = 2, enabled = true, minCard = 4, maxCard = 6 }
+        };
+
+        Debug.LogWarning("[BlindDrop] Seed Poker Configs가 비어 있어 기본값(1일차 1~3, 2일차 4~6)을 사용합니다.");
     }
 
     private List<int> DrawSeedCards(SeedPokerDayConfig cfg)
@@ -136,8 +168,8 @@ public class BlindDropManager : NetworkBehaviour
 
     private Graphic[] crosshairGraphics;
     private Color[] crosshairBaseColors;
-    private readonly RaycastHit[] aimHits = new RaycastHit[16];
-
+    private Vector3 crosshairBaseScale = Vector3.one;
+    private float nextAimLogTime;
 
     // =========================================================
     // Unity
@@ -152,6 +184,8 @@ public class BlindDropManager : NetworkBehaviour
         }
 
         Instance = this;
+
+        EnsureDefaultSeedPokerConfigs();
 
         if (participateButton != null)
             participateButton.onClick.AddListener(() => SendChoice(true));
@@ -206,6 +240,29 @@ public class BlindDropManager : NetworkBehaviour
         flowRoutine = StartCoroutine(ServerFlow(day));
     }
 
+    // 블라인드 드롭에서 등급이 0 이하가 된 플레이어를 사망 처리한다.
+    // 드롭 중에는 바로 죽지 않고, 일차가 넘어갈 때(화면이 검은 동안) GameFlowManager가 호출한다.
+    // 주의: ServerEndBlindDrop()이 대기 목록을 비우므로 반드시 그보다 먼저 호출해야 한다.
+    public void ServerApplyPendingDeaths()
+    {
+        if (!IsServer)
+            return;
+
+        List<ulong> targets = new List<ulong>(pendingDeaths);
+        pendingDeaths.Clear();
+
+        foreach (ulong id in targets)
+        {
+            PlayerStateList ps = GetPlayerState(id);
+
+            if (ps != null && ps.isAlive.Value)
+            {
+                ps.isAlive.Value = false;
+                Debug.Log($"[BlindDrop] Client {id} 등급 0 이하로 사망 처리");
+            }
+        }
+    }
+
     public void ServerEndBlindDrop()
     {
         if (!IsServer || !IsSpawned)
@@ -220,7 +277,7 @@ public class BlindDropManager : NetworkBehaviour
         choices.Clear();
         investigators.Clear();
         investigated.Clear();
-        seedResults.Clear();  
+        seedResults.Clear();
         pendingDeaths.Clear();
         serverStep = BlindDropStep.None;
 
@@ -266,11 +323,9 @@ public class BlindDropManager : NetworkBehaviour
         Debug.Log($"[BlindDrop] 참가 {participants.Count}명 / 생존 {GetAliveClientIds().Count}명");
 
         // 4) 시드 포커 (참가자가 있을 때만)
+        //    단계 시작 알림과 공개 대사는 결과 계산 직후 RunSeedPokerServer 안에서 보낸다.
         if (participants.Count > 0)
-        {
-            SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
             yield return RunSeedPokerServer(participants, day);
-        }
 
         // 5) 결과창 (안내창)
         serverStep = BlindDropStep.Result;
@@ -283,13 +338,8 @@ public class BlindDropManager : NetworkBehaviour
         }
         yield return new WaitForSeconds(resultDuration);
 
-        // 사망 처리 (결과창이 끝난 뒤)
-        foreach (ulong id in pendingDeaths)
-        {
-            var ps = GetPlayerState(id);
-            if (ps != null && ps.isAlive.Value) ps.isAlive.Value = false;
-        }
-        pendingDeaths.Clear();
+        // 등급이 0 이하가 된 플레이어의 사망은 여기서 처리하지 않는다.
+        // (일차가 넘어갈 때 GameFlowManager가 ServerApplyPendingDeaths()를 호출한다)
 
         // 6) 정체 조사권 (드롭 직후, 최상위 등급자)
         yield return RunInvestigationServer(day);
@@ -308,34 +358,49 @@ public class BlindDropManager : NetworkBehaviour
         switch (r.outcome)
         {
             case SeedPokerOutcome.Won:
-                return $"당신은 이번 결과로 시드카드 {r.cardValue}를 획득하였습니다.";
+                return $"당신은 이번 결과로 시드카드 {r.cardValue}를 획득하였습니다.\n등급 {r.oldGrade} → {r.newGrade}";
+
             case SeedPokerOutcome.Void:
-                return "당신은 이번 결과로 시드카드 획득에 실패하였습니다.";
+                return "같은 등급의 참가자가 있어 참가가 취소되었습니다.\n(등급 변동 없음)";
+
             default:
-                return $"당신은 이번 결과로 시드카드 획득에 실패하였습니다.\n추가로 {-r.gradeDelta}등급이 하락하였습니다.";
+                string text =
+                    "당신은 이번 결과로 시드카드 획득에 실패하였습니다.\n" +
+                    $"추가로 {-r.gradeDelta}등급이 하락하였습니다. (등급 {r.oldGrade} → {r.newGrade})";
+
+                if (r.newGrade < 1)
+                    text += "\n등급이 0 이하가 되어 다음 일차가 시작될 때 탈락합니다.";
+
+                return text;
         }
     }
+
     [Rpc(SendTo.SpecifiedInParams)]
     private void ShowResultRpc(string body, float duration, RpcParams rpcParams = default)
     {
         HideAllUI();
+        DialogueManager.Instance?.ClearLine();
+
         if (!IsLocalPlayerAlive()) return;
 
         SetCursorLocked(true);
         StartLocalTimer(duration);
         ShowNotice("블라인드 드롭 결과", body);
     }
-    // 실제 시드 포커 게임은 여기에 구현하면 된다.
+
+    // 시드 포커: SeedPokerResolver로 카드 배분 / 동점 / 페널티를 계산하고 등급에 반영한다.
     // participants: 참가를 선택한 생존자의 clientId 목록
     private IEnumerator RunSeedPokerServer(List<ulong> participants, int day)
     {
-        // TODO: 시드 포커 로직 연결 (카드 배분, 승패 판정, PT 적용 등)
         seedResults.Clear();
         pendingDeaths.Clear();
 
         var cfg = GetConfig(day);
         if (cfg == null || !cfg.enabled)
         {
+            SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
+            ShowSeedPokerVisualClientRpc(participants.Count, "", "", seedPokerDuration);
+
             yield return new WaitForSeconds(seedPokerDuration);
             yield break;
         }
@@ -351,6 +416,16 @@ public class BlindDropManager : NetworkBehaviour
 
         var results = SeedPokerResolver.Resolve(list, cards, day, penaltyPerDay, maxGradeFromSeedPoker);
 
+        // 단계 시작 알림 + 모든 생존자(폴드한 사람 포함)에게 공개 정보를 대사로 보여준다
+        SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
+
+        ShowSeedPokerVisualClientRpc(
+            list.Count,
+            PackCards(cards),
+            PackDoomed(results),
+            seedPokerDuration);
+
+        // 시드 포커 연출 시간 (이 동안 클라이언트는 공개 대사를 보여준다)
         yield return new WaitForSeconds(seedPokerDuration);
 
         // 전부 계산한 뒤 한 번에 적용
@@ -361,17 +436,208 @@ public class BlindDropManager : NetworkBehaviour
             if (ps == null) continue;
 
             if (r.gradeDelta != 0) ps.ServerSetCardGradeRaw(r.newGrade);
+
+            // 등급이 1 미만이어도 바로 죽이지 않고, 일차가 넘어갈 때 사망 처리한다
             if (r.newGrade < 1) pendingDeaths.Add(r.clientId);
         }
     }
 
-    // 결과창에 표시할 문구. 시드 포커 구현 후 실제 결과로 교체하면 된다.
+    // =========================================================
+    // 시드 포커 공개 정보 (연출 + 하단 대사)
+    // =========================================================
+    // 공개: 참가자 수, 보상 카드 값, 페널티로 탈락하게 된 사람(닉네임)과 그 등급 변화
+    // 비공개: 탈락자 외에 누가 참가했는지, 누가 카드를 받았는지, 페널티 수치, 동점 취소
+
+    // 보상 카드를 "5,4,3" 형태 문자열로 묶는다 (큰 카드부터)
+    private string PackCards(List<int> cards)
+    {
+        List<int> sorted = new List<int>(cards);
+        sorted.Sort((a, b) => b.CompareTo(a));
+
+        return string.Join(",", sorted);
+    }
+
+    // 페널티로 탈락하게 된 사람을 "닉네임 [탭] 이전등급 [탭] 이후등급" 줄들로 묶는다.
+    // 입력 순서(접속 순서)가 드러나지 않도록 등급 순으로 정렬한다.
+    // (닉네임에서는 제어문자가 제거되므로 탭/줄바꿈으로 구분해도 안전하다)
+    private string PackDoomed(List<SeedPokerPlayerResult> results)
+    {
+        List<SeedPokerPlayerResult> doomed = new List<SeedPokerPlayerResult>();
+
+        foreach (SeedPokerPlayerResult r in results)
+        {
+            if (r.outcome == SeedPokerOutcome.Penalized && r.newGrade < 1)
+                doomed.Add(r);
+        }
+
+        doomed.Sort((a, b) =>
+        {
+            int compare = a.oldGrade.CompareTo(b.oldGrade);
+            return compare != 0 ? compare : a.newGrade.CompareTo(b.newGrade);
+        });
+
+        List<string> entries = new List<string>();
+
+        foreach (SeedPokerPlayerResult r in doomed)
+            entries.Add($"{GetNickname(r.clientId)}\t{r.oldGrade}\t{r.newGrade}");
+
+        return string.Join("\n", entries);
+    }
+
+    // 서버에서 플레이어 닉네임을 읽는다. 비어 있으면 "Player{번호}"로 대신한다.
+    private string GetNickname(ulong clientId)
+    {
+        PlayerStateList ps = GetPlayerState(clientId);
+
+        if (ps != null && !ps.nickname.Value.IsEmpty)
+            return ps.nickname.Value.ToString();
+
+        return $"Player{clientId}";
+    }
+
+    // 모든 생존자(폴드한 사람 포함, 사망자 제외)에게 시드 포커 연출을 보여준다.
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ShowSeedPokerVisualClientRpc(
+        int participantCount,
+        string cardsCsv,
+        string doomedPacked,
+        float duration)
+    {
+        if (!IsLocalPlayerAlive())
+            return;
+
+        List<int> cards = ParseCards(cardsCsv);
+        List<DoomedEntry> doomed = ParseDoomed(doomedPacked);
+
+        // 화면 연출 (PokerPanel 안)
+        if (seedPokerVisualizer != null)
+            seedPokerVisualizer.Play(participantCount, cards, doomed, duration);
+
+        // 하단 대사 (연출 단계와 같은 비율로 진행)
+        if (seedPokerNarrationRoutine != null)
+            StopCoroutine(seedPokerNarrationRoutine);
+
+        seedPokerNarrationRoutine = StartCoroutine(
+            SeedPokerNarrationRoutine(participantCount, cards, doomed, duration));
+    }
+
+    private List<int> ParseCards(string csv)
+    {
+        List<int> list = new List<int>();
+
+        if (string.IsNullOrEmpty(csv))
+            return list;
+
+        foreach (string part in csv.Split(','))
+        {
+            if (int.TryParse(part, out int value))
+                list.Add(value);
+        }
+
+        return list;
+    }
+
+    private List<DoomedEntry> ParseDoomed(string packed)
+    {
+        List<DoomedEntry> list = new List<DoomedEntry>();
+
+        if (string.IsNullOrEmpty(packed))
+            return list;
+
+        foreach (string entry in packed.Split('\n'))
+        {
+            string[] fields = entry.Split('\t');
+
+            if (fields.Length < 3)
+                continue;
+
+            if (!int.TryParse(fields[1], out int oldGrade))
+                continue;
+
+            if (!int.TryParse(fields[2], out int newGrade))
+                continue;
+
+            list.Add(new DoomedEntry(fields[0], oldGrade, newGrade));
+        }
+
+        return list;
+    }
+
+    // 화면 하단 대사(DialogueManager). 연출 단계와 같은 비율로 한 줄씩 보여준다.
+    // 연출 UI가 없으면 탈락자 문장까지 대사로 직접 안내한다.
+    private IEnumerator SeedPokerNarrationRoutine(
+        int participantCount,
+        List<int> cards,
+        List<DoomedEntry> doomed,
+        float duration)
+    {
+        if (DialogueManager.Instance == null)
+            yield break;
+
+        float seatsTime = duration * BlindDropVisualizer.SeatsEndRatio;
+        float cardsTime = duration * (BlindDropVisualizer.CardsEndRatio - BlindDropVisualizer.SeatsEndRatio);
+        float doomedTime = duration * (1f - BlindDropVisualizer.CardsEndRatio);
+
+        // 1) 참가자 수
+        DialogueManager.Instance.ShowLine(
+            $"이번 블라인드 드롭 참가자는 {participantCount}명입니다.", seatsTime);
+
+        yield return new WaitForSeconds(seatsTime);
+
+        // 2) 보상 카드
+        if (cards.Count > 0)
+        {
+            DialogueManager.Instance.ShowLine(
+                $"보상 카드는 {string.Join(", ", cards)} 입니다.", cardsTime);
+        }
+
+        yield return new WaitForSeconds(cardsTime);
+
+        // 3) 탈락자
+        if (doomed.Count == 0)
+        {
+            DialogueManager.Instance.ShowLine(
+                "이번 블라인드 드롭으로 탈락하는 사람은 없습니다.", doomedTime);
+        }
+        else if (seedPokerVisualizer != null)
+        {
+            DialogueManager.Instance.ShowLine("탈락자가 발표됩니다.", doomedTime);
+        }
+        else
+        {
+            List<string> lines = new List<string>();
+
+            foreach (DoomedEntry entry in doomed)
+                lines.Add($"{entry.nickname} 님의 등급이 {entry.oldGrade}에서 {entry.newGrade}까지 하락하여 탈락합니다.");
+
+            DialogueManager.Instance.ShowLines(lines, doomedTime / lines.Count);
+        }
+
+        yield return new WaitForSeconds(doomedTime);
+
+        seedPokerNarrationRoutine = null;
+    }
+
+    // 시드 포커 연출과 하단 대사를 멈추고 지운다 (단계가 바뀌거나 드롭이 끝날 때)
+    private void StopSeedPokerPresentation()
+    {
+        if (seedPokerNarrationRoutine != null)
+        {
+            StopCoroutine(seedPokerNarrationRoutine);
+            seedPokerNarrationRoutine = null;
+        }
+
+        if (seedPokerVisualizer != null)
+            seedPokerVisualizer.Clear();
+    }
+
+    // 결과창에 표시할 문구 (현재는 개인별 문구를 사용하므로 쓰지 않음)
     private string BuildResultText(List<ulong> participants)
     {
         if (participants.Count == 0)
             return "전원 폴드했습니다.\n블라인드 드롭이 진행되지 않았습니다.";
 
-        return "블라인드 드롭이 종료되었습니다.\n(시드 포커 결과는 추후 연결)";
+        return "블라인드 드롭이 종료되었습니다.";
     }
 
     // 정체 조사권: 생존자 중 등급이 가장 높은 사람(동점이면 전원)이 한 명을 지목한다.
@@ -420,6 +686,7 @@ public class BlindDropManager : NetworkBehaviour
         }
         return null;
     }
+
     // =========================================================
     // 서버: 생존자 / 선택 확인
     // =========================================================
@@ -658,6 +925,8 @@ public class BlindDropManager : NetworkBehaviour
         if (crosshairRoot == null)
             return;
 
+        crosshairBaseScale = crosshairRoot.transform.localScale;
+
         crosshairGraphics = crosshairRoot.GetComponentsInChildren<Graphic>(true);
         crosshairBaseColors = new Color[crosshairGraphics.Length];
 
@@ -680,6 +949,14 @@ public class BlindDropManager : NetworkBehaviour
     // onTarget이 true면 대상 색, false면 원래 색
     private void SetCrosshairColor(bool onTarget)
     {
+        // 색이 잘 안 보이는 조준선 이미지를 위해 크기도 함께 바꾼다
+        if (crosshairRoot != null)
+        {
+            crosshairRoot.transform.localScale = onTarget
+                ? crosshairBaseScale * crosshairTargetScale
+                : crosshairBaseScale;
+        }
+
         if (crosshairGraphics == null)
             return;
 
@@ -709,20 +986,22 @@ public class BlindDropManager : NetworkBehaviour
 
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
 
-        int count = Physics.RaycastNonAlloc(
+        // RaycastAll은 맞은 물체를 하나도 빠뜨리지 않는다.
+        // (개수가 제한된 NonAlloc은 방에 물체가 많으면 먼 곳의 플레이어가 누락될 수 있었다)
+        RaycastHit[] hits = Physics.RaycastAll(
             ray,
-            aimHits,
-            investigationRange,
+            investigationAimRange,
             ~0,
             QueryTriggerInteraction.Ignore
         );
 
         float best = float.MaxValue;
         PlayerStateList bestTarget = null;
+        Collider bestCollider = null;
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < hits.Length; i++)
         {
-            RaycastHit hit = aimHits[i];
+            RaycastHit hit = hits[i];
             PlayerStateList target = hit.collider.GetComponentInParent<PlayerStateList>();
 
             // 내 몸에 맞은 것은 무시
@@ -735,6 +1014,29 @@ public class BlindDropManager : NetworkBehaviour
             // 가장 가까운 물체가 플레이어가 아니면(벽 등) null이 들어가 지목 불가 처리
             best = hit.distance;
             bestTarget = target;
+            bestCollider = hit.collider;
+        }
+
+        if (showAimDebug)
+        {
+            Debug.DrawRay(ray.origin, ray.direction * investigationAimRange, Color.yellow);
+
+            // 매 프레임 찍으면 콘솔이 가득 차므로 0.5초에 한 번만
+            if (Time.time >= nextAimLogTime)
+            {
+                nextAimLogTime = Time.time + 0.5f;
+
+                if (bestCollider == null)
+                {
+                    Debug.Log($"[Aim] 조준선에 맞은 물체 없음 (최대 거리 {investigationAimRange})");
+                }
+                else
+                {
+                    Debug.Log(
+                        $"[Aim] 가장 가까운 물체: {bestCollider.name} / 거리 {best:F1} / " +
+                        $"플레이어 여부: {(bestTarget != null ? "예" : "아니오(가려짐)")}");
+                }
+            }
         }
 
         return bestTarget;
@@ -785,15 +1087,6 @@ public class BlindDropManager : NetworkBehaviour
                 );
                 break;
 
-            //case BlindDropStep.Choice:
-            //    myChoice = -1;
-            //    SetActiveSafe(choicePanel, true);
-
-            //    if (participateButton != null) participateButton.interactable = true;
-            //    if (foldButton != null) foldButton.interactable = true;
-            //    if (choiceStatusText != null)
-            //        choiceStatusText.text = "블라인드 드롭에 참가할지 선택하세요.";
-            //    break;
             case BlindDropStep.Choice:
                 myChoice = -1;
                 SetActiveSafe(choicePanel, true);
@@ -810,6 +1103,7 @@ public class BlindDropManager : NetworkBehaviour
                         ? "등급이 너무 높아 참가할 수 없습니다.\n폴드만 선택할 수 있습니다."
                         : "블라인드 드롭에 참가할지 선택하세요.";
                 break;
+
             case BlindDropStep.SeedPoker:
                 SetActiveSafe(seedPokerPanel, true);
 
@@ -819,8 +1113,9 @@ public class BlindDropManager : NetworkBehaviour
                         ? "시드 포커 진행 중..."
                         : "폴드했습니다.\n시드 포커가 끝날 때까지 기다려주세요.";
                 }
+
+                // 연출 UI와 하단 대사는 ShowSeedPokerVisualClientRpc가 보여준다
                 break;
-            
 
             case BlindDropStep.Investigation:
                 // 기본 문구. 조사권이 있는 사람은 GrantInvestigationRpc가 문구를 덮어쓴다.
@@ -876,6 +1171,8 @@ public class BlindDropManager : NetworkBehaviour
         SetActiveSafe(seedPokerPanel, false);
         SetActiveSafe(investigationPanel, false);
 
+        StopSeedPokerPresentation();
+
         canInvestigate = false;
         timerActive = false;
 
@@ -890,7 +1187,7 @@ public class BlindDropManager : NetworkBehaviour
     }
 
     // 버튼을 클릭하려면 마우스 커서가 보여야 한다.
-    // (PlayerControlRigid는 커서가 잠겨있을 때만 시점이 돌아간다)
+    // (PlayerControlForNetwork는 커서가 잠겨있을 때만 시점이 돌아간다)
     private void SetCursorLocked(bool locked)
     {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
