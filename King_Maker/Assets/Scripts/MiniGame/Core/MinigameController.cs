@@ -46,6 +46,7 @@ public class MinigameController : MonoBehaviour
     private bool prevCursorVisible;
 
     public MissionData CurrentMission => isOpen ? currentData : null;
+    public MinigameBase Current => isOpen ? current : null;
 
     public static MinigameController GetOrCreate()
     {
@@ -120,6 +121,8 @@ public class MinigameController : MonoBehaviour
         cancelReason = reason;
         current.Cancel();
     }
+
+    public void HideToast() => toastText.gameObject.SetActive(false);
 
     public void ShowToast(string message, float duration = 2.2f)
     {
@@ -214,6 +217,36 @@ public class MinigameController : MonoBehaviour
 
     // ---------- 입력 / 피격 감시 ----------
 
+    private InputManager pausedInputManager;
+
+    // DeactivatePlayerControls()는 PlayerInput에 현재 액션맵이 없으면(씬 설정에 따라 null) 아무것도 잠그지 않는다.
+    // 그래서 미니게임 중에는 InputManager 자체를 멈추고 입력값을 0으로 비워, 방향키/스페이스가 캐릭터에 전달되지 않게 한다.
+    private void PauseInputManager(bool pause)
+    {
+        if (pause)
+        {
+            var im = FindFirstObjectByType<InputManager>();
+            if (im != null && im.enabled)
+            {
+                im.enabled = false;
+                pausedInputManager = im;
+            }
+            InputManager.moveDir = Vector2.zero;
+            InputManager.lookDelta = Vector2.zero;
+            InputManager.jumpPressed = false;
+            InputManager.sprintHeld = false;
+            InputManager.attackPressed = false;
+            InputManager.interactPressed = false;
+            InputManager.interactIsHeld = false;
+            InputManager.putDownPressed = false;
+        }
+        else if (pausedInputManager != null)
+        {
+            pausedInputManager.enabled = true;
+            pausedInputManager = null;
+        }
+    }
+
     private void SetPlayerInputLocked(bool locked)
     {
         if (locked)
@@ -221,11 +254,13 @@ public class MinigameController : MonoBehaviour
             prevLockMode = Cursor.lockState;
             prevCursorVisible = Cursor.visible;
             InputManager.DeactivatePlayerControls();
+            PauseInputManager(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
         else
         {
+            PauseInputManager(false);
             InputManager.ActivatePlayerControls();
             Cursor.lockState = prevLockMode;
             Cursor.visible = prevCursorVisible;

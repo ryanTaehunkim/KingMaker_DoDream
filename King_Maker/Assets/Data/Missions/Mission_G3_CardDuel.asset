@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93159f1b71ac3a243a7508671fbbf926, type: 3}
+  m_Name: Mission_G3_CardDuel
+  m_EditorClassIdentifier: Assembly-CSharp::CardDuelMissionData
+  missionId: 303
+  displayName: "1\uB3001 \uCE74\uB4DC \uB300\uACB0"
+  ruleText: "\uB458\uC774 \uBC30\uD305\uD558\uACE0 \uCE74\uB4DC 1\uC7A5\uC529! \uB192\uC740
+    \uCE74\uB4DC\uAC00 \uBC30\uD305\uC561\uC744 \uAC00\uC838\uAC11\uB2C8\uB2E4."
+  type: 2
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 2
+  gradeReward: 0
+  suitBonusEligible: 0
+  timeLimit: 20
+  minClearTime: 0
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 8810280299631312717, guid: 4c40c65509a59f443a5db76f67e8b916, type: 3}
+  mode: 2
+  syncWindow: 30
+  resetDelay: 3
+  slotActionText: "\uB300\uACB0 \uCC38\uAC00"
+  slotDoneText: "\uC644\uB8CC"
+  joinedMessage: "\uCC38\uAC00\uD588\uC2B5\uB2C8\uB2E4! {0:0}\uCD08 \uC548\uC5D0
+    \uC0C1\uB300\uAC00 \uB2E4\uB978 \uC790\uB9AC\uC5D0 \uCC38\uAC00\uD574\uC57C \uC2DC\uC791\uD569\uB2C8\uB2E4."
+  failMessage: "\uBBF8\uC158 \uC2E4\uD328!"
+  roleDeniedMessage: "\uBC30\uD305\uD560 \uB4F1\uAE09(PT)\uC774 \uBD80\uC871\uD569\uB2C8\uB2E4."
+  sumItemId: number_panel
+  config: {fileID: 11400000, guid: 51b6395ce743fe14e94c182d58947663, type: 2}
+  revealTime: 2

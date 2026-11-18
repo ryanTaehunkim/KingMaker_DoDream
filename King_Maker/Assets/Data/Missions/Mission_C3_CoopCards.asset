@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe81287528223c74cb95b4d2f19e4ce9, type: 3}
+  m_Name: Mission_C3_CoopCards
+  m_EditorClassIdentifier: Assembly-CSharp::CoopCardsMissionData
+  missionId: 203
+  displayName: "\uCE74\uB4DC \uC9DD \uB9DE\uCD94\uAE30(\uACE0\uAE09)"
+  ruleText: "5\uC30D(10\uC7A5)\uC744 \uB458\uC774 \uD568\uAED8 \uB4A4\uC9D1\uC5B4
+    8\uCD08 \uC548\uC5D0 \uBAA8\uB450 \uB9DE\uCD94\uC138\uC694."
+  type: 1
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 2
+  gradeReward: 2
+  suitBonusEligible: 1
+  timeLimit: 8
+  minClearTime: 0
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 7742701402483773978, guid: ab30cecc7fd644b40b1e35e7ca577a12, type: 3}
+  mode: 2
+  syncWindow: 20
+  resetDelay: 3
+  slotActionText: "\uCC38\uAC00"
+  slotDoneText: "\uC644\uB8CC"
+  joinedMessage: "\uCC38\uAC00\uD588\uC2B5\uB2C8\uB2E4! {0:0}\uCD08 \uC548\uC5D0
+    \uC0C1\uB300\uAC00 \uB2E4\uB978 \uC790\uB9AC\uC5D0 \uCC38\uAC00\uD574\uC57C \uC2DC\uC791\uD569\uB2C8\uB2E4."
+  failMessage: "\uBBF8\uC158 \uC2E4\uD328!"
+  roleDeniedMessage: 
+  sumItemId: number_panel
+  pairs: 5
+  mismatchShowTime: 0.6

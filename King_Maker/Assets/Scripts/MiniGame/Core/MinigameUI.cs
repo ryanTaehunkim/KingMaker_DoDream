@@ -101,4 +101,29 @@ public static class MinigameUI
         var rt = fillImage.rectTransform;
         rt.anchorMax = new Vector2(Mathf.Clamp01(value01), 1f);
     }
+
+    // 마우스 위치를 rt 기준 로컬 좌표로 (미니게임 캔버스는 Screen Space - Overlay라 카메라 null)
+    public static bool MouseLocal(RectTransform rt, out Vector2 local)
+    {
+        local = Vector2.zero;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        return mouse != null && RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, mouse.position.ReadValue(), null, out local);
+    }
+
+    // 두 점을 잇는 선 (SetLine으로 갱신)
+    public static Image Line(Transform parent, string name, Color color, float thickness)
+    {
+        var img = Image(parent, name, color, Vector2.zero, new Vector2(0f, thickness));
+        img.rectTransform.pivot = new Vector2(0f, 0.5f);
+        return img;
+    }
+
+    public static void SetLine(Image line, Vector2 from, Vector2 to)
+    {
+        var rt = line.rectTransform;
+        Vector2 d = to - from;
+        rt.anchoredPosition = from;
+        rt.sizeDelta = new Vector2(d.magnitude, rt.sizeDelta.y);
+        rt.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg);
+    }
 }

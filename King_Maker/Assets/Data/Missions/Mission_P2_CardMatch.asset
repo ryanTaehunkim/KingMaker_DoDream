@@ -21,7 +21,7 @@ MonoBehaviour:
   requiredToolId: 
   requiredToolName: 
   requiredPlayers: 1
-  gradeReward: 1
+  gradeReward: 2
   suitBonusEligible: 1
   timeLimit: 20
   minClearTime: 3

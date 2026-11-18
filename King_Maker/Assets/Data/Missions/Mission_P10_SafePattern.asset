@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa76b0c17c23a1547ad3e431d7cbca66, type: 3}
+  m_Name: Mission_P10_SafePattern
+  m_EditorClassIdentifier: Assembly-CSharp::SafePatternMissionData
+  missionId: 110
+  displayName: "\uAE08\uACE0 \uD328\uD134 \uB9DE\uCD94\uAE30"
+  ruleText: "2\uCD08\uAC04 \uBCF4\uC774\uB294 \uD328\uD134\uC744 \uAE30\uC5B5\uD588\uB2E4\uAC00
+    \uADF8\uB300\uB85C \uB530\uB77C \uADF8\uB9AC\uC138\uC694."
+  type: 0
+  isShared: 0
+  requiredToolId: 
+  requiredToolName: 
+  requiredPlayers: 1
+  gradeReward: 1
+  suitBonusEligible: 1
+  timeLimit: 15
+  minClearTime: 2.5
+  allowRetryOnFail: 1
+  failRetryCooldown: 3
+  surroundDim: 0.6
+  penalties: []
+  minigamePrefab: {fileID: 8363508689059078015, guid: d638466ea80fa4d4593c8d0ae6a3cef9, type: 3}
+  patternLength: 5
+  showTime: 2
+  reshowOnWrong: 1
+  failOnWrong: 0

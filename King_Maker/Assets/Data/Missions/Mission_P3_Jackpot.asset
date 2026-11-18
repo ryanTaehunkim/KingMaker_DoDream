@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::JackpotMissionData
   missionId: 103
   displayName: "\uC7AD\uD31F \uC22B\uC790 \uB9DE\uCD94\uAE30"
-  ruleText: "\u25B2\u25BC \uBC84\uD2BC\uC73C\uB85C \uBAA8\uB4E0 \uCE78\uC744 9\uB85C
-    \uB9DE\uCD94\uC138\uC694."
+  ruleText: "\uB3CC\uC544\uAC00\uB294 \uCCAB \uBC88\uC9F8 \uC22B\uC790\uAC00 9\uC77C
+    \uB54C STOP(\uB610\uB294 \uC2A4\uD398\uC774\uC2A4)\uC744 \uB204\uB974\uC138\uC694."
   type: 0
   isShared: 0
   requiredToolId: 
   requiredToolName: 
   requiredPlayers: 1
-  gradeReward: 1
+  gradeReward: 2
   suitBonusEligible: 1
   timeLimit: 10
   minClearTime: 0.5
@@ -33,5 +33,6 @@ MonoBehaviour:
   slotCount: 3
   randomSlotCount: 1
   targetDigit: 9
-  rollDuration: 0.3
-  allowDownButton: 1
+  spinInterval: 0.12
+  stopPause: 0.6
+  failOnMiss: 0

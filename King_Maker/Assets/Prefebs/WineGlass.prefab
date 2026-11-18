@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 3817991038467660397}
   - component: {fileID: 4588535084914597847}
   - component: {fileID: 7691508777992465267}
+  - component: {fileID: 5922292848441485651}
   m_Layer: 7
   m_Name: WineGlass
   m_TagString: Interactable
@@ -257,3 +258,17 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 0
   AutoSetKinematicOnDespawn: 0
+--- !u!114 &5922292848441485651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6511010173568261770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a764b09bcb35fe043a55b4de74833250, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MissionItem
+  itemId: wine_glass
+  displayName: "\uC640\uC778\uC794"
