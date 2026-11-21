@@ -23,6 +23,12 @@ public class PlayerControlForNetwork : NetworkBehaviour
     [SerializeField] private float minPitch = -85f; //고개 최대 내림 각도
     [SerializeField] private float maxPitch = 85f; //고개 최대 올림 각도
     [SerializeField] private Transform headTransform; //돌릴 머리 위치
+    [SerializeField] private Transform headBonesTransform;
+    private Quaternion baseHeadLocalRot;
+    private float pitchSendTimer;
+    private float currentPitch;
+    private NetworkVariable<float> netPitch = new NetworkVariable<float>(
+    0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private CinemachineCamera virtualCamera;
     [SerializeField] private Transform faceTransform;//실제 카메라 추적대상
 
@@ -76,6 +82,8 @@ public class PlayerControlForNetwork : NetworkBehaviour
         movementLock = GetComponent<PlayerMovementLock>();
         networkTransform = GetComponent<NetworkTransform>();
         ghost = GetComponent<PlayerGhostState>();
+        if (headBonesTransform != null)
+            baseHeadLocalRot = headBonesTransform.localRotation;
 
         GameObject camearObj = GameObject.FindGameObjectWithTag("MainCamera");
         if (camearObj != null)
@@ -111,6 +119,25 @@ public class PlayerControlForNetwork : NetworkBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+    private void LateUpdate()
+    {
+        if (headBonesTransform == null) return;
+        // Owner는 자기 pitch, 원격은 동기화된 pitch 사용
+        if (IsOwner) headBonesTransform.localScale = Vector3.zero;
+
+        if (IsOwner)
+        {
+            currentPitch = pitch;
+        }
+        else
+        {
+            // 원격: 받은 값을 부드럽게 따라감
+            currentPitch = Mathf.MoveTowards(currentPitch, netPitch.Value, 360f * Time.deltaTime);
+        }
+
+
+        headBonesTransform.localRotation = baseHeadLocalRot * Quaternion.Euler(currentPitch, 0f, 0f);
     }
 
     private void Update()
@@ -192,6 +219,13 @@ public class PlayerControlForNetwork : NetworkBehaviour
         if (headTransform != null)
         {
             headTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+       
+        }
+        pitchSendTimer += Time.deltaTime;
+        if (pitchSendTimer >= 0.1f && Mathf.Abs(netPitch.Value - pitch) > 0.5f)
+        {
+            pitchSendTimer = 0f;
+            netPitch.Value = pitch;
         }
     }
 
