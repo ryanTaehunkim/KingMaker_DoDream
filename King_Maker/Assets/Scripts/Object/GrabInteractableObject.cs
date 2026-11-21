@@ -11,6 +11,8 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
     [SerializeField] public Vector3 gripScale;
     [SerializeField] private GameObject heldItemPrefab;
 
+    [SerializeField] private ItemData data;
+
     private void Awake()
     {
         netObj = GetComponent<NetworkObject>();
@@ -31,6 +33,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         PutDownServerRpc();
     }
 
+    //실제 드는 행위
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void GrabServerRpc(RpcParams rpcParams = default)
     {
@@ -38,7 +41,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         ulong senderID = rpcParams.Receive.SenderClientId;
         NetworkObject playerObj = NetworkManager.Singleton.ConnectedClients[senderID].PlayerObject;
         PlayerStateList playerState = playerObj.GetComponent<PlayerStateList>();
-
+        PlayerCombat combat = playerObj.GetComponent<PlayerCombat>();   
         if (playerState == null) return;
 
         Transform playerTransform = playerObj.transform;
@@ -50,6 +53,10 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         Collider collider = newItemObj.GetComponent<Collider>();
         Collider[] colliders = newItemObj.GetComponentsInChildren<Collider>(true);
 
+        if (collider != null)
+        {
+            collider.isTrigger = true;
+        }
         foreach (Collider col in colliders)
         {
             col.isTrigger = true;
@@ -58,10 +65,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         {
             objRigid.isKinematic = true;
         }
-        if (collider != null)
-        {
-            collider.isTrigger = true;
-        }
+        
 
         NetworkObject newNetObj = newItemObj.GetComponent<NetworkObject>();
         newNetObj.Spawn();
@@ -69,6 +73,8 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         newItemObj.transform.localScale = gripScale;
 
         GrabInteractableObject holdObj = newItemObj.GetComponent<GrabInteractableObject>();
+        ItemEffectManager.Execute(data,combat);
+
         holdObj.isHeld.Value = true; //손에있는걸 다른 사람이 못잡게
 
         playerState.isHoldingItem.Value = true;
@@ -78,7 +84,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         netObj.Despawn(true);
       
     }
-
+    //실제 내려놓는 행위
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void PutDownServerRpc(RpcParams rpcParams = default)
     {
@@ -105,4 +111,6 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         isHeld.Value = false;
     }
 
+
+  
 }

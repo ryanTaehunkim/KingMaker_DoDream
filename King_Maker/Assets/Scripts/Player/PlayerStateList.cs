@@ -31,8 +31,8 @@ public class PlayerStateList : NetworkBehaviour
         );
     [Header("Stamina Sync")]
     [SerializeField] private float staminaSyncInterval = 0.2f;
-    private float serverStamina = 100f;
-    private float staminaSyncTimer;
+    //private float serverStamina = 100f;
+    //private float staminaSyncTimer;
 
     // 카드 등급
     // 기본적으로 자기 자신만 읽을 수 있도록 설정

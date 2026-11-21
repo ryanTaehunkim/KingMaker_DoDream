@@ -147162,6 +147162,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a321983a8ce54c46bdad6e500c57d56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceManager
+  audibleDistance: 150
+  conversationalDistance: 30
+  fadeIntensity: 1
+  positionInterval: 0.2
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 512
+  eyeHeight: 15
+  occlusionInterval: 0.2
+  blockedVolume: -50
 --- !u!43 &776060491
 Mesh:
   m_ObjectHideFlags: 0
@@ -201172,7 +201182,7 @@ GameObject:
   - component: {fileID: 1032664653}
   - component: {fileID: 1032664652}
   - component: {fileID: 1032664651}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cube (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -258705,7 +258715,7 @@ GameObject:
   - component: {fileID: 1354785094}
   - component: {fileID: 1354785093}
   - component: {fileID: 1354785092}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cube (25)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -320799,6 +320809,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionManager
   ShowTopMostFoldoutHeaderGroup: 1
+  coopAllowSameClient: 0
   startDayOnLaunch: 1
   maxInteractDistance: 5
   resultLatencyGrace: 2
@@ -338199,7 +338210,7 @@ GameObject:
   - component: {fileID: 1781796863}
   - component: {fileID: 1781796862}
   - component: {fileID: 1781796861}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cube (24)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -353337,7 +353348,7 @@ GameObject:
   - component: {fileID: 1856606076}
   - component: {fileID: 1856606075}
   - component: {fileID: 1856606074}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cube (26)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

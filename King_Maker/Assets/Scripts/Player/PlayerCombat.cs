@@ -137,6 +137,14 @@ public class PlayerCombat : NetworkBehaviour
         else control.ApplyKnockback(horizontal, upward);
     }
 
+    [Rpc(SendTo.Server)]
+    public void ApplyAttackItemRpc(float damage, float range, float serverDistance)
+    {
+        attackDamage += damage;
+        attackRange += range;
+        serverMaxDistance += serverDistance;
+    }
+
     private void OnDrawGizmos()
     {
         if (aimOrigin == null) return;

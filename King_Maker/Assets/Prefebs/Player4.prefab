@@ -1565,7 +1565,7 @@ MonoBehaviour:
   attackCoolDown: 0.4
   hitMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 576
   serverMaxDistance: 25
   aimOrigin: {fileID: 3982328805163779033}
   center: {fileID: 7702200689870323539}
