@@ -112540,86 +112540,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!1001 &632862280
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -83.30379
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 22.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 84.81311
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3118619131116519517, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: stationId
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4072434750573387395, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 6120685324941658868, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -33.96354
-      objectReference: {fileID: 0}
-    - target: {fileID: 6120685324941658868, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.6692066
-      objectReference: {fileID: 0}
-    - target: {fileID: 6120685324941658868, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -23.875404
-      objectReference: {fileID: 0}
-    - target: {fileID: 7233801446285912525, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      propertyPath: m_Name
-      value: Station_C4_Billiards_Power
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3717829488906209079, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-  m_SourcePrefab: {fileID: 100100000, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
 --- !u!1 &632978589
 GameObject:
   m_ObjectHideFlags: 0
@@ -132054,6 +131974,74 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!1001 &740840540
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -104.56
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 18.746902
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 60.171764
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2850746521096996283, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3118619131116519517, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: stationId
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4072434750573387395, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7233801446285912525, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      propertyPath: m_Name
+      value: Station_C4_Billiards_Power
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3717829488906209079, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+  m_SourcePrefab: {fileID: 100100000, guid: 665a4d2698ea1a5439737b7a92c4aa7c, type: 3}
 --- !u!43 &740937399
 Mesh:
   m_ObjectHideFlags: 0
@@ -378505,7 +378493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1152161055
+  GlobalObjectIdHash: 3878031605
   InScenePlacedSourceGlobalObjectIdHash: 1953216492
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -378643,7 +378631,6 @@ SceneRoots:
   - {fileID: 976604326}
   - {fileID: 292175873}
   - {fileID: 201149219}
-  - {fileID: 632862280}
   - {fileID: 558315834}
   - {fileID: 6105813}
   - {fileID: 1757889217}
@@ -378668,3 +378655,4 @@ SceneRoots:
   - {fileID: 1928301652}
   - {fileID: 1793831962}
   - {fileID: 830160276}
+  - {fileID: 740840540}
