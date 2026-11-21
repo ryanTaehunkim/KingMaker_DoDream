@@ -94,8 +94,8 @@ public class RoleManager : NetworkBehaviour
         if (!IsSpawned)
             return;
 
-        if (InputManager.interactPressed)
-            UpGradeBtnRpc();
+        //if (InputManager.interactPressed)
+        //    UpGradeBtnRpc();
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
