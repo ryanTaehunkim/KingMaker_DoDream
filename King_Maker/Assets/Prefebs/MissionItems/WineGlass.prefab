@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2290087001
+  GlobalObjectIdHash: 1953216492
   InScenePlacedSourceGlobalObjectIdHash: 3910286506
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -146,6 +146,7 @@ MonoBehaviour:
   gripEuler: {x: 0.0000008673566, y: 178.61655, z: -0.000010144611}
   gripScale: {x: 150, y: 150, z: 150}
   heldItemPrefab: {fileID: 6511010173568261770}
+  data: {fileID: 11400000, guid: bb5849e11d6d451408f6aafc91c7ec35, type: 2}
 --- !u!114 &1736842181517346190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,3 +273,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MissionItem
   itemId: wine_glass
   displayName: "\uC640\uC778\uC794"
+  value: 0

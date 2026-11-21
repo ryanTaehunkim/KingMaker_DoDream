@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b545c7ececc4fc8439438fce197a4775, type: 3}
+  m_Name: Wineglass
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: "\uC640\uC778\uC794"
+  description: "\uBBF8\uC158\uC6A9 \uC640\uC778\uC794"
+  prefab: {fileID: 6511010173568261770, guid: 9662cda7139b58445bab5aa45a73f27f, type: 3}
+  category: 2
+  attackDamage: 0
+  attackDistance: 0
+  itemId: itemid

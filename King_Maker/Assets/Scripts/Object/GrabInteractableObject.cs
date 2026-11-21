@@ -16,6 +16,8 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
     private void Awake()
     {
         netObj = GetComponent<NetworkObject>();
+        if (data != null)
+            heldItemPrefab = data.prefab;
     }
     public void Interact(PlayerStateList currentPlayer)
     {
@@ -90,6 +92,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
     {
         ulong senderID = rpcParams.Receive.SenderClientId;
         NetworkObject playerObj = NetworkManager.Singleton.ConnectedClients[senderID].PlayerObject;
+        PlayerCombat combat = playerObj.GetComponent<PlayerCombat>();
         PlayerStateList playerState = playerObj.GetComponent<PlayerStateList>();
 
         if (playerState == null) return;
@@ -108,6 +111,7 @@ public class GrabInteractableObject : NetworkBehaviour, IInteractable
         {
             collider.isTrigger = false;
         }
+        ItemEffectManager.Deexcute(data, combat);
         isHeld.Value = false;
     }
 
