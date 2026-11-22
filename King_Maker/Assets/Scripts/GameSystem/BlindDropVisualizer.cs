@@ -78,6 +78,7 @@ public class BlindDropVisualizer : MonoBehaviour
 
     public void Play(
         int participantCount,
+        int rewardedCount,
         IList<int> cards,
         IList<DoomedEntry> doomed,
         float duration)
@@ -88,7 +89,7 @@ public class BlindDropVisualizer : MonoBehaviour
         if (!isActiveAndEnabled)
             return;
 
-        StartCoroutine(PlayRoutine(participantCount, cards, doomed, duration));
+        StartCoroutine(PlayRoutine(participantCount, rewardedCount, cards, doomed, duration));
     }
 
     // 연출을 멈추고 만들어 둔 UI를 지운다
@@ -109,6 +110,7 @@ public class BlindDropVisualizer : MonoBehaviour
 
     private IEnumerator PlayRoutine(
         int participantCount,
+        int rewardedCount,
         IList<int> cards,
         IList<DoomedEntry> doomed,
         float duration)
@@ -134,9 +136,9 @@ public class BlindDropVisualizer : MonoBehaviour
             yield return new WaitForSeconds(cardsTime);
         }
 
-        // 3) 탈락자 발표
-        title.text = "탈락자 발표";
-        yield return DoomedRoutine(doomed, doomedTime);
+        // 3) 결과 발표  ← 이 부분만 교체
+        title.text = "블라인드 드롭 결과";
+        yield return DoomedRoutine(rewardedCount, doomed, doomedTime);
     }
 
     private IEnumerator SeatsRoutine(int count, float time)
@@ -202,25 +204,24 @@ public class BlindDropVisualizer : MonoBehaviour
         }
     }
 
-    private IEnumerator DoomedRoutine(IList<DoomedEntry> doomed, float time)
+    private IEnumerator DoomedRoutine(int rewardedCount, IList<DoomedEntry> doomed, float time)
     {
-        // 탈락자가 없을 때
-        if (doomed == null || doomed.Count == 0)
-        {
-            TextMeshProUGUI none = CreateText(
-                "NoDoomed",
-                "이번 블라인드 드롭으로 탈락하는 사람은 없습니다.",
-                38f, noDoomedColor, 0f, doomedY + doomedLineHeight, 1300f, 50f);
+        bool hasDoomed = doomed != null && doomed.Count > 0;
+        int shown = hasDoomed ? Mathf.Min(doomed.Count, maxDoomedLines) : 0;
+        float step = time / (shown + 1.5f);
 
-            StartCoroutine(FadeIn(none, 0.4f));
+        // 기본 정보: 보상 카드를 받은 인원 수 (항상 표시)
+        string summary = rewardedCount > 0
+            ? $"{rewardedCount}명이 보상 카드를 획득했습니다."
+            : "보상 카드를 획득한 사람이 없습니다.";
 
-            yield return new WaitForSeconds(time);
-            yield break;
-        }
+        TextMeshProUGUI info = CreateText(
+            "RewardInfo", summary, 38f, noDoomedColor, 0f, doomedY, 1300f, 50f);
 
-        int shown = Mathf.Min(doomed.Count, maxDoomedLines);
-        float step = time / (shown + 0.5f);
+        StartCoroutine(FadeIn(info, 0.4f));
+        yield return new WaitForSeconds(step);
 
+        // 탈락자 안내는 탈락자가 있을 때만
         for (int i = 0; i < shown; i++)
         {
             DoomedEntry entry = doomed[i];
@@ -228,20 +229,19 @@ public class BlindDropVisualizer : MonoBehaviour
             TextMeshProUGUI line = CreateText(
                 "Doomed" + i,
                 $"{entry.nickname} 님의 등급이 {entry.oldGrade}에서 {entry.newGrade}까지 하락하여 탈락합니다.",
-                34f, doomedColor, 0f, doomedY + i * doomedLineHeight, 1300f, doomedLineHeight);
+                34f, doomedColor, 0f, doomedY + (i + 1.3f) * doomedLineHeight, 1300f, doomedLineHeight);
 
             StartCoroutine(FadeIn(line, 0.4f));
 
             yield return new WaitForSeconds(step);
         }
 
-        // 줄이 모자라서 다 못 보여줬을 때
-        if (doomed.Count > shown)
+        if (hasDoomed && doomed.Count > shown)
         {
             TextMeshProUGUI more = CreateText(
                 "DoomedMore",
                 $"외 {doomed.Count - shown}명 탈락",
-                30f, doomedColor, 0f, doomedY + shown * doomedLineHeight, 1300f, doomedLineHeight);
+                30f, doomedColor, 0f, doomedY + (shown + 1.3f) * doomedLineHeight, 1300f, doomedLineHeight);
 
             StartCoroutine(FadeIn(more, 0.4f));
         }

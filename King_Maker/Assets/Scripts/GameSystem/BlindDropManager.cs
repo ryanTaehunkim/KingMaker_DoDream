@@ -347,7 +347,7 @@ public class BlindDropManager : NetworkBehaviour
         flowRoutine = null;
     }
 
-    private string BuildPersonalResultText(ulong id, int participantCount)
+    private string BuildPersonalDetailText(ulong id, int participantCount)
     {
         if (participantCount == 0)
             return "전원 폴드했습니다.\n블라인드 드롭이 진행되지 않았습니다.";
@@ -375,6 +375,24 @@ public class BlindDropManager : NetworkBehaviour
         }
     }
 
+    private string BuildPersonalResultText(ulong id, int participantCount)
+    {
+        string detail = BuildPersonalDetailText(id, participantCount);
+
+        if (participantCount == 0)
+            return detail;
+
+        return $"이번 블라인드 드롭에서 {CountRewarded()}명이 보상 카드를 획득했습니다.\n\n{detail}";
+    }
+
+    private int CountRewarded()
+    {
+        int count = 0;
+        foreach (var pair in seedResults)
+            if (pair.Value.outcome == SeedPokerOutcome.Won) count++;
+        return count;
+    }
+
     [Rpc(SendTo.SpecifiedInParams)]
     private void ShowResultRpc(string body, float duration, RpcParams rpcParams = default)
     {
@@ -399,7 +417,7 @@ public class BlindDropManager : NetworkBehaviour
         if (cfg == null || !cfg.enabled)
         {
             SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
-            ShowSeedPokerVisualClientRpc(participants.Count, "", "", seedPokerDuration);
+            ShowSeedPokerVisualClientRpc(participants.Count,0, "", "", seedPokerDuration);
 
             yield return new WaitForSeconds(seedPokerDuration);
             yield break;
@@ -416,11 +434,16 @@ public class BlindDropManager : NetworkBehaviour
 
         var results = SeedPokerResolver.Resolve(list, cards, day, penaltyPerDay, maxGradeFromSeedPoker);
 
+        int rewardedCount = 0;
+        foreach (var r in results)
+            if (r.outcome == SeedPokerOutcome.Won) rewardedCount++;
+
         // 단계 시작 알림 + 모든 생존자(폴드한 사람 포함)에게 공개 정보를 대사로 보여준다
         SetStep(BlindDropStep.SeedPoker, seedPokerDuration, day);
 
         ShowSeedPokerVisualClientRpc(
             list.Count,
+            rewardedCount,
             PackCards(cards),
             PackDoomed(results),
             seedPokerDuration);
@@ -499,6 +522,7 @@ public class BlindDropManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void ShowSeedPokerVisualClientRpc(
         int participantCount,
+        int rewardedCount,
         string cardsCsv,
         string doomedPacked,
         float duration)
@@ -509,16 +533,14 @@ public class BlindDropManager : NetworkBehaviour
         List<int> cards = ParseCards(cardsCsv);
         List<DoomedEntry> doomed = ParseDoomed(doomedPacked);
 
-        // 화면 연출 (PokerPanel 안)
         if (seedPokerVisualizer != null)
-            seedPokerVisualizer.Play(participantCount, cards, doomed, duration);
+            seedPokerVisualizer.Play(participantCount, rewardedCount, cards, doomed, duration);
 
-        // 하단 대사 (연출 단계와 같은 비율로 진행)
         if (seedPokerNarrationRoutine != null)
             StopCoroutine(seedPokerNarrationRoutine);
 
         seedPokerNarrationRoutine = StartCoroutine(
-            SeedPokerNarrationRoutine(participantCount, cards, doomed, duration));
+            SeedPokerNarrationRoutine(participantCount, rewardedCount, cards, doomed, duration));
     }
 
     private List<int> ParseCards(string csv)
@@ -567,6 +589,7 @@ public class BlindDropManager : NetworkBehaviour
     // 연출 UI가 없으면 탈락자 문장까지 대사로 직접 안내한다.
     private IEnumerator SeedPokerNarrationRoutine(
         int participantCount,
+        int rewardedCount,
         List<int> cards,
         List<DoomedEntry> doomed,
         float duration)
@@ -593,25 +616,27 @@ public class BlindDropManager : NetworkBehaviour
 
         yield return new WaitForSeconds(cardsTime);
 
-        // 3) 탈락자
-        if (doomed.Count == 0)
-        {
-            DialogueManager.Instance.ShowLine(
-                "이번 블라인드 드롭으로 탈락하는 사람은 없습니다.", doomedTime);
-        }
-        else if (seedPokerVisualizer != null)
-        {
-            DialogueManager.Instance.ShowLine("탈락자가 발표됩니다.", doomedTime);
-        }
-        else
-        {
-            List<string> lines = new List<string>();
+        // 3) 결과: 보상 인원은 항상, 탈락자는 있을 때만
+        List<string> lines = new List<string>();
 
-            foreach (DoomedEntry entry in doomed)
-                lines.Add($"{entry.nickname} 님의 등급이 {entry.oldGrade}에서 {entry.newGrade}까지 하락하여 탈락합니다.");
+        lines.Add(rewardedCount > 0
+            ? $"{rewardedCount}명이 보상 카드를 획득했습니다."
+            : "보상 카드를 획득한 사람이 없습니다.");
 
-            DialogueManager.Instance.ShowLines(lines, doomedTime / lines.Count);
+        if (doomed.Count > 0)
+        {
+            if (seedPokerVisualizer != null)
+            {
+                lines.Add("탈락자가 발표됩니다.");
+            }
+            else
+            {
+                foreach (DoomedEntry entry in doomed)
+                    lines.Add($"{entry.nickname} 님의 등급이 {entry.oldGrade}에서 {entry.newGrade}까지 하락하여 탈락합니다.");
+            }
         }
+
+        DialogueManager.Instance.ShowLines(lines, doomedTime / lines.Count);
 
         yield return new WaitForSeconds(doomedTime);
 

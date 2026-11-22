@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -13,6 +13,8 @@ public class GameTimeManager : NetworkBehaviour
     public const int PhaseDay3Field = 5;
     public const int PhaseDay4Final = 6;
     public const int PhaseFinished = 7;
+    public const int PhaseDay1Investigation = 8;   // 1일차 블라인드 드롭 중 정체 조사 구간
+    public const int PhaseDay2Investigation = 9;   // 2일차 블라인드 드롭 중 정체 조사 구간
 
     [System.Serializable]
     public class DayEntry
@@ -23,6 +25,8 @@ public class GameTimeManager : NetworkBehaviour
         public float fieldDuration = 210f;
         [Tooltip("블라인드 드롭 시간(초). 0이면 드롭 없이 다음 일차로 넘어감")]
         public float dropDuration = 90f;
+        [Tooltip("블라인드 드롭 시간 중 마지막 정체 조사 구간(초). 드롭 시간에 포함되며, 별도 페이즈로 분리됨")]
+        public float investigationDuration = 18f;
     }
 
     [Header("일차별 시간 (항목 1개 = 하루, 체크된 항목만 게임에 포함)")]
@@ -133,12 +137,30 @@ public class GameTimeManager : NetworkBehaviour
             // 마지막 일차는 드롭을 만들지 않는다
             if (!isLast && entry.dropDuration > 0f)
             {
-                phaseList.Add(new PhaseInfo
+                // 드롭 전체 시간 중 마지막 일부를 정체 조사 페이즈로 분리
+                float investigation = Mathf.Clamp(entry.investigationDuration, 0f, entry.dropDuration);
+                float dropOnly = entry.dropDuration - investigation;
+
+                if (dropOnly > 0f)
                 {
-                    phase = PhaseDay1Drop + i * 2,
-                    day = dayNumber,
-                    duration = entry.dropDuration
-                });
+                    phaseList.Add(new PhaseInfo
+                    {
+                        phase = PhaseDay1Drop + i * 2,
+                        day = dayNumber,
+                        duration = dropOnly
+                    });
+                }
+
+                if (investigation > 0f)
+                {
+                    phaseList.Add(new PhaseInfo
+                    {
+                        phase = PhaseDay1Investigation + i,
+                        day = dayNumber,
+                        duration = investigation
+                    });
+                }
+
                 totalDuration += entry.dropDuration;
             }
         }
