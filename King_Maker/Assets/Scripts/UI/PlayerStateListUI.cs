@@ -15,6 +15,14 @@ public class PlayerStateListUI : MonoBehaviour
 
     private AnonymousScoreboardManager scoreboardManager;
 
+    private void Awake()
+    {
+        // 점수판 관리자가 스폰되기 전에는 패널이 보이지 않도록 먼저 숨긴다
+        // (공개 여부는 이후 RefreshList가 결정한다)
+        if (scoreboardPanel != null)
+            scoreboardPanel.SetActive(false);
+    }
+
     private IEnumerator Start()
     {
         // 네트워크 매니저와 점수판 관리자가 준비될 때까지 대기
