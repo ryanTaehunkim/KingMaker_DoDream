@@ -21,7 +21,8 @@ public class FadeManager : MonoBehaviour
         }
         Instance = this;
 
-        SetAlpha(0f);
+        SetAlpha(carryBlackToNextScene ? 1f : 0f);
+        carryBlackToNextScene = false;   // 한 번만 적용
     }
     private void OnDestroy()
     {
@@ -101,5 +102,13 @@ public class FadeManager : MonoBehaviour
         yield return FadeRoutine(0f, inDuration, null);
 
         onComplete?.Invoke();
+    }
+
+    // 씬이 바뀌어도 "검은 화면이었는지"를 기억한다 (대기 씬 → Game 씬 이동 때 사용)
+    private static bool carryBlackToNextScene;
+
+    public static void KeepBlackForNextScene()
+    {
+        carryBlackToNextScene = true;
     }
 }

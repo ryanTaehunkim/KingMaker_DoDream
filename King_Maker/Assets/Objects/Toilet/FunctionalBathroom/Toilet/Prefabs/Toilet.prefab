@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 572047267905564037}
   - component: {fileID: 6735076762703333135}
   - component: {fileID: 3607691157651719804}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BackPipe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1374329820458489494}
   - component: {fileID: 3760202705491530736}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -196,7 +196,7 @@ GameObject:
   - component: {fileID: 7207071161534997982}
   - component: {fileID: 7800630643784046874}
   - component: {fileID: 8307983157895435912}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ToiletBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 7312617034805239110}
   - component: {fileID: 577568820181917063}
   - component: {fileID: 1195858291997218559}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FlushHandle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,9 +377,11 @@ GameObject:
   - component: {fileID: 3272192869390277357}
   - component: {fileID: 627363328146844297}
   - component: {fileID: 8667153702231101324}
-  m_Layer: 0
+  - component: {fileID: 3927974622808227806}
+  - component: {fileID: 7798594572672381649}
+  m_Layer: 7
   m_Name: Toilet
-  m_TagString: Untagged
+  m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -404,6 +406,7 @@ Transform:
   - {fileID: 6184267362392956674}
   - {fileID: 456053826962147168}
   - {fileID: 1374329820458489494}
+  - {fileID: 1123132603328669396}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &3272192869390277357
@@ -548,6 +551,53 @@ MonoBehaviour:
   OnFlushCompleted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!65 &3927974622808227806
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5461189818476011828}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5466566, y: 0.8951723, z: 0.7600746}
+  m_Center: {x: 0.019100666, y: 0.42577425, z: -0.13335037}
+--- !u!114 &7798594572672381649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5461189818476011828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1ac6480322d9a439565965de9b20bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VentInteractable
+  ventName: 
+  holdDuration: 2
+  promptDistance: 9
+  maxHoldDistance: 15
+  exitPoint: {fileID: 1123132603328669396}
+  fallbackExitDistance: 10
+  fadeOutDuration: 0.5
+  blackHoldDuration: 0.3
+  fadeInDuration: 0.5
+  toiletController: {fileID: 0}
+  uiFont: {fileID: 0}
+  promptMessage: "[E] \uAE38\uAC8C \uB20C\uB7EC \uBCA4\uD2B8 \uC0AC\uC6A9"
+  holdingMessage: "E\uB97C \uACC4\uC18D \uB204\uB974\uC138\uC694"
+  selectTitle: "\uC774\uB3D9\uD560 \uBCC0\uAE30\uB97C \uC120\uD0DD\uD558\uC138\uC694"
 --- !u!1 &5753875869195278087
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,7 +609,7 @@ GameObject:
   - component: {fileID: 8469563702017625072}
   - component: {fileID: 3812727990215742941}
   - component: {fileID: 3690146691744077632}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TankCover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -649,7 +699,7 @@ GameObject:
   - component: {fileID: 456053826962147168}
   - component: {fileID: 7549414843548297340}
   - component: {fileID: 2082358357805294431}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ToiletSeatCover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -728,6 +778,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8119742018592494722
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1123132603328669396}
+  m_Layer: 7
+  m_Name: ExitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1123132603328669396
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8119742018592494722}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 404914469534174189}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8732081641270287690
 GameObject:
   m_ObjectHideFlags: 0
@@ -739,7 +820,7 @@ GameObject:
   - component: {fileID: 6184267362392956674}
   - component: {fileID: 1077974275753159997}
   - component: {fileID: 3865738217964508308}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ToiletSeat
   m_TagString: Untagged
   m_Icon: {fileID: 0}

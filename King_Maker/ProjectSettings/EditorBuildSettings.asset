@@ -32,6 +32,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MissionTest.unity
     guid: 87a6acd574ac4d043b88237e52cbd98e
+  - enabled: 1
+    path: Assets/Scenes/WaitingRoom.unity
+    guid: af6898857c1f00245af77131825093fd
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -127,7 +127,7 @@ public class PlayerHUD : MonoBehaviour
     private void UpdateCardGrade(int value)
     {
         if (cardGradeText != null)
-            cardGradeText.text = $"GRADE {value}";
+            cardGradeText.text = $"GRADE {CardGradeUtil.ToLabel(value)}";
     }
 
     // 본인 정체 표시 (역할 배정 전에는 "?")

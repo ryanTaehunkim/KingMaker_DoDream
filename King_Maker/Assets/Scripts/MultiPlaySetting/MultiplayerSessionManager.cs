@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 using Unity.Netcode;
@@ -17,6 +17,9 @@ public class MultiplayerSessionManager : MonoBehaviour
     [SerializeField] private int maxPlayers = 8;
 
     [SerializeField] private string gameSceneName = "Game";
+
+    [Tooltip("시작 버튼을 누르면 가장 먼저 들어가는 대기 씬. 비워두면 기존처럼 바로 Game 씬으로 이동")]
+    [SerializeField] private string waitingSceneName = "WaitingRoom";
 
     // Current active Session
     public ISession CurrentSession { get; private set; }
@@ -50,6 +53,16 @@ public class MultiplayerSessionManager : MonoBehaviour
     // Internal state
     private bool isInitializing;
     private bool isBusy;
+
+    // 대기 씬에서 시작해서 넘어왔는지 (Game 씬의 GameFlowManager가 한 번 읽고 지운다)
+    public bool GameplayStartRequested { get; private set; }
+
+    public bool ConsumeGameplayStartRequest()
+    {
+        bool requested = GameplayStartRequested;
+        GameplayStartRequested = false;
+        return requested;
+    }
 
     // =========================================================
     // Unity Lifecycle
@@ -376,9 +389,36 @@ public class MultiplayerSessionManager : MonoBehaviour
             return;
         }
 
+        string firstScene =
+            string.IsNullOrWhiteSpace(waitingSceneName)
+                ? gameSceneName
+                : waitingSceneName;
+
         Debug.Log(
-            $"[Multiplayer] Starting game: {gameSceneName}"
+            $"[Multiplayer] Starting game: {firstScene}"
         );
+
+        NetworkManager.Singleton
+            .SceneManager
+            .LoadScene(
+                firstScene,
+                LoadSceneMode.Single
+            );
+    }
+
+    // 대기 씬에서 호스트가 게임을 시작할 때 (WaitingRoomManager가 호출)
+    public void StartGameplay()
+    {
+        if (NetworkManager.Singleton == null ||
+            !NetworkManager.Singleton.IsServer)
+        {
+            SetError("Only the Host can start the game.");
+            return;
+        }
+
+        GameplayStartRequested = true;
+
+        Debug.Log($"[Multiplayer] Starting gameplay: {gameSceneName}");
 
         NetworkManager.Singleton
             .SceneManager

@@ -1,4 +1,4 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerCombat : NetworkBehaviour
@@ -49,7 +49,8 @@ public class PlayerCombat : NetworkBehaviour
     public void TryAttack()
     {
         if(!InputManager.attackPressed) return;
-        if(!state.isAlive.Value)     return;
+        if (WaitingRoomManager.Instance != null) return;   // 대기 씬에서는 공격 불가
+        if (!state.isAlive.Value)     return;
         if (Time.time - lastLocalAttackTime < attackCoolDown)
         {
          
@@ -94,6 +95,8 @@ public class PlayerCombat : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void AttackServerRpc(ulong targetId)
     {
+        if (WaitingRoomManager.Instance != null) return;   // 대기 씬에서는 공격 불가
+
         Debug.Log($"[Server] 공격 요청 수신 target={targetId}");
 
         if (!state.isAlive.Value) { Debug.Log("거부: 공격자 사망"); return; }

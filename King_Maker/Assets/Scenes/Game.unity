@@ -2325,9 +2325,17 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3927974622808227806, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
+      propertyPath: m_ProvidesContacts
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5461189818476011828, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
       propertyPath: m_Name
       value: Toilet
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798594572672381649, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
+      propertyPath: ventName
+      value: "\uCE75\uD14C\uC77C\uBC14 \uBCC0\uAE30"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -27411,6 +27419,10 @@ PrefabInstance:
     - target: {fileID: 5461189818476011828, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
       propertyPath: m_Name
       value: Toilet (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798594572672381649, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
+      propertyPath: ventName
+      value: "\uB77C\uC6B4\uC9C0 \uBCC0\uAE30"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -53876,6 +53888,9 @@ MonoBehaviour:
   loseColor: {r: 0.95, g: 0.25, b: 0.25, a: 1}
   neutralColor: {r: 1, g: 1, b: 1, a: 1}
   menuSceneName: 
+  fadeOutDuration: 1
+  blackHoldDuration: 0.5
+  fadeInDuration: 1
 --- !u!114 &292175868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70303,6 +70318,10 @@ PrefabInstance:
     - target: {fileID: 5461189818476011828, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
       propertyPath: m_Name
       value: Toilet (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7798594572672381649, guid: 1d6266d5dec59cd759a50f948445d0c2, type: 3}
+      propertyPath: ventName
+      value: "\uCE74\uC9C0\uB178\uD640 \uBCC0\uAE30"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

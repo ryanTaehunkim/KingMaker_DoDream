@@ -1,4 +1,4 @@
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -229,8 +229,8 @@ public class PlayerStateList : NetworkBehaviour
         if (!IsServer)
             return;
 
-        // 최소 1등급
-        newGrade = Mathf.Max(1, newGrade);
+        // 최소 1등급, 최대 16등급(Q)
+        newGrade = Mathf.Clamp(newGrade, 1, CardGradeUtil.MaxGrade);
 
         // 기존 값과 같으면 처리하지 않음
         if (cardGrade.Value == newGrade)
@@ -375,6 +375,8 @@ public class PlayerStateList : NetworkBehaviour
     public void ServerSetCardGradeRaw(int newGrade)
     {
         if (!IsServer) return;
-        cardGrade.Value = newGrade;
+
+        // 하한은 일부러 막지 않는다. (블라인드 드롭 페널티로 0 이하가 되면 일차 전환 때 사망 처리)
+        cardGrade.Value = Mathf.Min(newGrade, CardGradeUtil.MaxGrade);
     }
 }

@@ -36,6 +36,15 @@ public class GameFlowManager : NetworkBehaviour
     [Header("블라인드 드롭 위치")]
     [SerializeField] private Transform[] blindDropSpawnPoints;
 
+    [Header("자동 시작 (대기 씬에서 넘어왔을 때)")]
+    [SerializeField] private bool autoStartFromWaitingRoom = true;
+    [SerializeField] private float autoStartMinDelay = 1f;   // Game 씬 로드 후 최소 대기 시간
+    [SerializeField] private float autoStartMaxWait = 10f;   // 느린 클라이언트를 기다리는 최대 시간
+
+    private bool autoStartPending;
+    private bool sceneLoadCompleted;
+    private float autoStartTimer;
+
     [Header("화면 전환(페이드)")]
     [SerializeField] private float startFadeDuration = 1f;  // 게임 시작 시 암전 시간
     [SerializeField] private float fadeDuration = 0.5f;     // 드롭 입장/복귀 시 암전 시간
@@ -91,10 +100,25 @@ public class GameFlowManager : NetworkBehaviour
         IsGameInProgress.Value = false;
 
         lastHandledPhase = GameTimeManager.PhaseWaiting;
+
+        sceneLoadCompleted = false;
+        autoStartTimer = 0f;
+
+        // 대기 씬에서 시작해서 넘어온 경우에만 자동 시작 (Game 씬만 단독 실행하면 기존처럼 Z로 시작)
+        autoStartPending =
+            autoStartFromWaitingRoom &&
+            MultiplayerSessionManager.Instance != null &&
+            MultiplayerSessionManager.Instance.ConsumeGameplayStartRequest();
+
+        if (autoStartPending && NetworkManager.SceneManager != null)
+            NetworkManager.SceneManager.OnLoadEventCompleted += OnSceneLoadEventCompleted;
     }
 
     public override void OnNetworkDespawn()
     {
+        if (NetworkManager != null && NetworkManager.SceneManager != null)
+            NetworkManager.SceneManager.OnLoadEventCompleted -= OnSceneLoadEventCompleted;
+
         if (Instance == this)
             Instance = null;
     }
@@ -107,6 +131,9 @@ public class GameFlowManager : NetworkBehaviour
         // 호스트만 Z로 시작
         if (!HasGameStarted.Value)
         {
+            if (autoStartPending && !isStarting)
+                UpdateAutoStart();
+
             if (!isStarting &&
                 Keyboard.current != null &&
                 Keyboard.current.zKey.wasPressedThisFrame)
@@ -144,6 +171,61 @@ public class GameFlowManager : NetworkBehaviour
     // =========================================================
     // 게임 시작
     // =========================================================
+
+    private void OnSceneLoadEventCompleted(
+    string sceneName,
+    UnityEngine.SceneManagement.LoadSceneMode loadSceneMode,
+    List<ulong> clientsCompleted,
+    List<ulong> clientsTimedOut)
+    {
+        sceneLoadCompleted = true;
+    }
+
+    private void UpdateAutoStart()
+    {
+        autoStartTimer += Time.deltaTime;
+
+        if (autoStartTimer < autoStartMinDelay)
+            return;
+
+        // 혼자(호스트만)면 기다릴 클라이언트가 없다
+        bool loaded =
+            sceneLoadCompleted ||
+            NetworkManager.ConnectedClientsList.Count <= 1;
+
+        // 모든 클라이언트의 씬 로드를 기다린다 (너무 오래 걸리면 시간 초과 후 진행)
+        if (!loaded && autoStartTimer < autoStartMaxWait)
+            return;
+
+        if (!AllPlayersSpawned())
+        {
+            if (autoStartTimer > autoStartMaxWait + 10f)
+            {
+                autoStartPending = false;
+                FadeClientRpc(false, fadeDuration);   // 검은 화면이 남지 않도록 복구
+                Debug.LogError("[GameFlow] 자동 시작 실패: 플레이어가 모두 스폰되지 않았습니다. Z로 직접 시작하세요.");
+            }
+
+            return;
+        }
+
+        autoStartPending = false;
+        StartGame();
+    }
+
+    private bool AllPlayersSpawned()
+    {
+        if (NetworkManager.ConnectedClientsList.Count == 0)
+            return false;
+
+        foreach (NetworkClient client in NetworkManager.ConnectedClientsList)
+        {
+            if (client.PlayerObject == null || !client.PlayerObject.IsSpawned)
+                return false;
+        }
+
+        return true;
+    }
 
     private void StartGame()
     {

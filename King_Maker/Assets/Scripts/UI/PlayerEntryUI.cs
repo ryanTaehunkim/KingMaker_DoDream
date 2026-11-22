@@ -18,7 +18,7 @@ public class PlayerEntryUI : MonoBehaviour
 
         if (showGrade)
         {
-            gradeText.text = $"GRADE {grade}";
+            gradeText.text = $"GRADE {CardGradeUtil.ToLabel(grade)}";
         }
         else
         {
@@ -29,7 +29,7 @@ public class PlayerEntryUI : MonoBehaviour
     // 익명 정보판 표시용: "GRADE 3  -  2명"
     public void SetGradeCountData(int grade, int count)
     {
-        playerNameText.text = $"GRADE {grade}";
+        playerNameText.text = $"GRADE {CardGradeUtil.ToLabel(grade)}";
         gradeText.text = $"{count}명";
     }
 
@@ -37,12 +37,12 @@ public class PlayerEntryUI : MonoBehaviour
     public void SetAnonymousData(int rank, int grade)
     {
         playerNameText.text = $"RANK {rank}";
-        gradeText.text = $"GRADE {grade}";
+        gradeText.text = $"GRADE {CardGradeUtil.ToLabel(grade)}";
     }
 
     public void SetGrade(int grade)
     {
-        gradeText.text = $"GRADE {grade}";
+        gradeText.text = $"GRADE {CardGradeUtil.ToLabel(grade)}";
     }
 
     public void HideGrade()

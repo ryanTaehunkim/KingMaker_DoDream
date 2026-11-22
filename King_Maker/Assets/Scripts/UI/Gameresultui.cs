@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
 
 // 게임 결과(승리 / 패배 / 종료) 화면. 네트워크와 무관하게 각 플레이어 PC에서 따로 표시한다.
 //
@@ -33,6 +34,13 @@ public class GameResultUI : MonoBehaviour
     [SerializeField] private string menuSceneName = "";
 
     private bool shown;
+
+    [Header("암전 연출")]
+    [SerializeField] private float fadeOutDuration = 1f;    // 화면이 어두워지는 시간
+    [SerializeField] private float blackHoldDuration = 0.5f; // 완전히 검은 상태로 유지하는 시간
+    [SerializeField] private float fadeInDuration = 1f;     // 결과 화면이 밝아지는 시간
+
+    private Coroutine showRoutine;
 
     private void Awake()
     {
@@ -86,11 +94,50 @@ public class GameResultUI : MonoBehaviour
 
     private void ShowPanel(GameResult result, GameEndReason reason)
     {
+        // result와 endReason이 따로 도착하므로, 글자는 매번 갱신한다
+        UpdateTexts(result, reason);
+
+        // 연출은 처음 한 번만 시작한다
+        if (shown)
+            return;
+
         shown = true;
 
-        if (resultPanel != null)
+        if (showRoutine != null)
+            StopCoroutine(showRoutine);
+
+        showRoutine = StartCoroutine(ShowPanelRoutine());
+    }
+
+    // 암전 → 결과 패널 켜기 → 화면 밝힘
+    private IEnumerator ShowPanelRoutine()
+    {
+        FadeManager fade = FadeManager.Instance;
+
+        if (fade != null)
+        {
+            fade.FadeOut(fadeOutDuration);
+            yield return new WaitForSecondsRealtime(fadeOutDuration + 0.05f);
+
+            // 다른 곳의 페이드(드롭 복귀 등) 때문에 화면이 밝아졌다면 다시 완전히 어둡게 한다
+            fade.FadeOut(0f);
+
+            if (blackHoldDuration > 0f)
+                yield return new WaitForSecondsRealtime(blackHoldDuration);
+        }
+
+        // 암전 중에 결과가 초기화(HidePanel)되었다면 켜지 않는다
+        if (shown && resultPanel != null)
             resultPanel.SetActive(true);
 
+        if (fade != null)
+            fade.FadeIn(fadeInDuration);
+
+        showRoutine = null;
+    }
+
+    private void UpdateTexts(GameResult result, GameEndReason reason)
+    {
         Role myRole = GetLocalRole();
 
         bool hasRole = myRole != Role.None;
@@ -130,6 +177,12 @@ public class GameResultUI : MonoBehaviour
     private void HidePanel()
     {
         shown = false;
+
+        if (showRoutine != null)
+        {
+            StopCoroutine(showRoutine);
+            showRoutine = null;
+        }
 
         if (resultPanel != null)
             resultPanel.SetActive(false);
